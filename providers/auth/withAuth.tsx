@@ -23,16 +23,16 @@ export function WithAuth({ children, requiredRole }: WithAuthProps) {
   useEffect(() => {
     const checkAuth = async () => {
       const { data, error } = await supabase.auth.getSession();
-      
+      console.log('data', { data, error });
       if (error || !data?.session) {
-        router.push('/auth/login');
+        router.push('/login');
         return;
       }
 
       // If a specific role is required, check if the user has it
       if (requiredRole) {
         const userRole = data.session.user.user_metadata.role;
-        
+
         if (!userRole || userRole !== requiredRole) {
           // Redirect to unauthorized page or home page
           router.push('/');
