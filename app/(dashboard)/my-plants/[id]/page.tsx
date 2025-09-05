@@ -3,6 +3,8 @@
  * Plant details: nickname, type, photo, care, care logs
  */
 
+import Link from 'next/link';
+
 export default function PlantDetailsPage({ params }: { params: { id: string } }) {
   const { id } = params;
   
@@ -16,14 +18,14 @@ export default function PlantDetailsPage({ params }: { params: { id: string } })
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <a href="/my-plants" className="text-blue-600 hover:underline">
+            <Link href="/my-plants" className="text-blue-600 hover:underline">
               Back to My Plants
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/reminders" className="text-blue-600 hover:underline">
+            <Link href="/reminders" className="text-blue-600 hover:underline">
               View Reminders
-            </a>
+            </Link>
           </li>
         </ul>
       </div>

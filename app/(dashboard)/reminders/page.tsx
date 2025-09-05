@@ -3,6 +3,8 @@
  * Upcoming/overdue plant care reminders, mark as complete
  */
 
+import Link from 'next/link';
+
 export default function RemindersPage() {
   return (
     <div className="container mx-auto p-6">
@@ -14,14 +16,14 @@ export default function RemindersPage() {
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <a href="/dashboard" className="text-blue-600 hover:underline">
+            <Link href="/dashboard" className="text-blue-600 hover:underline">
               Back to Dashboard
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/my-plants" className="text-blue-600 hover:underline">
+            <Link href="/my-plants" className="text-blue-600 hover:underline">
               My Plants
-            </a>
+            </Link>
           </li>
         </ul>
       </div>

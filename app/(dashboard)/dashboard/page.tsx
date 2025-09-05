@@ -3,6 +3,8 @@
  * User plant stats, reminders, quick links
  */
 
+import Link from 'next/link';
+
 export default function DashboardPage() {
   return (
     <div className="container mx-auto p-6">
@@ -14,19 +16,19 @@ export default function DashboardPage() {
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <a href="/my-plants" className="text-blue-600 hover:underline">
+            <Link href="/my-plants" className="text-blue-600 hover:underline">
               My Plants
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/reminders" className="text-blue-600 hover:underline">
+            <Link href="/reminders" className="text-blue-600 hover:underline">
               Reminders
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/profile" className="text-blue-600 hover:underline">
+            <Link href="/profile" className="text-blue-600 hover:underline">
               Profile
-            </a>
+            </Link>
           </li>
         </ul>
       </div>
