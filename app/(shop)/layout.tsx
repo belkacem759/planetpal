@@ -1,11 +1,10 @@
 import { ReactNode } from 'react';
+import { MainLayout } from '@/components/layouts/main-layout';
 
 export default function ShopLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex-1 w-full flex flex-col gap-6 px-8 py-6">
-      <h1 className="text-3xl font-bold">Shop</h1>
-      <hr className="border-t border-gray-200 dark:border-gray-800" />
+    <MainLayout>
       {children}
-    </div>
+    </MainLayout>
   );
 }
