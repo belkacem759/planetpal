@@ -1,0 +1,88 @@
+import { NextRequest } from 'next/server';
+import { createMiddleware } from '@/lib/middleware';
+import { OrderService } from '@/lib/db';
+import { OrderInsertSchema, PaginationSchema } from '@/lib/validation';
+import { handleApiError, createSuccessResponse, createPaginatedResponse } from '@/lib/errors';
+import { validateData } from '@/lib/validation';
+
+const orderService = new OrderService();
+
+// GET /api/orders - Get user's orders (authenticated user)
+export async function GET(request: NextRequest) {
+  try {
+    const middleware = createMiddleware({
+      enableRateLimit: true,
+      requireAuth: true
+    });
+    
+    const middlewareResult = await middleware(request);
+    if (middlewareResult) return middlewareResult;
+
+    const userId = request.headers.get('x-user-id');
+    
+    if (!userId) {
+      return handleApiError(new Error('User ID not found'));
+    }
+
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+
+    // Validate pagination
+    const paginationValidation = validateData(PaginationSchema, { page, limit });
+    if (!paginationValidation.success) {
+      return handleApiError(new Error('Invalid pagination parameters'));
+    }
+
+    const result = await orderService.getUserOrders(userId);
+    
+    if (!result.success) {
+      return handleApiError(new Error(result.error));
+    }
+
+    return createSuccessResponse(result.data);
+  } catch (error) {
+    return handleApiError(error, '/api/orders');
+  }
+}
+
+// POST /api/orders - Create order (authenticated user)
+export async function POST(request: NextRequest) {
+  try {
+    const middleware = createMiddleware({
+      enableRateLimit: true,
+      requireAuth: true,
+  
+    });
+    
+    const middlewareResult = await middleware(request);
+    if (middlewareResult) return middlewareResult;
+
+    const userId = request.headers.get('x-user-id');
+    
+    if (!userId) {
+      return handleApiError(new Error('User ID not found'));
+    }
+
+    const body = await request.json();
+    
+    // Validate input
+    const validation = validateData(OrderInsertSchema, {
+      ...body,
+      user_id: userId
+    });
+    if (!validation.success) {
+      return handleApiError(new Error(`Validation failed: ${validation.errors?.join(', ')}`));
+    }
+
+    const result = await orderService.createOrder(userId, validation.data);
+    
+    if (!result.success) {
+      return handleApiError(new Error(result.error));
+    }
+
+    return createSuccessResponse(result.data);
+  } catch (error) {
+    return handleApiError(error, '/api/orders');
+  }
+}
