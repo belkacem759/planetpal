@@ -1,179 +1,603 @@
 'use client';
 
-import { useProductsQuery, useCategoriesQuery, useAddToCartMutation } from '@/hooks';
-import { ProductGrid } from '@/components/organisms/product-grid';
+import { GrowingPlant } from '@/components/animated/growing-plant';
+import { Header } from '@/components/layouts/header';
+import { ProductGridInfo } from '@/components/organisms';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
-import { ArrowRight, Leaf, Recycle, Globe } from 'lucide-react';
+import { useCategoriesQuery, useProductsQuery } from '@/hooks';
+import { motion } from 'framer-motion';
+import { ArrowRight, Globe, Heart, Leaf, Recycle, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 
 export default function Home() {
-  const { data: productsData, isLoading: productsLoading } = useProductsQuery({ limit: 8 });
-  const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesQuery();
-  const addToCartMutation = useAddToCartMutation();
-  const [addingToCart, setAddingToCart] = useState<string | null>(null);
-  const featuredProducts = productsData?.data || []
-  const categories = categoriesData?.data || []
 
-  const handleAddToCart = async (productId: string, quantity: number = 1) => {
-    setAddingToCart(productId);
-    try {
-      await addToCartMutation.mutateAsync({ product_id: productId, quantity });
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-    } finally {
-      setAddingToCart(null);
-    }
-  };
+  // Data fetching
+  const { data: categories, isLoading: categoriesLoading } = useCategoriesQuery();
+  const { data: products, isLoading: productsLoading } = useProductsQuery({
+    limit: 12,
+  });
+
+  const featuredProducts = products?.data || [];
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-50 to-blue-50 py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Welcome to <span className="text-green-600">PlanetPal</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Discover eco-friendly products that help you live sustainably while protecting our planet.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-green-600 hover:bg-green-700">
-              <Link href="/shop">
-                Shop Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/about">
-                Learn More
-              </Link>
-            </Button>
-          </div>
+      <Header />
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="relative bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 py-20 overflow-hidden"
+      >
+
+        {/* Growing plants decoration */}
+        <div className="absolute left-8 bottom-8 hidden lg:block">
+          <GrowingPlant size="lg" delay={500} />
         </div>
-      </section>
+        <div className="absolute right-12 top-16 hidden lg:block">
+          <GrowingPlant size="md" delay={1000} />
+        </div>
+        <div className="absolute left-1/4 top-12 hidden md:block">
+          <GrowingPlant size="sm" delay={1500} />
+        </div>
+
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <motion.div
+              className="flex items-center justify-center mb-4"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 10, -10, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+              >
+                <Sparkles className="h-8 w-8 text-yellow-500 mr-2" />
+              </motion.div>
+              <motion.h1
+                className="text-6xl font-bold text-gray-900 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 100 }}
+              >
+                PlanetPal
+              </motion.h1>
+              <motion.div
+                animate={{
+                  scale: [1, 1.3, 1],
+                  rotate: [0, -15, 15, 0]
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+              >
+                <Heart className="h-8 w-8 text-red-500 ml-2" />
+              </motion.div>
+            </motion.div>
+
+            <motion.p
+              className="text-2xl text-gray-700 mb-2 font-medium"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              🌱 Your Eco-Friendly Adventure Starts Here! 🌍
+            </motion.p>
+
+            <motion.p
+              className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
+              Discover amazing eco-friendly products that make sustainability fun and stylish!
+            </motion.p>
+
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl"
+                >
+                  <Link href="/shop">
+                    🛍️ Shop Now
+                    <motion.div
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="ml-2"
+                    >
+                      <ArrowRight className="h-5 w-5" />
+                    </motion.div>
+                  </Link>
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-lg hover:shadow-xl"
+                >
+                  <Link href="/about">
+                    🌿 Learn More
+                  </Link>
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose PlanetPal?</h2>
+      <motion.section
+        id="features"
+        className="py-16 bg-white relative overflow-hidden"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-100px" }}
+      >
+        {/* Decorative plants */}
+        <div className="absolute right-4 top-8 hidden lg:block">
+          <GrowingPlant size="sm" delay={2000} />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            ✨ Why Choose PlanetPal? ✨
+          </h2>
+          <p className="text-center text-gray-600 mb-12 text-lg">Because saving the planet should be fun! 🎉</p>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Leaf className="h-8 w-8 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">100% Eco-Friendly</h3>
-              <p className="text-gray-600">
-                All our products are sustainably sourced and environmentally responsible.
+            <motion.div
+              className="text-center group cursor-pointer"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -5 }}
+            >
+              <motion.div
+                className="bg-gradient-to-br from-green-100 to-green-200 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                whileHover={{
+                  scale: 1.1,
+                  rotate: 12,
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <motion.div
+                  whileHover={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 10, -10, 0]
+                  }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <Leaf className="h-10 w-10 text-green-600" />
+                </motion.div>
+              </motion.div>
+              <motion.h3
+                className="text-xl font-semibold mb-2 group-hover:text-green-600 transition-colors duration-300"
+                whileHover={{ scale: 1.05 }}
+              >
+                🌿 100% Eco-Friendly
+              </motion.h3>
+              <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
+                All our products are sustainably sourced and environmentally responsible. Mother Earth approved! 🌍
               </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Recycle className="h-8 w-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Recyclable Packaging</h3>
-              <p className="text-gray-600">
-                Our packaging is 100% recyclable and made from recycled materials.
+            </motion.div>
+
+            <motion.div
+              className="text-center group cursor-pointer"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -5 }}
+            >
+              <motion.div
+                className="bg-gradient-to-br from-blue-100 to-blue-200 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                whileHover={{
+                  scale: 1.1,
+                  rotate: 12,
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <motion.div
+                  whileHover={{
+                    rotate: 360
+                  }}
+                  transition={{ duration: 1, ease: "easeInOut" }}
+                >
+                  <Recycle className="h-10 w-10 text-blue-600" />
+                </motion.div>
+              </motion.div>
+              <motion.h3
+                className="text-xl font-semibold mb-2 group-hover:text-blue-600 transition-colors duration-300"
+                whileHover={{ scale: 1.05 }}
+              >
+                ♻️ Recyclable Packaging
+              </motion.h3>
+              <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
+                Our packaging is 100% recyclable and made from recycled materials. Zero waste, maximum awesome! 📦
               </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Globe className="h-8 w-8 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Global Impact</h3>
-              <p className="text-gray-600">
-                Every purchase contributes to environmental conservation efforts worldwide.
+            </motion.div>
+
+            <motion.div
+              className="text-center group cursor-pointer"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -5 }}
+            >
+              <motion.div
+                className="bg-gradient-to-br from-purple-100 to-purple-200 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                whileHover={{
+                  scale: 1.1,
+                  rotate: 12,
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <motion.div
+                  whileHover={{
+                    y: [0, -5, 0],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <Globe className="h-10 w-10 text-purple-600" />
+                </motion.div>
+              </motion.div>
+              <motion.h3
+                className="text-xl font-semibold mb-2 group-hover:text-purple-600 transition-colors duration-300"
+                whileHover={{ scale: 1.05 }}
+              >
+                🌍 Global Impact
+              </motion.h3>
+              <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
+                Every purchase contributes to environmental conservation efforts worldwide. You're a planet hero! 🦸‍♀️
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Categories Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Shop by Category</h2>
+      <motion.section
+        id="categories"
+        className="py-16 bg-gradient-to-br from-gray-50 to-green-50 relative overflow-hidden"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-100px" }}
+      >
+        {/* Decorative elements */}
+        <div className="absolute left-8 top-16 hidden lg:block">
+          <GrowingPlant size="md" delay={2500} />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-green-600 to-purple-600 bg-clip-text text-transparent">
+            🛍️ Shop by Category 🛍️
+          </h2>
+          <p className="text-center text-gray-600 mb-12 text-lg">Find your perfect eco-friendly match! 💚</p>
+
           {categoriesLoading ? (
             <div className="flex justify-center">
-              <Spinner className="h-8 w-8" />
+              <Spinner className="h-8 w-8 animate-spin" />
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {categories?.slice(0, 4).map((category) => (
-                <Card key={category.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <Link href={`/categories/${category.slug}`}>
-                    <CardHeader className="text-center">
-                      <CardTitle className="text-lg">{category.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-600 text-center">
-                        {category.description}
-                      </p>
-                    </CardContent>
-                  </Link>
-                </Card>
+              {categories?.data?.slice(0, 4).map((category: any, index: number) => (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: index * 0.1,
+                    ease: "easeOut"
+                  }}
+                  viewport={{ once: true }}
+                  whileHover={{
+                    y: -8,
+                    scale: 1.02,
+                    transition: { type: "spring", stiffness: 400, damping: 17 }
+                  }}
+                >
+                  <Card className="group hover:shadow-2xl transition-all duration-300 cursor-pointer bg-white border-2 border-transparent hover:border-green-200 h-full">
+                    <Link href={`/categories/${category.slug}`}>
+                      <CardHeader className="text-center pb-2">
+                        <motion.div
+                          className="w-12 h-12 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-3"
+                          whileHover={{
+                            y: [0, -5, 0],
+                            rotate: [0, 10, -10, 0],
+                            scale: [1, 1.1, 1]
+                          }}
+                          transition={{ duration: 0.6 }}
+                        >
+                          <Sparkles className="h-6 w-6 text-green-600" />
+                        </motion.div>
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        >
+                          <CardTitle className="text-lg group-hover:text-green-600 transition-colors duration-300">
+                            {category.name}
+                          </CardTitle>
+                        </motion.div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600 text-center group-hover:text-gray-700 transition-colors duration-300">
+                          {category.description}
+                        </p>
+                      </CardContent>
+                    </Link>
+                  </Card>
+                </motion.div>
               ))}
             </div>
           )}
-          <div className="text-center mt-8">
-            <Button asChild variant="outline">
-              <Link href="/shop">
-                View All Categories
-              </Link>
-            </Button>
-          </div>
+
+          <motion.div
+            className="text-center mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Button
+                asChild
+                variant="outline"
+                className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-lg hover:shadow-xl"
+              >
+                <Link href="/shop">
+                  🌟 View All Categories
+                </Link>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Featured Products Section */}
-      <section className="py-16 bg-white">
+      <motion.section
+        id="products"
+        className="py-16 bg-white relative overflow-hidden"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-100px" }}
+      >
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
+          <motion.h2
+            className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            ⭐ Featured Products ⭐
+          </motion.h2>
+          <motion.p
+            className="text-center text-gray-600 mb-12 text-lg"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true }}
+          >
+            Handpicked eco-friendly favorites! 💚
+          </motion.p>
           {productsLoading ? (
             <div className="flex justify-center">
               <Spinner className="h-8 w-8" />
             </div>
           ) : (
             <>
-              <ProductGrid
-                products={featuredProducts || []}
-                onAddToCart={handleAddToCart}
-                isAddingToCart={addingToCart}
-              />
-              <div className="text-center mt-8">
-                <Button asChild size="lg">
-                  <Link href="/shop">
-                    View All Products
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                viewport={{ once: true }}
+              >
+                <ProductGridInfo
+                  products={featuredProducts || []}
+                />
+              </motion.div>
+              <motion.div
+                className="text-center mt-8"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                viewport={{ once: true }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 shadow-lg hover:shadow-xl"
+                  >
+                    <Link href="/shop">
+                      🛍️ View All Products
+                      <motion.div
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="ml-2"
+                      >
+                        <ArrowRight className="h-5 w-5" />
+                      </motion.div>
+                    </Link>
+                  </Button>
+                </motion.div>
+              </motion.div>
             </>
           )}
         </div>
-      </section>
+      </motion.section>
 
-      {/* Newsletter Section */}
-      <section className="py-16 bg-green-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
-          <p className="text-xl mb-8 opacity-90">
-            Get the latest eco-friendly products and sustainability tips delivered to your inbox.
-          </p>
-          <div className="max-w-md mx-auto flex gap-4">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-2 rounded-lg text-gray-900"
+      {/* CTA Section */}
+      <motion.section
+        id="cta"
+        className="py-20 bg-gradient-to-r from-green-600 via-green-500 to-blue-600 text-white relative overflow-hidden"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-100px" }}
+      >
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          {[...Array(4)].map((_, i) => (
+            <motion.div
+              key={i}
+              className={`absolute bg-white/10 rounded-full ${i === 0 ? 'top-10 left-10 w-20 h-20' :
+                i === 1 ? 'top-32 right-20 w-16 h-16' :
+                  i === 2 ? 'bottom-20 left-1/4 w-12 h-12' :
+                    'bottom-32 right-1/3 w-24 h-24'
+                }`}
+              animate={{
+                y: [0, i === 0 ? -20 : i === 1 ? -15 : i === 2 ? -10 : -25, 0],
+                ...(i === 1 && { x: [0, 10, 0] }),
+                ...(i === 2 && { rotate: [0, 180, 360] }),
+                scale: [1, i === 0 ? 1.1 : i === 1 ? 1.2 : i === 3 ? 0.8 : 1, 1],
+                ...(i !== 1 && i !== 2 && { opacity: [i === 0 ? 0.3 : 0.2, i === 0 ? 0.6 : 0.5, i === 0 ? 0.3 : 0.2] })
+              }}
+              transition={{
+                duration: i === 0 ? 4 : i === 1 ? 3.5 : i === 2 ? 5 : 4.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.5
+              }}
             />
-            <Button className="bg-white text-green-600 hover:bg-gray-100">
-              Subscribe
-            </Button>
-          </div>
+          ))}
         </div>
-      </section>
+
+        {/* Decorative plants */}
+        <div className="absolute left-8 bottom-8 hidden lg:block">
+          <GrowingPlant size="lg" delay={1000} />
+        </div>
+        <div className="absolute right-8 top-8 hidden lg:block">
+          <GrowingPlant size="md" delay={1500} />
+        </div>
+
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <motion.h2
+              className="text-5xl font-bold mb-6"
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            >
+              🌍 Ready to Make a Difference? 🌱
+            </motion.h2>
+            <motion.p
+              className="text-xl mb-8 opacity-90 max-w-2xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 0.9, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              Join thousands of eco-conscious shoppers making sustainable choices every day.
+              Together, we're growing a greener future! 💚
+            </motion.p>
+
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.05, y: -3 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  asChild
+                  className="group bg-white text-green-600 hover:bg-green-50 shadow-2xl hover:shadow-3xl px-8 py-4 text-lg font-semibold"
+                >
+                  <Link href="/shop" className="flex items-center gap-2">
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Sparkles className="h-5 w-5" />
+                    </motion.div>
+                    Start Shopping Now
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 10, -10, 0]
+                      }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <Heart className="h-5 w-5" />
+                    </motion.div>
+                  </Link>
+                </Button>
+              </motion.div>
+
+              <motion.div
+                className="flex items-center gap-2 text-white/80"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 0.8 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+                viewport={{ once: true }}
+              >
+                <span className="text-sm">🌟 Free shipping on orders over $50</span>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
     </div>
   );
 }
