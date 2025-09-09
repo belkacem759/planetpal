@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
-import { WithAuth } from '@/providers/auth';
+import { WithAuth } from '@/providers/auth/withAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -148,7 +147,7 @@ function OrderSuccessContent() {
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
                         {item.image_url ? (
-                          <Image src={item.image_url || '/placeholder.jpg'} alt={item.name} width={80} height={80} className="w-full h-full object-cover rounded-lg" />
+                          <img src={item.image_url || '/placeholder.jpg'} alt={item.name} width={80} height={80} className="w-full h-full object-cover rounded-lg" />
                         ) : (
                           <span className="text-2xl">🌱</span>
                         )}

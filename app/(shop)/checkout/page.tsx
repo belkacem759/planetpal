@@ -5,42 +5,32 @@
  * Shipping address form, order summary, payment
  */
 
-import { CheckoutForm, CheckoutFormData } from '@/components/organisms/checkout-form';
+import { StripeCheckoutForm } from '@/components/organisms/stripe-checkout-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCartQuery, useCheckoutMutation, CheckoutData } from '@/hooks';
-import { WithServerAuth } from '@/providers/auth';
+import { useCartQuery } from '@/hooks';
+import { WithAuth } from '@/providers/auth/withAuth';
+import { StripeProvider } from '@/components/providers/stripe-provider';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { api } from '@/lib/api/client';
 
 function CheckoutPageContent() {
   const router = useRouter();
   const { data: cart } = useCartQuery();
-  const checkoutMutation = useCheckoutMutation();
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderError, setOrderError] = useState<string | null>(null);
 
-  const handleCheckout = async (formData: CheckoutFormData) => {
-    try {
-      // Transform form data to checkout data format
-      const checkoutData: CheckoutData = {
-        email: formData.email,
-        phone: formData.phone,
-        shipping_address: {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          address_line_1: formData.address,
-          city: formData.city,
-          state: formData.state,
-          postal_code: formData.zipCode,
-          country: 'US' // Default country
-        },
-        payment_method: 'credit_card' // Default payment method
-      };
-      
-      const result = await checkoutMutation.mutateAsync(checkoutData);
-      router.push(`/order-success?orderId=${result.order.id}`);
-    } catch (error) {
-      console.error('Checkout failed:', error);
-    }
+  const handlePaymentSuccess = (paymentIntentId: string) => {
+    router.push(`/order-success?paymentIntentId=${paymentIntentId}&orderId=${orderId}`);
+  };
+
+  const handlePaymentError = (error: Error) => {
+    console.error('Payment failed:', error);
+    // You can add toast notification here
   };
 
   const orderSummary = {
@@ -53,6 +43,49 @@ function CheckoutPageContent() {
   orderSummary.tax = orderSummary.subtotal * 0.08; // 8% tax
   orderSummary.shipping = orderSummary.subtotal > 50 ? 0 : 9.99; // Free shipping over $50
   orderSummary.total = orderSummary.subtotal + orderSummary.tax + orderSummary.shipping;
+
+  // Create order when cart is available
+  useEffect(() => {
+    const createOrder = async () => {
+      if (!cart?.items?.length || orderId) return;
+      
+      setIsProcessing(true);
+      setOrderError(null);
+      
+      try {
+        const response = await api.post('/api/orders', {
+          total_amount: orderSummary.total,
+          status: 'pending',
+          payment_status: 'pending'
+        }, { requiresAuth: true });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          // If authentication failed, redirect to login
+          if (response.status === 401 || response.status === 307) {
+            router.push('/login?redirect=/checkout');
+            return;
+          }
+          throw new Error(errorData.error || 'Failed to create order');
+        }
+        
+        const { data } = await response.json();
+        setOrderId(data.id);
+      } catch (error) {
+        console.error('Error creating order:', error);
+        // Check if it's an authentication error
+        if (error instanceof Error && error.message.includes('No authentication token')) {
+          router.push('/login?redirect=/checkout');
+          return;
+        }
+        setOrderError(error instanceof Error ? error.message : 'Failed to create order');
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+    
+    createOrder();
+  }, [cart?.items, orderId, orderSummary.total, router]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -70,11 +103,29 @@ function CheckoutPageContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Checkout Form */}
         <div>
-          <CheckoutForm
-            onSubmit={handleCheckout}
-            isSubmitting={checkoutMutation.isPending}
-            error={checkoutMutation.error ? new Error(checkoutMutation.error.message) : null}
-          />
+          {orderError && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-800">Error creating order: {orderError}</p>
+            </div>
+          )}
+          
+          {isProcessing && !orderId && (
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-blue-800">Creating order...</p>
+            </div>
+          )}
+          
+          {orderId && (
+            <StripeProvider clientSecret={clientSecret || undefined}>
+              <StripeCheckoutForm
+                orderId={orderId}
+                amount={Math.round(orderSummary.total * 100)} // Convert to cents
+                currency="usd"
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+              />
+            </StripeProvider>
+          )}
         </div>
 
         {/* Order Summary */}
@@ -127,8 +178,8 @@ function CheckoutPageContent() {
 
 export default function CheckoutPage() {
   return (
-    <WithServerAuth>
+    <WithAuth>
       <CheckoutPageContent />
-    </WithServerAuth>
+    </WithAuth>
   );
 }

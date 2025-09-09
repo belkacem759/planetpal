@@ -1,11 +1,9 @@
-import { NextRequest } from 'next/server';
+import { cartService } from '@/lib/db';
+import { createSuccessResponse, handleApiError, createError } from '@/lib/errors';
 import { createMiddleware } from '@/lib/middleware';
-import { CartService } from '@/lib/db';
-import { CartInsertSchema } from '@/lib/validation';
-import { handleApiError, createSuccessResponse } from '@/lib/errors';
-import { validateData } from '@/lib/validation';
-
-const cartService = new CartService();
+import { CartInsertSchema, validateData } from '@/lib/validation';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { NextRequest } from 'next/server';
 
 // GET /api/cart - Get user's cart (authenticated user)
 export async function GET(request: NextRequest) {
@@ -14,20 +12,17 @@ export async function GET(request: NextRequest) {
       enableRateLimit: true,
       requireAuth: true
     });
-    
+
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    // Extract user from middleware result (this would need to be passed through)
-    // For now, we'll assume user ID is available in request context
-    const userId = request.headers.get('x-user-id'); // This would be set by auth middleware
-    
-    if (!userId) {
-      return handleApiError(new Error('User ID not found'));
+    const { user, error: authError } = await getAuthenticatedUser();
+    if (authError || !user) {
+      return handleApiError(authError || createError.unauthorized());
     }
 
-    const result = await cartService.getUserCart(userId);
-    
+    const result = await cartService.getUserCart(user.id);
+
     if (!result.success) {
       return handleApiError(new Error(result.error));
     }
@@ -44,35 +39,33 @@ export async function POST(request: NextRequest) {
     const middleware = createMiddleware({
       enableRateLimit: true,
       requireAuth: true,
-  
     });
-    
+
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const userId = request.headers.get('x-user-id');
-    
-    if (!userId) {
-      return handleApiError(new Error('User ID not found'));
+    const { user, error: authError } = await getAuthenticatedUser();
+    if (authError || !user) {
+      return handleApiError(authError || createError.unauthorized());
     }
 
     const body = await request.json();
-    
+
     // Validate input
     const validation = validateData(CartInsertSchema, {
       ...body,
-      user_id: userId
+      user_id: user.id
     });
     if (!validation.success) {
       return handleApiError(new Error(`Validation failed: ${validation.errors?.join(', ')}`));
     }
 
     const result = await cartService.addToCart(
-      userId,
+      user.id,
       body.product_id,
       body.quantity || 1
     );
-    
+
     if (!result.success) {
       return handleApiError(new Error(result.error));
     }

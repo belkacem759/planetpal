@@ -1,17 +1,17 @@
 'use client';
 
-import { use, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { useProductQuery, useProductsQuery } from '@/hooks/useProducts';
-import { useAddToCartMutation } from '@/hooks/useCart';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Minus, Plus, ShoppingCart } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
+import { useAddToCartMutation } from '@/hooks/useCart';
+import { useProductQuery } from '@/hooks/useProducts';
+import { CareInstructions } from '@/types/database';
 import { Params } from '@/types/types';
+import { Droplets, Leaf, Minus, Plus, ShoppingCart, Sun, Thermometer, Wind } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { use, useState } from 'react';
 
 
 export default function ProductDetailsPage({
@@ -23,6 +23,54 @@ export default function ProductDetailsPage({
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  // Care instruction icons mapping
+  const careIcons = {
+    water: Droplets,
+    light: Sun,
+    temperature: Thermometer,
+    fertilizer: Leaf,
+    humidity: Wind,
+  };
+
+  // Difficulty level colors
+  const getDifficultyColor = (difficulty: number) => {
+    if (difficulty <= 2) return "bg-green-100 text-green-800";
+    if (difficulty <= 3) return "bg-yellow-100 text-yellow-800";
+    return "bg-red-100 text-red-800";
+  };
+
+  // Render care instructions
+  const renderCareInstructions = (careInstructions: any) => {
+    const careTypes = ['water', 'light', 'humidity', 'fertilizer', 'temperature'];
+
+    return careTypes.map((type) => {
+      const IconComponent = careIcons[type as keyof typeof careIcons];
+      if (!IconComponent) return null;
+
+      const instructionText = careInstructions[type];
+      const difficultyKey = `${type}_difficulty`;
+      const difficulty = careInstructions[difficultyKey];
+
+      // Skip if no instruction text or difficulty
+      if (!instructionText || difficulty === undefined) return null;
+
+      return (
+        <div key={type} className="flex items-start space-x-3 p-3 rounded-lg border">
+          <IconComponent className="h-5 w-5 mt-0.5 text-muted-foreground" />
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1">
+              <h4 className="font-medium capitalize">{type}</h4>
+              <Badge className={getDifficultyColor(difficulty)}>
+                {difficulty}/5
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">{instructionText}</p>
+          </div>
+        </div>
+      );
+    });
+  };
 
   // Fetch all products to find the one with matching slug
   const { data: product, isLoading, error } = useProductQuery(slug);
@@ -97,9 +145,9 @@ export default function ProductDetailsPage({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Product Image */}
         <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-          {product.image_url ? (
-            <Image
-              src={product.image_url || '/placeholder.jpg'}
+          {Array.isArray(product.images) && product.images.length > 0 ? (
+            <img
+              src={(product.images as string[])[0] || '/placeholder.jpg'}
               alt={product.name}
               width={400}
               height={400}
@@ -131,6 +179,16 @@ export default function ProductDetailsPage({
               <div className="flex items-center gap-2">
                 <span className="font-medium">Difficulty:</span>
                 <Badge variant="secondary">{product.difficulty_level}</Badge>
+              </div>
+            )}
+
+            {/* Care Instructions Section */}
+            {product.is_plant && product.care_instructions && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-4">Care Instructions</h3>
+                <div className="space-y-3">
+                  {renderCareInstructions(product.care_instructions)}
+                </div>
               </div>
             )}
             {product.category_id && (

@@ -19,6 +19,12 @@ export default function ShopPage() {
     maxPrice: filters.maxPrice,
     difficulty: filters.difficulty,
     isPlant: filters.isPlant,
+    care_difficulty_water: filters.care_difficulty_water,
+    care_difficulty_light: filters.care_difficulty_light,
+    care_difficulty_humidity: filters.care_difficulty_humidity,
+    care_difficulty_fertilizer: filters.care_difficulty_fertilizer,
+    care_difficulty_temperature: filters.care_difficulty_temperature,
+    max_care_difficulty: filters.max_care_difficulty,
     limit: 20,
     offset: 0
   });

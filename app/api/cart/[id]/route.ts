@@ -1,9 +1,8 @@
 import { NextRequest } from 'next/server';
 import { createMiddleware } from '@/lib/middleware';
-import { CartService } from '@/lib/db';
+import { cartService } from '@/lib/db';
 import { handleApiError, createSuccessResponse, createError } from '@/lib/errors';
-
-const cartService = new CartService();
+import { getAuthenticatedUser } from '@/lib/auth';
 
 // PUT /api/cart/[id] - Update cart item quantity (authenticated user)
 export async function PUT(
@@ -14,16 +13,15 @@ export async function PUT(
     const middleware = createMiddleware({
       enableRateLimit: true,
       requireAuth: true,
-  
+
     });
-    
+
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const userId = request.headers.get('x-user-id');
-    
-    if (!userId) {
-      return handleApiError(new Error('User ID not found'));
+    const { user, error: authError } = await getAuthenticatedUser();
+    if (authError || !user) {
+      return handleApiError(authError || createError.unauthorized());
     }
 
     const body = await request.json();
@@ -33,13 +31,19 @@ export async function PUT(
       return handleApiError(createError.validation('Quantity must be at least 1'));
     }
 
-    const result = await cartService.updateQuantity(userId, params.id, quantity);
-    
+    const result = await cartService.updateQuantity(user.id, params.id, quantity);
+
     if (!result.success) {
       return handleApiError(new Error(result.error));
     }
 
-    return createSuccessResponse(result.data);
+    // Return the full cart data after update
+    const cartResult = await cartService.getUserCart(user.id);
+    if (!cartResult.success) {
+      return handleApiError(new Error(cartResult.error));
+    }
+
+    return createSuccessResponse(cartResult.data);
   } catch (error) {
     return handleApiError(error, `/api/cart/${params.id}`);
   }
@@ -54,20 +58,19 @@ export async function DELETE(
     const middleware = createMiddleware({
       enableRateLimit: true,
       requireAuth: true,
-  
+
     });
-    
+
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const userId = request.headers.get('x-user-id');
-    
-    if (!userId) {
-      return handleApiError(new Error('User ID not found'));
+    const { user, error: authError } = await getAuthenticatedUser();
+    if (authError || !user) {
+      return handleApiError(authError || createError.unauthorized());
     }
 
-    const result = await cartService.removeFromCart(userId, params.id);
-    
+    const result = await cartService.removeFromCart(user.id, params.id);
+
     if (!result.success) {
       return handleApiError(new Error(result.error));
     }

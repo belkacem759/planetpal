@@ -5,10 +5,10 @@
  * User's cart, quantity edit, remove/add, proceed to checkout
  */
 
-import { WithAuth } from '@/providers/auth/withAuth';
 import { CartList } from '@/components/organisms/cart-list';
-import { useCartQuery, useUpdateCartItemMutation, useRemoveFromCartMutation } from '@/hooks';
+import { useCartQuery, useRemoveFromCartMutation, useUpdateCartItemMutation } from '@/hooks';
 import { useRouter } from 'next/navigation';
+import { startTransition } from 'react';
 
 function CartPageContent() {
   const router = useRouter();
@@ -18,9 +18,11 @@ function CartPageContent() {
 
   const handleUpdateQuantity = async (itemId: string, quantity: number) => {
     try {
-      await updateCartItemMutation.mutateAsync({
-        item_id: itemId,
-        quantity
+      startTransition(() => {
+        updateCartItemMutation.mutateAsync({
+          item_id: itemId,
+          quantity
+        });
       });
     } catch (error) {
       console.error('Failed to update cart item:', error);
@@ -29,7 +31,9 @@ function CartPageContent() {
 
   const handleRemoveItem = async (itemId: string) => {
     try {
-      await removeFromCartMutation.mutateAsync(itemId);
+      startTransition(() => {
+        removeFromCartMutation.mutateAsync(itemId);
+      });
     } catch (error) {
       console.error('Failed to remove cart item:', error);
     }
@@ -49,7 +53,7 @@ function CartPageContent() {
       </div>
 
       <CartList
-        items={cart?.items || []}
+        items={(cart?.items) || []}
         isLoading={isLoading}
         error={error ? new Error(error.message) : null}
         onQuantityChange={handleUpdateQuantity}
@@ -64,8 +68,6 @@ function CartPageContent() {
 
 export default function CartPage() {
   return (
-    <WithAuth>
-      <CartPageContent />
-    </WithAuth>
+    <CartPageContent />
   );
 }

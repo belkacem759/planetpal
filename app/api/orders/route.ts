@@ -18,11 +18,13 @@ export async function GET(request: NextRequest) {
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const userId = request.headers.get('x-user-id');
+    const user = (request as any).user;
     
-    if (!userId) {
+    if (!user || !user.id) {
       return handleApiError(new Error('User ID not found'));
     }
+    
+    const userId = user.id;
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -58,11 +60,13 @@ export async function POST(request: NextRequest) {
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const userId = request.headers.get('x-user-id');
+    const user = (request as any).user;
     
-    if (!userId) {
+    if (!user || !user.id) {
       return handleApiError(new Error('User ID not found'));
     }
+    
+    const userId = user.id;
 
     const body = await request.json();
     
@@ -71,7 +75,7 @@ export async function POST(request: NextRequest) {
       ...body,
       user_id: userId
     });
-    if (!validation.success) {
+    if (!validation.success || !validation.data) {
       return handleApiError(new Error(`Validation failed: ${validation.errors?.join(', ')}`));
     }
 

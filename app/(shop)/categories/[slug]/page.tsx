@@ -1,16 +1,17 @@
 'use client';
 
-import { use, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useProductsQuery } from '@/hooks/useProducts';
-import { useCategoriesQuery, useCategoryQuery } from '@/hooks/useCategories';
-import { useAddToCartMutation } from '@/hooks/useCart';
-import { ProductGrid } from '@/components/organisms/product-grid';
 import { FilterBar } from '@/components/molecules/filter-bar';
+import { ProductGrid } from '@/components/organisms/product-grid';
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { Alert } from '@/components/ui/alert';
+import { useAddToCartMutation } from '@/hooks/useCart';
+import { useCategoryQuery } from '@/hooks/useCategories';
+import { useProductsQuery } from '@/hooks/useProducts';
+import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { Params } from '@/types/types';
+import { useRouter } from 'next/navigation';
+import { use, useState } from 'react';
 
 /**
  * Public Route: Accessible to all users
@@ -22,17 +23,29 @@ export default function CategoryPage({
 }: {
   params: Params
 }) {
+  const { slug } = use(params);
   const router = useRouter();
-  const { slug } = use(params)
-  const [search, setSearch] = useState('');
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const { filters } = useUrlFilters();
 
   // Fetch category data
   const { data: categoryData } = useCategoryQuery(slug);
   // Fetch products for this category
   const { data: products, isLoading, error } = useProductsQuery({
-    search,
-    category: categoryData?.data.id || "",
+    search: filters.search,
+    category: categoryData?.id || "",
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+    difficulty: filters.difficulty,
+    isPlant: filters.isPlant,
+    care_difficulty_water: filters.care_difficulty_water,
+    care_difficulty_light: filters.care_difficulty_light,
+    care_difficulty_humidity: filters.care_difficulty_humidity,
+    care_difficulty_fertilizer: filters.care_difficulty_fertilizer,
+    care_difficulty_temperature: filters.care_difficulty_temperature,
+    max_care_difficulty: filters.max_care_difficulty,
+    limit: 20,
+    offset: 0
   });
 
   console.log({ categoryData, products })
@@ -50,9 +63,7 @@ export default function CategoryPage({
     }
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-  };
+
 
 
 
@@ -87,6 +98,7 @@ export default function CategoryPage({
         )}
       </div>
 
+      <FilterBar />
 
       {isLoading && (
         <div className="flex justify-center py-8">

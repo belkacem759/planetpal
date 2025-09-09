@@ -1,8 +1,38 @@
 import { updateSession } from "@/lib/supabase/middleware";
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  // First, handle Supabase session
+  const response = await updateSession(request);
+
+  // Enforce HTTPS in production
+  if (
+    process.env.NODE_ENV === 'production' &&
+    request.headers.get('x-forwarded-proto') !== 'https'
+  ) {
+    return NextResponse.redirect(
+      `https://${request.headers.get('host')}${request.nextUrl.pathname}${request.nextUrl.search}`,
+      301
+    );
+  }
+
+  // Add security headers for PCI DSS compliance
+  if (response) {
+    // Prevent caching of sensitive pages
+    if (request.nextUrl.pathname.startsWith('/checkout') || 
+        request.nextUrl.pathname.startsWith('/api/stripe')) {
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+    }
+
+    // Add additional security headers
+    response.headers.set('X-DNS-Prefetch-Control', 'off');
+    response.headers.set('X-Download-Options', 'noopen');
+    response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
+  }
+
+  return response;
 }
 
 export const config = {
