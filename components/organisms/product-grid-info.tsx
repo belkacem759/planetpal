@@ -1,27 +1,23 @@
 import * as React from "react";
-import { ProductCard } from "@/components/molecules/product-card";
+import { ProductInfoCard } from "@/components/molecules/product-info-card";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/database";
 
-interface ProductGridProps {
+interface ProductGridInfoProps {
   products: Product[];
   isLoading?: boolean;
   error?: Error | null;
-  onAddToCart?: (productId: string) => void;
-  isAddingToCart?: string | null; // productId currently being added
   className?: string;
   emptyMessage?: string;
 }
 
-const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
+const ProductGridInfo = React.forwardRef<HTMLDivElement, ProductGridInfoProps>(
   ({
     products,
     isLoading = false,
     error = null,
-    onAddToCart,
-    isAddingToCart = null,
     className,
     emptyMessage = "No products found.",
     ...props
@@ -94,7 +90,7 @@ const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
       );
     }
 
-    // Products grid
+    // Products grid with info cards
     return (
       <div
         ref={ref}
@@ -106,14 +102,14 @@ const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
       >
         {products.map((product) => {
           // Handle images array from JSON
-          const images = Array.isArray(product.images)
+          const images = Array.isArray(product.images) 
             ? product.images as string[]
-            : product.images
-              ? [product.images as string]
-              : [];
+            : product.images 
+            ? [product.images as string]
+            : [];
 
           return (
-            <ProductCard
+            <ProductInfoCard
               key={product.id}
               id={product.id}
               name={product.name}
@@ -123,9 +119,8 @@ const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
               stockQuantity={product.stock_quantity}
               difficultyLevel={product.difficulty_level || undefined}
               isPlant={product.is_plant || undefined}
-              onAddToCart={onAddToCart}
-              isLoading={isAddingToCart === product.id}
-              careInstructions={product.care_instructions || undefined}
+              description={product.description || undefined}
+              careInstructions={product.care_instructions}
             />
           );
         })}
@@ -133,7 +128,7 @@ const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
     );
   }
 );
-ProductGrid.displayName = "ProductGrid";
+ProductGridInfo.displayName = "ProductGridInfo";
 
-export { ProductGrid };
-export type { ProductGridProps, Product };
+export { ProductGridInfo };
+export type { ProductGridInfoProps };

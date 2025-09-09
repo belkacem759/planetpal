@@ -1,10 +1,9 @@
-import * as React from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import * as React from "react";
 
 interface CartItemProps {
   id: string;
@@ -106,10 +105,10 @@ const CartItem = React.forwardRef<HTMLDivElement, CartItemProps>(
             {/* Product Image */}
             <Link href={`/products/${productSlug}`} className="flex-shrink-0">
               <div className="relative w-20 h-20 rounded-md overflow-hidden">
-                <Image
+                <img
                   src={productImage || "/placeholder-plant.jpg"}
                   alt={productName}
-                  fill
+                  // fill
                   className="object-cover"
                   sizes="80px"
                 />

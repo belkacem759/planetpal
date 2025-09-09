@@ -1,10 +1,10 @@
-import * as React from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { CareInstructions, Json } from "@/types/database";
+import Link from "next/link";
+import * as React from "react";
 
 interface ProductCardProps {
   id: string;
@@ -15,6 +15,7 @@ interface ProductCardProps {
   difficultyLevel?: string;
   isPlant?: boolean;
   stockQuantity?: number;
+  careInstructions?: CareInstructions | Json | null;
   onAddToCart?: (productId: string) => void;
   isLoading?: boolean;
   className?: string;
@@ -30,6 +31,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
     difficultyLevel,
     isPlant,
     stockQuantity = 0,
+    careInstructions,
     onAddToCart,
     isLoading = false,
     className,
@@ -37,6 +39,34 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
   }, ref) => {
     const imageUrl = images?.[0] || "/placeholder-plant.jpg";
     const isOutOfStock = stockQuantity <= 0;
+
+    // Calculate average care difficulty for plants
+    const getAverageDifficulty = () => {
+      if (!careInstructions || !isPlant) return null;
+
+      try {
+        // Handle both CareInstructions object and raw Json data
+        const instructions = typeof careInstructions === 'string' 
+          ? JSON.parse(careInstructions) 
+          : careInstructions;
+        
+        if (!instructions || typeof instructions !== 'object') return null;
+        
+        const difficulties = Object.values(instructions)
+          .map((instruction: any) => instruction?.difficulty)
+          .filter(difficulty => typeof difficulty === 'number' && difficulty >= 1 && difficulty <= 5);
+        
+        if (difficulties.length === 0) return null;
+
+        const average = difficulties.reduce((sum, diff) => sum + diff, 0) / difficulties.length;
+        return Math.round(average);
+      } catch (error) {
+        console.warn('Error parsing care instructions:', error);
+        return null;
+      }
+    };
+
+    const avgDifficulty = getAverageDifficulty();
 
     const handleAddToCart = (e: React.MouseEvent) => {
       e.preventDefault();
@@ -58,19 +88,18 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
         <Link href={`/products/${slug}`}>
           <CardContent className="p-0">
             <div className="relative aspect-square overflow-hidden rounded-t-xl">
-              <Image
+              <img
                 src={imageUrl}
                 alt={name}
-                fill
                 className="object-cover transition-transform group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
-              {isPlant && difficultyLevel && (
+              {isPlant && (difficultyLevel || avgDifficulty) && (
                 <Badge
                   variant="secondary"
                   className="absolute top-2 right-2"
                 >
-                  {difficultyLevel}
+                  {difficultyLevel || `Difficulty: ${avgDifficulty}/5`}
                 </Badge>
               )}
               {isOutOfStock && (
@@ -88,6 +117,40 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
                 <p className="text-sm text-orange-600 mt-1">
                   Only {stockQuantity} left!
                 </p>
+              )}
+              {careInstructions && (
+                <div className="mt-3 space-y-1">
+                  <p className="text-sm font-medium text-gray-700">Care Instructions:</p>
+                  <div className="text-xs text-gray-600 space-y-1">
+                    {(() => {
+                      try {
+                        let instructions = careInstructions;
+                        if (typeof instructions === 'string') {
+                          instructions = JSON.parse(instructions);
+                        }
+                        if (instructions && typeof instructions === 'object') {
+                          return Object.entries(instructions)
+                            .filter(([key, value]) => value && typeof value === 'object' && 'text' in value)
+                            .slice(0, 2)
+                            .map(([key, instruction]: [string, any]) => (
+                              <div key={key} className="flex justify-between items-center">
+                                <span className="capitalize">{key.replace('_', ' ')}:</span>
+                                <span className="text-right flex-1 ml-2 truncate">{instruction.text}</span>
+                                {instruction.difficulty && (
+                                  <Badge variant="outline" className="ml-1 text-xs px-1 py-0">
+                                    {instruction.difficulty}/5
+                                  </Badge>
+                                )}
+                              </div>
+                            ));
+                        }
+                      } catch (error) {
+                        console.error('Error parsing care instructions:', error);
+                      }
+                      return null;
+                    })()} 
+                  </div>
+                </div>
               )}
             </div>
           </CardContent>
