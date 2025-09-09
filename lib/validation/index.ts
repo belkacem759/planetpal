@@ -38,6 +38,27 @@ export const CategoryUpdateSchema = v.object({
   image_url: v.optional(v.nullable(v.pipe(v.string(), v.url()))),
 });
 
+// Care Instructions schemas
+export const CareInstructionItemSchema = v.object({
+  text: v.pipe(v.string(), v.minLength(1)),
+  difficulty: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(5)),
+});
+
+export const PlantCareInstructionsSchema = v.object({
+  light: CareInstructionItemSchema,
+  water: CareInstructionItemSchema,
+  humidity: CareInstructionItemSchema,
+  fertilizer: CareInstructionItemSchema,
+  temperature: CareInstructionItemSchema,
+});
+
+export const ProductCareInstructionsSchema = v.record(v.string(), CareInstructionItemSchema);
+
+export const CareInstructionsSchema = v.union([
+  PlantCareInstructionsSchema,
+  ProductCareInstructionsSchema,
+]);
+
 // Product schemas
 export const ProductInsertSchema = v.object({
   category_id: v.optional(v.nullable(UuidSchema)),
@@ -47,7 +68,7 @@ export const ProductInsertSchema = v.object({
   price: v.pipe(v.number(), v.minValue(0)),
   stock_quantity: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
   images: v.optional(v.nullable(v.array(v.pipe(v.string(), v.url())))),
-  care_instructions: v.optional(v.nullable(v.record(v.string(), v.any()))),
+  care_instructions: v.optional(v.nullable(CareInstructionsSchema)),
   difficulty_level: v.optional(v.nullable(v.picklist(['beginner', 'intermediate', 'advanced']))),
   is_plant: v.optional(v.nullable(v.boolean())),
 });
@@ -60,7 +81,7 @@ export const ProductUpdateSchema = v.object({
   price: v.optional(v.pipe(v.number(), v.minValue(0))),
   stock_quantity: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0))),
   images: v.optional(v.nullable(v.array(v.pipe(v.string(), v.url())))),
-  care_instructions: v.optional(v.nullable(v.record(v.string(), v.any()))),
+  care_instructions: v.optional(v.nullable(CareInstructionsSchema)),
   difficulty_level: v.optional(v.nullable(v.picklist(['beginner', 'intermediate', 'advanced']))),
   is_plant: v.optional(v.nullable(v.boolean())),
 });

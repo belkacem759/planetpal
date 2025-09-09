@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { WithServerAuth } from '@/providers/auth';
+import { WithServerAuth } from '@/providers/auth/withServerAuth';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (

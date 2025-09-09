@@ -10,6 +10,10 @@ import Link from "next/link";
 interface CartItemData {
   id: string;
   product_id: string;
+  quantity: number;
+  price: number;
+  created_at: string;
+  updated_at: string;
   product: {
     id: string;
     name: string;
@@ -18,7 +22,6 @@ interface CartItemData {
     image_url: string;
     stock_quantity: number;
   };
-  quantity: number;
 }
 
 interface CartListProps {
@@ -50,7 +53,7 @@ const CartList = React.forwardRef<HTMLDivElement, CartListProps>(
   }, ref) => {
     // Calculate totals
     const subtotal = items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+      (sum, item) => sum + (item.product?.price || 0) * item.quantity,
       0
     );
     const tax = subtotal * 0.08; // 8% tax
@@ -147,12 +150,12 @@ const CartList = React.forwardRef<HTMLDivElement, CartListProps>(
                 key={item.id}
                 id={item.id}
                 productId={item.product_id}
-                productName={item.product.name}
-                productSlug={item.product.slug}
-                productImage={item.product.image_url}
-                price={item.product.price}
+                productName={item.product?.name || 'Unknown Product'}
+                productSlug={item.product?.slug || ''}
+                productImage={item.product?.image_url || ''}
+                price={item.product?.price || 0}
                 quantity={item.quantity}
-                maxQuantity={item.product.stock_quantity}
+                maxQuantity={item.product?.stock_quantity || 0}
                 onQuantityChange={onQuantityChange || (() => {})}
                 onRemove={onRemoveItem || (() => {})}
                 isUpdating={isUpdating === item.id}

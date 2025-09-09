@@ -2,28 +2,9 @@ import { ApiSuccessResponse } from '@/lib/errors';
 import { handleMutationError, invalidateQueries, queryKeys } from '@/lib/queryClient';
 import { apiClient } from '@/lib/api/client';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { Product } from '@/lib/db';
 
 // Types
-export interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  image_url: string;
-  stock_quantity: number;
-  category_id: string;
-  category?: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-  care_instructions?: string;
-  difficulty_level?: 'beginner' | 'intermediate' | 'advanced';
-  is_plant: boolean;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface ProductsFilters extends Record<string, unknown> {
   category?: string;
@@ -33,6 +14,12 @@ export interface ProductsFilters extends Record<string, unknown> {
   difficulty?: string;
   isPlant?: boolean;
   inStock?: boolean;
+  care_difficulty_water?: number;
+  care_difficulty_light?: number;
+  care_difficulty_humidity?: number;
+  care_difficulty_fertilizer?: number;
+  care_difficulty_temperature?: number;
+  max_care_difficulty?: number;
   limit?: number;
   offset?: number;
 }
@@ -76,7 +63,8 @@ const fetchProduct = async (slug: string): Promise<Product> => {
     throw new Error(`Failed to fetch product: ${response.statusText}`);
   }
 
-  return response.json();
+  const result: ApiSuccessResponse<Product> = await response.json();
+  return result.data;
 };
 
 // Custom hooks

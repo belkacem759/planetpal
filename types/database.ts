@@ -359,3 +359,29 @@ export interface Database {
     }
   }
 }
+
+// Care Instructions Types
+export interface CareInstructionItem {
+  text: string
+  difficulty: number // 1-5 scale
+}
+
+export interface PlantCareInstructions {
+  light: CareInstructionItem
+  water: CareInstructionItem
+  humidity: CareInstructionItem
+  fertilizer: CareInstructionItem
+  temperature: CareInstructionItem
+}
+
+export interface ProductCareInstructions {
+  [key: string]: CareInstructionItem
+}
+
+export type CareInstructions = PlantCareInstructions | ProductCareInstructions
+
+// Product type with proper care_instructions typing
+export type Product = Database['public']['Tables']['products']['Row'] & {
+  care_instructions: CareInstructions | Json | null
+  category?: Database['public']['Tables']['categories']['Row'] | null
+}

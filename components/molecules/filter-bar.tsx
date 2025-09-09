@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Spinner } from '@/components/ui/spinner';
-import { useCategoriesQuery, useUrlFilters } from '@/hooks';
+import { useCategoriesQuery, useUrlFilters, FilterParams } from '@/hooks';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Filter, Search, X } from 'lucide-react';
 import { useState } from 'react';
@@ -32,6 +32,22 @@ export function FilterBar() {
     { value: 'beginner', label: 'Beginner' },
     { value: 'intermediate', label: 'Intermediate' },
     { value: 'advanced', label: 'Advanced' },
+  ];
+  
+  const careInstructionTypes = [
+    { value: 'water', label: 'Water Care' },
+    { value: 'light', label: 'Light Requirements' },
+    { value: 'humidity', label: 'Humidity Needs' },
+    { value: 'fertilizer', label: 'Fertilizer Schedule' },
+    { value: 'temperature', label: 'Temperature Range' },
+  ];
+  
+  const careDifficultyLevels = [
+    { value: 1, label: 'Very Easy (1)' },
+    { value: 2, label: 'Easy (2)' },
+    { value: 3, label: 'Moderate (3)' },
+    { value: 4, label: 'Hard (4)' },
+    { value: 5, label: 'Very Hard (5)' },
   ];
 
   const selectedDifficultyLabel = difficultyOptions.find(
@@ -153,6 +169,37 @@ export function FilterBar() {
               </button>
             </Badge>
           )}
+          
+          {/* Care Instruction Difficulty Badges */}
+          {careInstructionTypes.map(({ value, label }) => {
+            const filterKey = `care_difficulty_${value}`;
+            const filterValue = (filters as any)[filterKey] as number | undefined;
+            if (!filterValue) return null;
+            
+            return (
+              <Badge key={value} variant="secondary" className="flex items-center gap-1">
+                {label}: {filterValue}/5
+                <button
+                  onClick={() => setParam(filterKey as keyof FilterParams, null)}
+                  className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            );
+          })}
+          
+          {filters.max_care_difficulty && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              Max Difficulty: {filters.max_care_difficulty}/5
+              <button
+                onClick={() => setParam('max_care_difficulty', null)}
+                className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
         </div>
       )}
 
@@ -267,6 +314,76 @@ export function FilterBar() {
               </label>
             </div>
           </div>
+          
+          {/* Care Instruction Difficulty Filters */}
+          {filters.isPlant && (
+            <>
+              <div>
+                <h3 className="font-medium mb-3">Care Instruction Difficulty</h3>
+                <div className="space-y-4">
+                  {careInstructionTypes.map(({ value, label }) => {
+                    const filterKey = `care_difficulty_${value}`;
+                    const currentValue = (filters as any)[filterKey] as number | undefined;
+                    
+                    return (
+                      <div key={value}>
+                        <label className="text-sm font-medium mb-2 block">{label}</label>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full justify-between">
+                              {currentValue ? `Level ${currentValue}/5` : 'Any Level'}
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-full">
+                            <DropdownMenuItem onClick={() => setParam(filterKey as keyof FilterParams, null)}>
+                              Any Level
+                            </DropdownMenuItem>
+                            {careDifficultyLevels.map((level) => (
+                              <DropdownMenuItem
+                                key={level.value}
+                                onClick={() => setParam(filterKey as keyof FilterParams, level.value)}
+                              >
+                                {level.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-medium mb-3">Maximum Care Difficulty</h3>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between">
+                      {filters.max_care_difficulty ? `Max ${filters.max_care_difficulty}/5` : 'No Limit'}
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full">
+                    <DropdownMenuItem onClick={() => setParam('max_care_difficulty', null)}>
+                      No Limit
+                    </DropdownMenuItem>
+                    {careDifficultyLevels.map((level) => (
+                      <DropdownMenuItem
+                        key={level.value}
+                        onClick={() => setParam('max_care_difficulty', level.value)}
+                      >
+                        Max {level.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <p className="text-xs text-gray-500 mt-1">
+                  Show plants where all care instructions are at or below this difficulty level
+                </p>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

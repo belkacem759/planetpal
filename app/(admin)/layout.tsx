@@ -1,4 +1,4 @@
-import { WithServerAuth } from '@/providers/auth';
+import { WithServerAuth } from '@/providers/auth/withServerAuth';
 
 export default function AdminLayout({
   children,

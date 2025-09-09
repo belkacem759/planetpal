@@ -16,14 +16,23 @@ type WithServerAuthProps = {
  */
 export async function WithServerAuth({ children, requiredRole }: WithServerAuthProps) {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims) {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
     redirect('/login');
   }
 
   // If a specific role is required, check if the user has it
   if (requiredRole) {
-    const userRole = data.claims.user_metadata?.role;
+    let userRole: string | undefined = user.user_metadata?.role as string | undefined;
+
+    if (!userRole) {
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      userRole = (profile as { role?: string } | null)?.role;
+    }
 
     if (!userRole || userRole !== requiredRole) {
       // Redirect to unauthorized page or home page

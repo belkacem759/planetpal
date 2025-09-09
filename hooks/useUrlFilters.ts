@@ -20,6 +20,12 @@ export interface FilterParams {
   maxPrice?: number;
   difficulty?: string;
   isPlant?: boolean;
+  care_difficulty_water?: number;
+  care_difficulty_light?: number;
+  care_difficulty_humidity?: number;
+  care_difficulty_fertilizer?: number;
+  care_difficulty_temperature?: number;
+  max_care_difficulty?: number;
 }
 
 export const useUrlFilters = () => {
@@ -47,6 +53,25 @@ export const useUrlFilters = () => {
 
     const isPlant = searchParams.get('isPlant');
     if (isPlant) params.isPlant = isPlant === 'true';
+
+    // Care instruction difficulty filters
+    const careWater = searchParams.get('care_difficulty_water');
+    if (careWater) params.care_difficulty_water = parseInt(careWater);
+
+    const careLight = searchParams.get('care_difficulty_light');
+    if (careLight) params.care_difficulty_light = parseInt(careLight);
+
+    const careHumidity = searchParams.get('care_difficulty_humidity');
+    if (careHumidity) params.care_difficulty_humidity = parseInt(careHumidity);
+
+    const careFertilizer = searchParams.get('care_difficulty_fertilizer');
+    if (careFertilizer) params.care_difficulty_fertilizer = parseInt(careFertilizer);
+
+    const careTemperature = searchParams.get('care_difficulty_temperature');
+    if (careTemperature) params.care_difficulty_temperature = parseInt(careTemperature);
+
+    const maxCareDifficulty = searchParams.get('max_care_difficulty');
+    if (maxCareDifficulty) params.max_care_difficulty = parseInt(maxCareDifficulty);
 
     return params;
   }, [searchParams]);

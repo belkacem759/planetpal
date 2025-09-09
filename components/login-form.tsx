@@ -16,10 +16,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+type LoginFormProps = React.ComponentPropsWithoutRef<"div"> & {
+  redirectTo?: string | null;
+};
+
 export function LoginForm({
   className,
+  redirectTo,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,8 +43,9 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/protected");
+      // Redirect to the intended page or default to dashboard
+      const redirectUrl = redirectTo || "/dashboard";
+      router.push(redirectUrl);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
