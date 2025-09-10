@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
           const { error } = await supabase
             .from('orders')
             .update({
-              payment_status: 'succeeded',
+              payment_status: 'paid',
               status: 'confirmed',
               payment_method: paymentIntent.payment_method_types[0] || 'card',
               payment_metadata: {

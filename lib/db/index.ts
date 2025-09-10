@@ -439,6 +439,26 @@ export class CartService extends BaseService {
   async removeFromCart(userId: string, cartId: string): Promise<DbResult<Cart[]>> {
     return this.delete<Cart>(cartId, userId);
   }
+
+  async clearCart(userId: string): Promise<DbResult<any>> {
+    try {
+      const { error } = await (this.client as any)
+        .from(this.tableName)
+        .delete()
+        .eq('user_id', userId);
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data: { cleared: true } };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
 }
 
 export class OrderService extends BaseService {

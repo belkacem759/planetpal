@@ -33,6 +33,34 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// DELETE /api/cart - Clear entire cart (authenticated user)
+export async function DELETE(request: NextRequest) {
+  try {
+    const middleware = createMiddleware({
+      enableRateLimit: true,
+      requireAuth: true,
+    });
+
+    const middlewareResult = await middleware(request);
+    if (middlewareResult) return middlewareResult;
+
+    const { user, error: authError } = await getAuthenticatedUser();
+    if (authError || !user) {
+      return handleApiError(authError || createError.unauthorized());
+    }
+
+    const result = await cartService.clearCart(user.id);
+
+    if (!result.success) {
+      return handleApiError(new Error(result.error));
+    }
+
+    return createSuccessResponse(result.data);
+  } catch (error) {
+    return handleApiError(error, '/api/cart');
+  }
+}
+
 // POST /api/cart - Add item to cart (authenticated user)
 export async function POST(request: NextRequest) {
   try {

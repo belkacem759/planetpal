@@ -8,7 +8,6 @@
 import { StripeCheckoutForm } from '@/components/organisms/stripe-checkout-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCartQuery } from '@/hooks';
-import { WithAuth } from '@/providers/auth/withAuth';
 import { StripeProvider } from '@/components/providers/stripe-provider';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -48,17 +47,17 @@ function CheckoutPageContent() {
   useEffect(() => {
     const createOrder = async () => {
       if (!cart?.items?.length || orderId) return;
-      
+
       setIsProcessing(true);
       setOrderError(null);
-      
+
       try {
         const response = await api.post('/api/orders', {
           total_amount: orderSummary.total,
           status: 'pending',
           payment_status: 'pending'
         }, { requiresAuth: true });
-        
+
         if (!response.ok) {
           const errorData = await response.json();
           // If authentication failed, redirect to login
@@ -68,7 +67,7 @@ function CheckoutPageContent() {
           }
           throw new Error(errorData.error || 'Failed to create order');
         }
-        
+
         const { data } = await response.json();
         setOrderId(data.id);
       } catch (error) {
@@ -83,7 +82,7 @@ function CheckoutPageContent() {
         setIsProcessing(false);
       }
     };
-    
+
     createOrder();
   }, [cart?.items, orderId, orderSummary.total, router]);
 
@@ -108,13 +107,13 @@ function CheckoutPageContent() {
               <p className="text-red-800">Error creating order: {orderError}</p>
             </div>
           )}
-          
+
           {isProcessing && !orderId && (
             <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
               <p className="text-blue-800">Creating order...</p>
             </div>
           )}
-          
+
           {orderId && (
             <StripeProvider clientSecret={clientSecret || undefined}>
               <StripeCheckoutForm
@@ -177,9 +176,5 @@ function CheckoutPageContent() {
 }
 
 export default function CheckoutPage() {
-  return (
-    <WithAuth>
-      <CheckoutPageContent />
-    </WithAuth>
-  );
+  return <CheckoutPageContent />;
 }

@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { WithAuth } from '@/providers/auth/withAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Package, Calendar, CreditCard } from 'lucide-react';
+import { useClearCartMutation } from '@/hooks/useCart';
+import { useOrderQuery } from '@/hooks/useCheckout';
 
 /**
  * Protected Route: Authenticated users only
@@ -16,65 +17,21 @@ import { CheckCircle, Package, Calendar, CreditCard } from 'lucide-react';
 function OrderSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [orderDetails, setOrderDetails] = useState<{
-    id: string;
-    order_number: string;
-    total: number;
-    status: string;
-    created_at: string;
-    items: Array<{
-      id: string;
-      name: string;
-      price: number;
-      quantity: number;
-      image_url: string | null;
-    }>;
-    shipping_address: {
-      street: string;
-      city: string;
-      state: string;
-      zip: string;
-    };
-  } | null>(null);
+  const clearCartMutation = useClearCartMutation();
+  const [cartCleared, setCartCleared] = useState(false);
   
-  const orderId = searchParams.get('order_id');
-  const orderNumber = searchParams.get('order_number');
+  const orderId = searchParams.get('orderId') || searchParams.get('order_id');
+  const paymentIntentId = searchParams.get('paymentIntentId');
+  
+  // Fetch real order data from the database
+  const { data: orderDetails, isLoading, error } = useOrderQuery(orderId || '');
 
-  useEffect(() => {
-    // In a real app, you would fetch order details from the API
-    // For now, we'll simulate order data
-    if (orderId) {
-      setOrderDetails({
-        id: orderId,
-        order_number: orderNumber || `ORD-${Date.now()}`,
-        total: 89.97,
-        status: 'confirmed',
-        created_at: new Date().toISOString(),
-        items: [
-          {
-            id: '1',
-            name: 'Monstera Deliciosa',
-            price: 29.99,
-            quantity: 2,
-            image_url: null
-          },
-          {
-            id: '2', 
-            name: 'Plant Care Kit',
-            price: 29.99,
-            quantity: 1,
-            image_url: null
-          }
-        ],
-        shipping_address: {
-          street: '123 Green Street',
-          city: 'Plant City',
-          state: 'CA',
-          zip: '90210'
-        }
-      });
-    }
-  }, [orderId, orderNumber]);
+  // Clear cart when payment is successful (without useEffect)
+  const shouldClearCart = paymentIntentId && orderId && !cartCleared && orderDetails?.payment_status === 'paid';
+  if (shouldClearCart) {
+    clearCartMutation.mutate(undefined);
+    setCartCleared(true);
+  }
 
   if (!orderId) {
     return (
@@ -82,6 +39,34 @@ function OrderSuccessContent() {
         <Card className="max-w-md mx-auto">
           <CardContent className="p-6 text-center">
             <p className="text-gray-600 mb-4">No order information found.</p>
+            <Button onClick={() => router.push('/shop')}>Continue Shopping</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="p-6 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+            </div>
+            <p className="text-gray-600">Loading order details...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="p-6 text-center">
+            <p className="text-red-600 mb-4">Error loading order details: {error.message}</p>
             <Button onClick={() => router.push('/shop')}>Continue Shopping</Button>
           </CardContent>
         </Card>
@@ -125,7 +110,7 @@ function OrderSuccessContent() {
               
               <div className="flex justify-between items-center">
                 <span className="font-medium">Total:</span>
-                <span className="text-xl font-bold">${orderDetails.total.toFixed(2)}</span>
+                <span className="text-xl font-bold">${orderDetails.total_amount.toFixed(2)}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -174,10 +159,15 @@ function OrderSuccessContent() {
             </CardHeader>
             <CardContent>
               <div className="text-sm space-y-1">
-                <p>{orderDetails.shipping_address.street}</p>
+                <p>{orderDetails.shipping_address.first_name} {orderDetails.shipping_address.last_name}</p>
+                <p>{orderDetails.shipping_address.address_line_1}</p>
+                {orderDetails.shipping_address.address_line_2 && (
+                  <p>{orderDetails.shipping_address.address_line_2}</p>
+                )}
                 <p>
-                  {orderDetails.shipping_address.city}, {orderDetails.shipping_address.state} {orderDetails.shipping_address.zip}
+                  {orderDetails.shipping_address.city}, {orderDetails.shipping_address.state} {orderDetails.shipping_address.postal_code}
                 </p>
+                <p>{orderDetails.shipping_address.country}</p>
               </div>
             </CardContent>
           </Card>
@@ -219,9 +209,5 @@ function OrderSuccessContent() {
 }
 
 export default function OrderSuccessPage() {
-  return (
-    <WithAuth>
-      <OrderSuccessContent />
-    </WithAuth>
-  );
+  return <OrderSuccessContent />;
 }
