@@ -28,7 +28,7 @@ export default function Home() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 py-20 overflow-hidden"
+        className="relative bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-green-950 dark:via-blue-950 dark:to-purple-950 py-20 overflow-hidden"
       >
 
         {/* Growing plants decoration */}
@@ -68,7 +68,7 @@ export default function Home() {
                 <Sparkles className="h-8 w-8 text-yellow-500 mr-2" />
               </motion.div>
               <motion.h1
-                className="text-6xl font-bold text-gray-900 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent"
+                className="text-6xl font-bold text-foreground bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent"
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 100 }}
@@ -91,7 +91,7 @@ export default function Home() {
             </motion.div>
 
             <motion.p
-              className="text-2xl text-gray-700 mb-2 font-medium"
+              className="text-2xl text-foreground/80 mb-2 font-medium"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -100,7 +100,7 @@ export default function Home() {
             </motion.p>
 
             <motion.p
-              className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto"
+              className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
@@ -145,7 +145,7 @@ export default function Home() {
                   asChild
                   variant="outline"
                   size="lg"
-                  className="border-2 border-green-500 text-green-600 hover:bg-green-50 shadow-lg hover:shadow-xl"
+                  className="border-2 border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 shadow-lg hover:shadow-xl"
                 >
                   <Link href="/about">
                     🌿 Learn More
@@ -160,7 +160,7 @@ export default function Home() {
       {/* Features Section */}
       <motion.section
         id="features"
-        className="py-16 bg-white relative overflow-hidden"
+        className="py-16 bg-background relative overflow-hidden"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -175,7 +175,7 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
             ✨ Why Choose PlanetPal? ✨
           </h2>
-          <p className="text-center text-gray-600 mb-12 text-lg">Because saving the planet should be fun! 🎉</p>
+          <p className="text-center text-muted-foreground mb-12 text-lg">Because saving the planet should be fun! 🎉</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <motion.div
@@ -187,7 +187,7 @@ export default function Home() {
               whileHover={{ y: -5 }}
             >
               <motion.div
-                className="bg-gradient-to-br from-green-100 to-green-200 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                className="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
                 whileHover={{
                   scale: 1.1,
                   rotate: 12,
@@ -211,7 +211,7 @@ export default function Home() {
               >
                 🌿 100% Eco-Friendly
               </motion.h3>
-              <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-muted-foreground group-hover:text-foreground/80 transition-colors duration-300">
                 All our products are sustainably sourced and environmentally responsible. Mother Earth approved! 🌍
               </p>
             </motion.div>
@@ -225,7 +225,7 @@ export default function Home() {
               whileHover={{ y: -5 }}
             >
               <motion.div
-                className="bg-gradient-to-br from-blue-100 to-blue-200 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
                 whileHover={{
                   scale: 1.1,
                   rotate: 12,
@@ -248,7 +248,7 @@ export default function Home() {
               >
                 ♻️ Recyclable Packaging
               </motion.h3>
-              <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-muted-foreground group-hover:text-foreground/80 transition-colors duration-300">
                 Our packaging is 100% recyclable and made from recycled materials. Zero waste, maximum awesome! 📦
               </p>
             </motion.div>
@@ -262,7 +262,7 @@ export default function Home() {
               whileHover={{ y: -5 }}
             >
               <motion.div
-                className="bg-gradient-to-br from-purple-100 to-purple-200 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
                 whileHover={{
                   scale: 1.1,
                   rotate: 12,
@@ -286,7 +286,7 @@ export default function Home() {
               >
                 🌍 Global Impact
               </motion.h3>
-              <p className="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-muted-foreground group-hover:text-foreground/80 transition-colors duration-300">
                 Every purchase contributes to environmental conservation efforts worldwide. You're a planet hero! 🦸‍♀️
               </p>
             </motion.div>
@@ -297,7 +297,7 @@ export default function Home() {
       {/* Categories Section */}
       <motion.section
         id="categories"
-        className="py-16 bg-gradient-to-br from-gray-50 to-green-50 relative overflow-hidden"
+        className="py-16 bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-900 dark:to-green-950 relative overflow-hidden"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -312,7 +312,7 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-green-600 to-purple-600 bg-clip-text text-transparent">
             🛍️ Shop by Category 🛍️
           </h2>
-          <p className="text-center text-gray-600 mb-12 text-lg">Find your perfect eco-friendly match! 💚</p>
+          <p className="text-center text-muted-foreground mb-12 text-lg">Find your perfect eco-friendly match! 💚</p>
 
           {categoriesLoading ? (
             <div className="flex justify-center">
@@ -337,11 +337,11 @@ export default function Home() {
                     transition: { type: "spring", stiffness: 400, damping: 17 }
                   }}
                 >
-                  <Card className="group hover:shadow-2xl transition-all duration-300 cursor-pointer bg-white border-2 border-transparent hover:border-green-200 h-full">
+                  <Card className="group hover:shadow-2xl transition-all duration-300 cursor-pointer bg-card border-2 border-transparent hover:border-green-200 dark:hover:border-green-800 h-full">
                     <Link href={`/categories/${category.slug}`}>
                       <CardHeader className="text-center pb-2">
                         <motion.div
-                          className="w-12 h-12 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-3"
+                          className="w-12 h-12 bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-800 dark:to-blue-800 rounded-full flex items-center justify-center mx-auto mb-3"
                           whileHover={{
                             y: [0, -5, 0],
                             rotate: [0, 10, -10, 0],
@@ -361,7 +361,7 @@ export default function Home() {
                         </motion.div>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-gray-600 text-center group-hover:text-gray-700 transition-colors duration-300">
+                        <p className="text-sm text-muted-foreground text-center group-hover:text-foreground/80 transition-colors duration-300">
                           {category.description}
                         </p>
                       </CardContent>
@@ -401,7 +401,7 @@ export default function Home() {
       {/* Featured Products Section */}
       <motion.section
         id="products"
-        className="py-16 bg-white relative overflow-hidden"
+        className="py-16 bg-background relative overflow-hidden"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -418,7 +418,7 @@ export default function Home() {
             ⭐ Featured Products ⭐
           </motion.h2>
           <motion.p
-            className="text-center text-gray-600 mb-12 text-lg"
+            className="text-center text-muted-foreground mb-12 text-lg"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -480,7 +480,7 @@ export default function Home() {
       {/* CTA Section */}
       <motion.section
         id="cta"
-        className="py-20 bg-gradient-to-r from-green-600 via-green-500 to-blue-600 text-white relative overflow-hidden"
+        className="py-20 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 dark:from-green-700 dark:via-blue-700 dark:to-purple-700 text-white relative overflow-hidden"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -536,7 +536,7 @@ export default function Home() {
               🌍 Ready to Make a Difference? 🌱
             </motion.h2>
             <motion.p
-              className="text-xl mb-8 opacity-90 max-w-2xl mx-auto leading-relaxed"
+              className="text-xl mb-8 text-green-100 dark:text-green-200 max-w-2xl mx-auto"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 0.9, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}

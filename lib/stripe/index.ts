@@ -35,6 +35,8 @@ export class StripeService {
         automatic_payment_methods: {
           enabled: true,
         },
+      }, {
+        idempotencyKey: metadata.orderId,
       });
 
       return paymentIntent;

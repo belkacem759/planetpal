@@ -12,7 +12,7 @@ interface ProductInfoCardProps {
   name: string;
   slug: string;
   price: number;
-  images: string[];
+  images: { main?: string; gallery?: string[] }
   description?: string;
   difficultyLevel?: string;
   isPlant?: boolean;
@@ -42,7 +42,6 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
     className,
     ...props
   }, ref) => {
-    const imageUrl = images?.[0] || "/placeholder-plant.jpg";
     const isOutOfStock = stockQuantity <= 0;
 
     // Calculate average care difficulty for plants
@@ -65,7 +64,7 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
           key={i}
           className={cn(
             "h-4 w-4",
-            i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+            i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300 dark:text-gray-600"
           )}
         />
       ));
@@ -79,7 +78,7 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
         <Card
           ref={ref}
           className={cn(
-            "group cursor-pointer transition-all hover:shadow-xl border-0 bg-white overflow-hidden",
+            "group cursor-pointer transition-all hover:shadow-xl border-0 bg-card overflow-hidden",
             className
           )}
           {...props}
@@ -89,23 +88,23 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
               {/* Image Section */}
               <div className="relative aspect-[4/3] overflow-hidden">
                 <motion.img
-                  src={imageUrl}
+                  src={images.main}
                   alt={name}
                   className="w-full h-full object-cover"
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.3 }}
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
-                
+
                 {/* Overlay badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-2">
                   {category && (
-                    <Badge variant="secondary" className="bg-white/90 text-gray-700 backdrop-blur-sm">
+                    <Badge variant="secondary" className="bg-background/90 text-foreground backdrop-blur-sm">
                       {category}
                     </Badge>
                   )}
                   {isPlant && (difficultyLevel || avgDifficulty) && (
-                    <Badge variant="outline" className="bg-green-100/90 text-green-700 border-green-200 backdrop-blur-sm">
+                    <Badge variant="outline" className="bg-green-100/90 text-green-700 border-green-200 dark:bg-green-950/90 dark:text-green-300 dark:border-green-800 backdrop-blur-sm">
                       <Leaf className="h-3 w-3 mr-1" />
                       {difficultyLevel || `Level ${avgDifficulty}/5`}
                     </Badge>
@@ -119,7 +118,7 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
                       Out of Stock
                     </Badge>
                   ) : stockQuantity <= 5 ? (
-                    <Badge variant="outline" className="bg-orange-100/90 text-orange-700 border-orange-200 backdrop-blur-sm">
+                    <Badge variant="outline" className="bg-orange-100/90 text-orange-700 border-orange-200 dark:bg-orange-950/90 dark:text-orange-300 dark:border-orange-800 backdrop-blur-sm">
                       {stockQuantity} left
                     </Badge>
                   ) : null}
@@ -127,11 +126,11 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
 
                 {/* Favorite icon */}
                 <motion.div
-                  className="absolute bottom-3 right-3 p-2 bg-white/90 rounded-full shadow-lg backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  className="absolute bottom-3 right-3 p-2 bg-background/90 rounded-full shadow-lg backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Heart className="h-4 w-4 text-gray-600 hover:text-red-500 transition-colors" />
+                  <Heart className="h-4 w-4 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 transition-colors" />
                 </motion.div>
               </div>
 
@@ -144,7 +143,7 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
 
                 {/* Description */}
                 {description && (
-                  <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                  <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                     {description}
                   </p>
                 )}
@@ -155,7 +154,7 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
                     <div className="flex items-center gap-1">
                       {renderStars(rating)}
                     </div>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-muted-foreground">
                       {rating.toFixed(1)}
                       {reviewCount && ` (${reviewCount})`}
                     </span>
@@ -165,19 +164,19 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
                 {/* Price and stock info */}
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                       ${price.toFixed(2)}
                     </p>
                     {stockQuantity > 0 && stockQuantity <= 5 && (
-                      <p className="text-xs text-orange-600 font-medium">
+                      <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">
                         Only {stockQuantity} left!
                       </p>
                     )}
                   </div>
-                  
+
                   {/* Eco-friendly indicator for plants */}
                   {isPlant && (
-                    <div className="flex items-center gap-1 text-green-600">
+                    <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                       <Leaf className="h-4 w-4" />
                       <span className="text-xs font-medium">Eco-Friendly</span>
                     </div>

@@ -76,7 +76,7 @@ export interface Database {
           description: string | null
           price: number
           stock_quantity: number
-          images: Json | null
+          images: { main: string; gallery: string[] }
           care_instructions: Json | null
           difficulty_level: string | null
           is_plant: boolean | null

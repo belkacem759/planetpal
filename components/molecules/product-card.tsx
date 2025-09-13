@@ -11,7 +11,7 @@ interface ProductCardProps {
   name: string;
   slug: string;
   price: number;
-  images: string[];
+  images: { main: string; gallery: string[] };
   difficultyLevel?: string;
   isPlant?: boolean;
   stockQuantity?: number;
@@ -37,25 +37,27 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
     className,
     ...props
   }, ref) => {
-    const imageUrl = images?.[0] || "/placeholder-plant.jpg";
-    const isOutOfStock = stockQuantity <= 0;
+    // Handle both new JSON structure and legacy array format
 
+    const { main = "", gallery = [] } = images;
+    const isOutOfStock = stockQuantity <= 0;
+    console.log(images);
     // Calculate average care difficulty for plants
     const getAverageDifficulty = () => {
       if (!careInstructions || !isPlant) return null;
 
       try {
         // Handle both CareInstructions object and raw Json data
-        const instructions = typeof careInstructions === 'string' 
-          ? JSON.parse(careInstructions) 
+        const instructions = typeof careInstructions === 'string'
+          ? JSON.parse(careInstructions)
           : careInstructions;
-        
+
         if (!instructions || typeof instructions !== 'object') return null;
-        
+
         const difficulties = Object.values(instructions)
           .map((instruction: any) => instruction?.difficulty)
           .filter(difficulty => typeof difficulty === 'number' && difficulty >= 1 && difficulty <= 5);
-        
+
         if (difficulties.length === 0) return null;
 
         const average = difficulties.reduce((sum, diff) => sum + diff, 0) / difficulties.length;
@@ -89,7 +91,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
           <CardContent className="p-0">
             <div className="relative aspect-square overflow-hidden rounded-t-xl">
               <img
-                src={imageUrl}
+                src={images.main}
                 alt={name}
                 className="object-cover transition-transform group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -120,8 +122,8 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
               )}
               {careInstructions && (
                 <div className="mt-3 space-y-1">
-                  <p className="text-sm font-medium text-gray-700">Care Instructions:</p>
-                  <div className="text-xs text-gray-600 space-y-1">
+                  <p className="text-sm font-medium text-foreground">Care Instructions:</p>
+                  <div className="text-xs text-muted-foreground space-y-1">
                     {(() => {
                       try {
                         let instructions = careInstructions;
@@ -148,7 +150,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
                         console.error('Error parsing care instructions:', error);
                       }
                       return null;
-                    })()} 
+                    })()}
                   </div>
                 </div>
               )}

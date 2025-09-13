@@ -69,7 +69,6 @@ export async function updateSession(request: NextRequest) {
   // with the Supabase client, your users may be randomly logged out.
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
-  console.log("data from middleware", data)
   
   const pathname = request.nextUrl.pathname;
   const isAuthenticated = !!user;

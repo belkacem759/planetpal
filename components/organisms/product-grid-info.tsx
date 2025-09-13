@@ -1,9 +1,9 @@
-import * as React from "react";
 import { ProductInfoCard } from "@/components/molecules/product-info-card";
-import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/database";
+import * as React from "react";
 
 interface ProductGridInfoProps {
   products: Product[];
@@ -100,30 +100,21 @@ const ProductGridInfo = React.forwardRef<HTMLDivElement, ProductGridInfoProps>(
         )}
         {...props}
       >
-        {products.map((product) => {
-          // Handle images array from JSON
-          const images = Array.isArray(product.images) 
-            ? product.images as string[]
-            : product.images 
-            ? [product.images as string]
-            : [];
-
-          return (
-            <ProductInfoCard
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              slug={product.slug}
-              price={product.price}
-              images={images}
-              stockQuantity={product.stock_quantity}
-              difficultyLevel={product.difficulty_level || undefined}
-              isPlant={product.is_plant || undefined}
-              description={product.description || undefined}
-              careInstructions={product.care_instructions}
-            />
-          );
-        })}
+        {products.map((product) => (
+          <ProductInfoCard
+            key={product.id}
+            id={product.id}
+            name={product.name}
+            slug={product.slug}
+            price={product.price}
+            images={product.images}
+            stockQuantity={product.stock_quantity}
+            difficultyLevel={product.difficulty_level || undefined}
+            isPlant={product.is_plant || undefined}
+            description={product.description || undefined}
+            careInstructions={product.care_instructions}
+          />
+        ))}
       </div>
     );
   }

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { useCartQuery } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { Heart, Menu, Search, ShoppingCart, User, X } from "lucide-react";
@@ -127,6 +128,11 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
                   )}
                 </Button>
               </Link>
+
+              {/* Theme Switcher */}
+              <div className="hidden md:block">
+                <ThemeSwitcher />
+              </div>
 
               {/* User Avatar Dropdown */}
               <DropdownMenu>
@@ -290,6 +296,12 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
                   <button className="block w-full text-left py-2 text-lg font-medium transition-colors hover:text-primary">
                     Logout
                   </button>
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-medium">Theme</span>
+                      <ThemeSwitcher />
+                    </div>
+                  </div>
                 </div>
               </nav>
             </div>
