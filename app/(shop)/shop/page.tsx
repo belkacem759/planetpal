@@ -1,7 +1,8 @@
 'use client';
 
-import { FilterBar } from '@/components/molecules/filter-bar';
+import { FilterSidebar } from '@/components/molecules/filter-sidebar';
 import { ProductGrid } from '@/components/organisms/product-grid';
+import ShopLayout from '@/components/layouts/shop-layout';
 
 import { useAddToCartMutation, useProductsQuery, useUrlFilters } from '@/hooks';
 
@@ -49,20 +50,18 @@ export default function ShopPage() {
 
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Shop Plants</h1>
-        <p className="text-gray-600 mb-6">
-          Discover our collection of beautiful plants for your home and garden.
-        </p>
-
-
-      </div>
-
-      <div className="space-y-8">
-        {/* Filters */}
-        <FilterBar />
-
+    <div className="container mx-auto px-0 md:px-4 py-8">
+      <ShopLayout
+        header={
+          <div>
+            <h1 className="text-3xl font-bold mb-4">Shop Plants</h1>
+            <p className="text-gray-600 mb-6">
+              Discover our collection of beautiful plants for your home and garden.
+            </p>
+          </div>
+        }
+        sidebar={<FilterSidebar />}
+      >
         {/* Product Grid */}
         <ProductGrid
           products={products}
@@ -72,7 +71,7 @@ export default function ShopPage() {
           isAddingToCart={addToCartMutation.isPending ? 'loading' : ''}
           emptyMessage="No plants found. Try adjusting your filters."
         />
-      </div>
+      </ShopLayout>
     </div>
   );
 }

@@ -19,24 +19,25 @@ interface ProductCardProps {
   onAddToCart?: (productId: string) => void;
   isLoading?: boolean;
   className?: string;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
-const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
-  ({
-    id,
-    name,
-    slug,
-    price,
-    images,
-    difficultyLevel,
-    isPlant,
-    stockQuantity = 0,
-    careInstructions,
-    onAddToCart,
-    isLoading = false,
-    className,
-    ...props
-  }, ref) => {
+const ProductCard = ({
+  id,
+  name,
+  slug,
+  price,
+  images,
+  difficultyLevel,
+  isPlant,
+  stockQuantity = 0,
+  careInstructions,
+  onAddToCart,
+  isLoading = false,
+  className,
+  ref,
+  ...props
+}: ProductCardProps) => {
     // Handle both new JSON structure and legacy array format
 
     const { main = "", gallery = [] } = images;
@@ -169,8 +170,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
         </CardFooter>
       </Card>
     );
-  }
-);
+};
 ProductCard.displayName = "ProductCard";
 
 export { ProductCard };

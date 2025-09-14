@@ -15,11 +15,19 @@ import { Spinner } from '@/components/ui/spinner';
 import { useCategoriesQuery, useUrlFilters, FilterParams } from '@/hooks';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Filter, Search, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 
 export function FilterBar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const { filters, setParam, clearFilters, hasActiveFilters, setParams } = useUrlFilters();
+  // Local input state to avoid tying keystrokes directly to URL updates
+  const [searchInput, setSearchInput] = useState(filters.search || '');
+
+  // Keep local input in sync when URL changes from elsewhere
+  useEffect(() => {
+    setSearchInput(filters.search || '');
+  }, [filters.search]);
+
   const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesQuery({
     limit: 100,
     offset: 0
@@ -72,8 +80,12 @@ export function FilterBar() {
         <Input
           type="text"
           placeholder="Search plants and accessories..."
-          value={filters.search || ''}
-          onChange={(e) => setParam('search', e.target.value || null)}
+          value={searchInput}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            const v = e.target.value;
+            setSearchInput(v);
+            setParam('search', v ? v : null);
+          }}
           className="pl-10"
         />
       </div>

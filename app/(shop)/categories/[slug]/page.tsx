@@ -1,6 +1,7 @@
 'use client';
 
-import { FilterBar } from '@/components/molecules/filter-bar';
+import { FilterSidebar } from '@/components/molecules/filter-sidebar';
+import ShopLayout from '@/components/layouts/shop-layout';
 import { ProductGrid } from '@/components/organisms/product-grid';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -81,51 +82,54 @@ export default function CategoryPage({
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <Button
-          variant="outline"
-          onClick={() => router.push('/shop')}
-          className="mb-4"
-        >
-          ← Back to Shop
-        </Button>
-        <h1 className="text-3xl font-bold mb-2">
-          {categoryData?.name || slug}
-        </h1>
-        {categoryData?.description && (
-          <p className="text-gray-600 mb-4">{categoryData.description}</p>
+    <div className="container mx-auto px-0 md:px-4 py-8">
+      <ShopLayout
+        header={
+          <div className="mb-6">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/shop')}
+              className="mb-4"
+            >
+              ← Back to Shop
+            </Button>
+            <h1 className="text-3xl font-bold mb-2">
+              {categoryData?.name || slug}
+            </h1>
+            {categoryData?.description && (
+              <p className="text-gray-600 mb-4">{categoryData.description}</p>
+            )}
+          </div>
+        }
+        sidebar={<FilterSidebar />}
+      >
+        {isLoading && (
+          <div className="flex justify-center py-8">
+            <Spinner size="lg" />
+          </div>
         )}
-      </div>
 
-      <FilterBar />
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            Failed to load products. Please try again.
+          </Alert>
+        )}
 
-      {isLoading && (
-        <div className="flex justify-center py-8">
-          <Spinner size="lg" />
-        </div>
-      )}
+        {products && (
+          <ProductGrid
+            products={products?.data || []}
+            onAddToCart={handleAddToCart}
+            isAddingToCart={addingToCart}
+          />
+        )}
 
-      {error && (
-        <Alert variant="destructive" className="mb-6">
-          Failed to load products. Please try again.
-        </Alert>
-      )}
-
-      {products && (
-        <ProductGrid
-          products={products?.data || []}
-          onAddToCart={handleAddToCart}
-          isAddingToCart={addingToCart}
-        />
-      )}
-
-      {products && products.data.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">No products found in this category.</p>
-          <Button onClick={() => router.push('/shop')}>Browse All Products</Button>
-        </div>
-      )}
+        {products && products.data.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-500 mb-4">No products found in this category.</p>
+            <Button onClick={() => router.push('/shop')}>Browse All Products</Button>
+          </div>
+        )}
+      </ShopLayout>
     </div>
   );
 }

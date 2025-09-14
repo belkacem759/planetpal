@@ -1,4 +1,5 @@
 import { ProductCard } from "@/components/molecules/product-card";
+import { ProductCardSkeleton } from "@/components/molecules/product-card-skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
@@ -13,34 +14,55 @@ interface ProductGridProps {
   isAddingToCart?: string | null;
   className?: string;
   emptyMessage?: string;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
-const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
-  ({
-    products,
-    isLoading = false,
-    error = null,
-    onAddToCart,
-    isAddingToCart = null,
-    className,
-    emptyMessage = "No products found.",
-    ...props
-  }, ref) => {
+const ProductGrid = React.memo(({
+  products,
+  isLoading = false,
+  error = null,
+  onAddToCart,
+  isAddingToCart = null,
+  className,
+  emptyMessage = "No products found.",
+  ref,
+  ...props
+}: ProductGridProps) => {
+    // Create skeleton cards
+    const skeletonCards = Array(8).fill(0).map((_, index) => (
+      <ProductCardSkeleton key={index} />
+    ));
+
+    // Create product cards
+  const productCards = products?.map((product) => (
+    <ProductCard
+      key={product.id}
+      id={product.id}
+      name={product.name}
+      slug={product.slug}
+      price={product.price}
+      images={product.images}
+      stockQuantity={product.stock_quantity}
+      difficultyLevel={product.difficulty_level || undefined}
+      isPlant={product.is_plant || undefined}
+      onAddToCart={onAddToCart}
+      isLoading={isAddingToCart === product.id}
+      careInstructions={product.care_instructions || undefined}
+    />
+  )) || [];
+
     // Loading state
     if (isLoading) {
       return (
         <div
           ref={ref}
           className={cn(
-            "flex items-center justify-center min-h-[400px]",
+            "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6",
             className
           )}
           {...props}
         >
-          <div className="text-center">
-            <Spinner size="lg" className="mb-4" />
-            <p className="text-muted-foreground">Loading products...</p>
-          </div>
+          {skeletonCards}
         </div>
       );
     }
@@ -99,31 +121,15 @@ const ProductGrid = React.forwardRef<HTMLDivElement, ProductGridProps>(
       <div
         ref={ref}
         className={cn(
-          "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6",
+          "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6",
           className
         )}
         {...props}
       >
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            id={product.id}
-            name={product.name}
-            slug={product.slug}
-            price={product.price}
-            images={product.images}
-            stockQuantity={product.stock_quantity}
-            difficultyLevel={product.difficulty_level || undefined}
-            isPlant={product.is_plant || undefined}
-            onAddToCart={onAddToCart}
-            isLoading={isAddingToCart === product.id}
-            careInstructions={product.care_instructions || undefined}
-          />
-        ))}
+        {productCards}
       </div>
     );
-  }
-);
+});
 
 export { ProductGrid };
 export type { Product, ProductGridProps };
