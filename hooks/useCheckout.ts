@@ -125,18 +125,18 @@ const processCheckout = async (checkoutData: CheckoutData): Promise<CheckoutResp
 };
 
 const fetchOrder = async (orderId: string): Promise<Order> => {
-  const response = await fetch(`/api/orders/${orderId}`, {
-    credentials: 'include',
+  const response = await apiClient(`/api/orders/${orderId}`, {
+    method: 'GET',
+    requiresAuth: true
   });
-  
+
   if (!response.ok) {
-    if (response.status === 404) {
-      throw new Error('Order not found');
-    }
-    throw new Error(`Failed to fetch order: ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `Failed to fetch order: ${response.statusText}`);
   }
-  
-  return response.json();
+
+  const data = await response.json();
+  return data.data;
 };
 
 const fetchOrders = async (filters?: OrdersFilters): Promise<Order[]> => {

@@ -19,7 +19,10 @@ interface CartItemData {
     name: string;
     slug: string;
     price: number;
-    image_url: string;
+    images: {
+      main: string;
+      gallery: string[];
+    };
     stock_quantity: number;
   };
 }
@@ -134,7 +137,7 @@ const CartList = React.forwardRef<HTMLDivElement, CartListProps>(
         </div>
       );
     }
-
+    console.log(items)
     return (
       <div
         ref={ref}
@@ -152,12 +155,12 @@ const CartList = React.forwardRef<HTMLDivElement, CartListProps>(
                 productId={item.product_id}
                 productName={item.product?.name || 'Unknown Product'}
                 productSlug={item.product?.slug || ''}
-                productImage={item.product?.image_url || ''}
+                productImage={item.product?.images?.main || ''}
                 price={item.product?.price || 0}
                 quantity={item.quantity}
                 maxQuantity={item.product?.stock_quantity || 0}
-                onQuantityChange={onQuantityChange || (() => {})}
-                onRemove={onRemoveItem || (() => {})}
+                onQuantityChange={onQuantityChange || (() => { })}
+                onRemove={onRemoveItem || (() => { })}
                 isUpdating={isUpdating === item.id}
               />
             ))}

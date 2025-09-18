@@ -1,9 +1,7 @@
 'use client';
 
 import * as React from "react";
-import { loadStripe } from '@stripe/stripe-js';
 import {
-  Elements,
   CardElement,
   useStripe,
   useElements,
@@ -19,8 +17,7 @@ import { api } from "@/lib/api/client";
 import { PaymentStatus, usePaymentStatus } from "@/components/ui/payment-status";
 import * as v from 'valibot';
 
-// Initialize Stripe
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
 
 // Validation schemas
 const checkoutFormSchema = v.object({
@@ -227,6 +224,32 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
+        updateStatus('processing', 'Updating order with shipping information...');
+        
+        // Update order with shipping address and create order items
+        try {
+          const updateResponse = await api.put(`/api/orders/${orderId}`, {
+            shipping_address: {
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+              address_line_1: formData.address,
+              city: formData.city,
+              state: formData.state,
+              postal_code: formData.zipCode,
+              country: 'US',
+              phone: formData.phone,
+            },
+            payment_status: 'paid',
+            status: 'processing'
+          }, { requiresAuth: true });
+
+          if (!updateResponse.ok) {
+            console.error('Failed to update order with shipping address');
+          }
+        } catch (error) {
+          console.error('Error updating order:', error);
+        }
+        
         updateStatus('succeeded', 'Payment completed successfully!');
         onSuccess(paymentIntent.id);
       } else if (paymentIntent && paymentIntent.status === 'requires_action') {
@@ -483,13 +506,8 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
   );
 };
 
-// Main component that wraps with Stripe Elements provider
 export const StripeCheckoutForm: React.FC<StripeCheckoutFormProps> = (props) => {
-  return (
-    <Elements stripe={stripePromise}>
-      <StripeCheckoutFormInner {...props} />
-    </Elements>
-  );
+  return <StripeCheckoutFormInner {...props} />;
 };
 
 export type { StripeCheckoutFormProps, CheckoutFormData };

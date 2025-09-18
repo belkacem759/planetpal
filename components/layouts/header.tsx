@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { useCartQuery } from "@/hooks";
 import { cn } from "@/lib/utils";
-import { Heart, Menu, Search, ShoppingCart, User, X } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { Heart, LogIn, Menu, Search, ShoppingCart, User, X } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface HeaderProps {
   className?: string;
@@ -17,10 +19,27 @@ interface HeaderProps {
 
 const Header = React.forwardRef<HTMLElement, HeaderProps>(
   ({ className, ...props }, ref) => {
-    const { data: cart, isLoading } = useCartQuery()
-    console.log(cart)
-    const cartItemCount = cart?.items?.length || 0
+    const { data: cart, isLoading } = useCartQuery();
+    const cartItemCount = cart?.items?.length || 0;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+    const [user, setUser] = React.useState<SupabaseUser | null>(null);
+
+    React.useEffect(() => {
+      const supabase = createClient();
+      
+      const getUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      };
+
+      getUser();
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null);
+      });
+
+      return () => subscription.unsubscribe();
+    }, []);
 
     return (
       <header
@@ -134,32 +153,52 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
                 <ThemeSwitcher />
               </div>
 
-              {/* User Avatar Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="hidden md:flex">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48" side="bottom" sideOffset={8}>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">Dashboard</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/my-plants">My Plants</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/reminders">Reminders</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Authentication Section */}
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                    >
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    align="end" 
+                    className="w-48"
+                  >
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/my-plants">My Plants</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/reminders">Reminders</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={async () => {
+                        const supabase = createClient();
+                        await supabase.auth.signOut();
+                      }}
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button asChild variant="default" size="sm">
+                  <Link href="/login">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Login
+                  </Link>
+                </Button>
+              )}
 
               {/* Mobile Menu Button */}
               <Button
@@ -293,9 +332,26 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
                   >
                     Reminders
                   </Link>
-                  <button className="block w-full text-left py-2 text-lg font-medium transition-colors hover:text-primary">
-                    Logout
-                  </button>
+                  {user ? (
+                    <button 
+                      className="block w-full text-left py-2 text-lg font-medium transition-colors hover:text-primary"
+                      onClick={async () => {
+                        const supabase = createClient();
+                        await supabase.auth.signOut();
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Logout
+                    </button>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="block py-2 text-lg font-medium transition-colors hover:text-primary"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                  )}
                   <div className="pt-2">
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-medium">Theme</span>

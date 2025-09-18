@@ -70,22 +70,7 @@ const fetchCart = async (): Promise<Cart> => {
     const result = await response.json();
 
     // Transform the API response to match the expected Cart interface
-    const cartItems = (result.data || []).map((item: any) => ({
-      id: item.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      price: item.product?.price || 0, // Use product price as cart item price
-      created_at: item.created_at,
-      updated_at: item.updated_at,
-      product: {
-        id: item.product?.id || '',
-        name: item.product?.name || '',
-        slug: item.product?.slug || '',
-        price: item.product?.price || 0,
-        image_url: item.product?.images?.[0] || null,
-        stock_quantity: item.product?.stock_quantity || 0,
-      },
-    }));
+    const cartItems = (result.data || [])
     const subtotal = cartItems.reduce((sum: number, item: any) =>
       sum + (item.product?.price || 0) * item.quantity, 0
     );
@@ -94,7 +79,7 @@ const fetchCart = async (): Promise<Cart> => {
     const total_amount = subtotal + tax_amount + shipping_amount;
 
     return {
-      id: result.cart_id || 'temp-cart-id', // Use cart_id from response or temp ID
+      id: cartItems.id || 'temp-cart-id', // Use cart_id from response or temp ID
       items: cartItems,
       total_items: cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0),
       subtotal,
@@ -149,7 +134,7 @@ const updateCartItem = async (data: UpdateCartItemData): Promise<Cart> => {
   }
 
   const result = await response.json();
-  
+
   // Transform the API response to match the expected Cart interface
   const cartItems = (result.data || []).map((item: any) => ({
     id: item.id,
@@ -167,7 +152,7 @@ const updateCartItem = async (data: UpdateCartItemData): Promise<Cart> => {
       stock_quantity: item.product?.stock_quantity || 0,
     },
   }));
-  
+
   const subtotal = cartItems.reduce((sum: number, item: any) =>
     sum + (item.product?.price || 0) * item.quantity, 0
   );
@@ -239,7 +224,7 @@ export const useAddToCartMutation = () => {
 
 export const useUpdateCartItemMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: updateCartItem,
     onSuccess: (updatedCart: Cart) => {
@@ -266,13 +251,13 @@ export const useOptimisticUpdateCartItem = () => {
       if (previousCart) {
         const optimisticCart = {
           ...previousCart,
-          items: previousCart.items.map(item => 
-            item.id === variables.item_id 
+          items: previousCart.items.map(item =>
+            item.id === variables.item_id
               ? { ...item, quantity: variables.quantity }
               : item
           )
         };
-        
+
         // Recalculate totals
         const subtotal = optimisticCart.items.reduce(
           (sum, item) => sum + (item.product?.price || 0) * item.quantity,
@@ -281,13 +266,13 @@ export const useOptimisticUpdateCartItem = () => {
         const tax_amount = subtotal * 0.08;
         const shipping_amount = subtotal > 50 ? 0 : 9.99;
         const total_amount = subtotal + tax_amount + shipping_amount;
-        
+
         optimisticCart.subtotal = subtotal;
         optimisticCart.tax_amount = tax_amount;
         optimisticCart.shipping_amount = shipping_amount;
         optimisticCart.total_amount = total_amount;
         optimisticCart.total_items = optimisticCart.items.reduce((sum, item) => sum + item.quantity, 0);
-        
+
         queryClient.setQueryData(queryKeys.cart.items(), optimisticCart);
       }
 

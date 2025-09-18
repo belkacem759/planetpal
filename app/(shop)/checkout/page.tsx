@@ -7,7 +7,7 @@
 
 import { StripeCheckoutForm } from '@/components/organisms/stripe-checkout-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCartQuery } from '@/hooks';
+import { useCartQuery, useUserQuery } from '@/hooks';
 import { StripeProvider } from '@/components/providers/stripe-provider';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -18,6 +18,7 @@ import { api } from '@/lib/api/client';
 function CheckoutPageContent() {
   const router = useRouter();
   const { data: cart } = useCartQuery();
+  const { data: user } = useUserQuery();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -43,7 +44,7 @@ function CheckoutPageContent() {
   orderSummary.shipping = orderSummary.subtotal > 50 ? 0 : 9.99; // Free shipping over $50
   orderSummary.total = orderSummary.subtotal + orderSummary.tax + orderSummary.shipping;
 
-  // Create order when cart is available
+  // Create order and payment intent when cart is available
   useEffect(() => {
     const createOrder = async () => {
       if (!cart?.items?.length || orderId) return;
@@ -55,7 +56,12 @@ function CheckoutPageContent() {
         const response = await api.post('/api/orders', {
           total_amount: orderSummary.total,
           status: 'pending',
-          payment_status: 'pending'
+          payment_status: 'pending',
+          cart_items: cart.items.map(item => ({
+            product_id: item.product.id,
+            quantity: item.quantity,
+            price: item.product.price
+          }))
         }, { requiresAuth: true });
 
         if (!response.ok) {
@@ -70,6 +76,24 @@ function CheckoutPageContent() {
 
         const { data } = await response.json();
         setOrderId(data.id);
+
+        // Create payment intent
+        const paymentResponse = await api.post('/api/stripe/create-payment-intent', {
+          amount: Math.round(orderSummary.total * 100),
+          currency: 'usd',
+          orderId: data.id,
+          customerEmail: user?.email || 'customer@example.com',
+          customerName: user?.first_name && user?.last_name 
+            ? `${user.first_name} ${user.last_name}` 
+            : user?.first_name || 'Customer Name'
+        }, { requiresAuth: true });
+
+        if (!paymentResponse.ok) {
+          throw new Error('Failed to create payment intent');
+        }
+
+        const paymentData = await paymentResponse.json();
+        setClientSecret(paymentData.clientSecret);
       } catch (error) {
         console.error('Error creating order:', error);
         // Check if it's an authentication error

@@ -27,6 +27,9 @@ export class StripeService {
     metadata?: Record<string, string>;
   }): Promise<Stripe.PaymentIntent> {
     try {
+      // Generate a unique idempotency key that includes order ID and timestamp
+      const idempotencyKey = `${metadata.orderId}-${Date.now()}`;
+      
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency,
@@ -36,7 +39,7 @@ export class StripeService {
           enabled: true,
         },
       }, {
-        idempotencyKey: metadata.orderId,
+        idempotencyKey,
       });
 
       return paymentIntent;

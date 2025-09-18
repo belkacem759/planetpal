@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Package, Calendar, CreditCard } from 'lucide-react';
 import { useClearCartMutation } from '@/hooks/useCart';
 import { useOrderQuery } from '@/hooks/useCheckout';
-
 /**
  * Protected Route: Authenticated users only
  * Purchase confirmation, order summary

@@ -1,11 +1,9 @@
 import { NextRequest } from 'next/server';
 import { createMiddleware } from '@/lib/middleware';
-import { OrderService } from '@/lib/db';
+import { orderService, orderItemService } from '@/lib/db';
 import { OrderInsertSchema, PaginationSchema } from '@/lib/validation';
 import { handleApiError, createSuccessResponse, createPaginatedResponse } from '@/lib/errors';
 import { validateData } from '@/lib/validation';
-
-const orderService = new OrderService();
 
 // GET /api/orders - Get user's orders (authenticated user)
 export async function GET(request: NextRequest) {
@@ -69,23 +67,42 @@ export async function POST(request: NextRequest) {
     const userId = user.id;
 
     const body = await request.json();
+    const { cart_items, ...orderData } = body;
     
     // Validate input
     const validation = validateData(OrderInsertSchema, {
-      ...body,
+      ...orderData,
       user_id: userId
     });
     if (!validation.success || !validation.data) {
       return handleApiError(new Error(`Validation failed: ${validation.errors?.join(', ')}`));
     }
 
-    const result = await orderService.createOrder(userId, validation.data);
+    // Create the order first
+    const orderResult = await orderService.createOrder(userId, validation.data);
     
-    if (!result.success) {
-      return handleApiError(new Error(result.error));
+    if (!orderResult.success) {
+      return handleApiError(new Error(orderResult.error));
     }
 
-    return createSuccessResponse(result.data);
+    // Create order items if cart_items are provided
+    if (cart_items && Array.isArray(cart_items) && cart_items.length > 0) {
+      const orderItems = cart_items.map((item: any) => ({
+        order_id: orderResult.data.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price_at_purchase: item.price
+      }));
+
+      const orderItemsResult = await orderItemService.createOrderItems(orderItems);
+      
+      if (!orderItemsResult.success) {
+        // Log error but don't fail the order creation
+        console.error('Failed to create order items:', orderItemsResult.error);
+      }
+    }
+
+    return createSuccessResponse(orderResult.data);
   } catch (error) {
     return handleApiError(error, '/api/orders');
   }

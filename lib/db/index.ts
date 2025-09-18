@@ -30,6 +30,9 @@ export type CartUpdate = Tables['cart']['Update'];
 export type Order = Tables['orders']['Row'];
 export type OrderInsert = Tables['orders']['Insert'];
 export type OrderUpdate = Tables['orders']['Update'];
+export type OrderItem = Tables['order_items']['Row'];
+export type OrderItemInsert = Tables['order_items']['Insert'];
+export type OrderItemUpdate = Tables['order_items']['Update'];
 export type UserPlant = Tables['user_plants']['Row'];
 export type UserPlantInsert = Tables['user_plants']['Insert'];
 export type UserPlantUpdate = Tables['user_plants']['Update'];
@@ -480,6 +483,61 @@ export class OrderService extends BaseService {
   }
 }
 
+export class OrderItemService extends BaseService {
+  constructor() {
+    super('order_items', true); // Use service role for bypassing RLS
+  }
+
+  async createOrderItems(orderItems: OrderItemInsert[]): Promise<DbResult<OrderItem[]>> {
+    try {
+      const { data, error } = await (this.client as any)
+        .from(this.tableName)
+        .insert(orderItems)
+        .select();
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data: data as OrderItem[] };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
+
+  async getOrderItems(orderId: string): Promise<DbResult<OrderItem[]>> {
+    try {
+      const { data, error } = await (this.client as any)
+        .from(this.tableName)
+        .select(`
+          *,
+          product:products(
+            id,
+            name,
+            slug,
+            images
+          )
+        `)
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data: data || [] };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
+}
+
 export class UserPlantService extends BaseService {
   constructor() {
     super('user_plants');
@@ -550,6 +608,7 @@ export const categoryService = new CategoryService();
 export const productService = new ProductService();
 export const cartService = new CartService(); // Uses service role by default
 export const orderService = new OrderService();
+export const orderItemService = new OrderItemService();
 export const userPlantService = new UserPlantService();
 export const reminderService = new ReminderService();
 

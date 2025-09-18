@@ -115,11 +115,15 @@ export const OrderInsertSchema = v.object({
 export const OrderUpdateSchema = v.object({
   status: v.optional(v.nullable(v.picklist(['pending', 'processing', 'shipped', 'delivered', 'cancelled']))),
   shipping_address: v.optional(v.nullable(v.object({
-    street: v.string(),
+    first_name: v.string(),
+    last_name: v.string(),
+    address_line_1: v.string(),
+    address_line_2: v.optional(v.string()),
     city: v.string(),
     state: v.string(),
     postal_code: v.string(),
     country: v.string(),
+    phone: v.optional(v.string()),
   }))),
   payment_status: v.optional(v.nullable(v.picklist(['pending', 'paid', 'failed']))),
 });
