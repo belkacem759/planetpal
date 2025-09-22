@@ -1,8 +1,8 @@
 'use client';
 
+import ShopLayout from '@/components/layouts/shop-layout';
 import { FilterSidebar } from '@/components/molecules/filter-sidebar';
 import { ProductGrid } from '@/components/organisms/product-grid';
-import ShopLayout from '@/components/layouts/shop-layout';
 
 import { useAddToCartMutation, useProductsQuery, useUrlFilters } from '@/hooks';
 
@@ -12,28 +12,25 @@ import { useAddToCartMutation, useProductsQuery, useUrlFilters } from '@/hooks';
  */
 export default function ShopPage() {
   const { filters } = useUrlFilters();
-  
+
   const { data: productsData, isLoading, error } = useProductsQuery({
     search: filters.search,
-    category: filters.category,
+    categories: filters.categories,
     minPrice: filters.minPrice,
     maxPrice: filters.maxPrice,
-    difficulty: filters.difficulty,
+    difficulty: filters.difficulty || undefined,
     isPlant: filters.isPlant,
-    care_difficulty_water: filters.care_difficulty_water,
-    care_difficulty_light: filters.care_difficulty_light,
-    care_difficulty_humidity: filters.care_difficulty_humidity,
-    care_difficulty_fertilizer: filters.care_difficulty_fertilizer,
-    care_difficulty_temperature: filters.care_difficulty_temperature,
-    max_care_difficulty: filters.max_care_difficulty,
+    care_difficulty_water: filters.care_difficulty_water || undefined,
+    care_difficulty_light: filters.care_difficulty_light || undefined,
+    care_difficulty_humidity: filters.care_difficulty_humidity || undefined,
+    care_difficulty_fertilizer: filters.care_difficulty_fertilizer || undefined,
+    care_difficulty_temperature: filters.care_difficulty_temperature || undefined,
+    max_care_difficulty: filters.max_care_difficulty || undefined,
     limit: 20,
     offset: 0
   });
-  
 
-  
   const products = productsData?.products || [];
-
   const addToCartMutation = useAddToCartMutation();
 
   const handleAddToCart = async (productId: string) => {
@@ -46,8 +43,6 @@ export default function ShopPage() {
       console.error('Failed to add to cart:', error);
     }
   };
-
-
 
   return (
     <div className="container mx-auto px-0 md:px-4 py-8">

@@ -1,140 +1,122 @@
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useCallback, useRef, startTransition } from 'react';
+import { useQueryStates, parseAsString, parseAsInteger, parseAsBoolean, parseAsArrayOf, parseAsStringEnum } from 'nuqs';
 
-// Simple debounce implementation
-const debounce = <T extends (...args: any[]) => void>(
-  func: T,
-  delay: number
-): ((...args: Parameters<T>) => void) => {
-  let timeoutId: ReturnType<typeof setTimeout>;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func(...args), delay);
-  };
+// Define parsers for each filter type
+const filterParsers = {
+  // Search query
+  search: parseAsString.withDefault(''),
+  
+  // Multiple categories using slugs
+  categories: parseAsArrayOf(parseAsString).withDefault([]),
+  
+  // Price range
+  minPrice: parseAsInteger.withDefault(0),
+  maxPrice: parseAsInteger.withDefault(1000),
+  
+  // Difficulty level
+  difficulty: parseAsStringEnum(['beginner', 'intermediate', 'advanced']),
+  
+  // Plants only filter
+  isPlant: parseAsBoolean.withDefault(false),
+  
+  // Care instruction difficulty filters
+  care_difficulty_watering: parseAsInteger,
+  care_difficulty_sunlight: parseAsInteger,
+  care_difficulty_soil: parseAsInteger,
+  care_difficulty_water: parseAsInteger,
+  care_difficulty_light: parseAsInteger,
+  care_difficulty_humidity: parseAsInteger,
+  care_difficulty_fertilizer: parseAsInteger,
+  care_difficulty_temperature: parseAsInteger,
+  
+  // Maximum care difficulty
+  max_care_difficulty: parseAsInteger,
 };
 
-export interface FilterParams {
-  search?: string;
-  category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  difficulty?: string;
-  isPlant?: boolean;
+export type FilterParams = {
+  search: string;
+  categories: string[];
+  minPrice: number;
+  maxPrice: number;
+  difficulty: 'beginner' | 'intermediate' | 'advanced' | null;
+  isPlant: boolean;
+  care_difficulty_watering?: number;
+  care_difficulty_sunlight?: number;
+  care_difficulty_soil?: number;
   care_difficulty_water?: number;
   care_difficulty_light?: number;
   care_difficulty_humidity?: number;
   care_difficulty_fertilizer?: number;
   care_difficulty_temperature?: number;
   max_care_difficulty?: number;
-}
+};
 
 export const useUrlFilters = () => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const [filters, setFilters] = useQueryStates(filterParsers, {
+    // Debounce URL updates to avoid excessive navigation
+    throttleMs: 300,
+    // Use shallow routing for better performance
+    shallow: true,
+    // Clear empty values from URL
+    clearOnDefault: true,
+  });
 
-  // Parse current URL params into filter object
-  const params: FilterParams = {};
+  // Helper function to update a single filter parameter
+  const setParam = <K extends keyof FilterParams>(
+    key: K,
+    value: FilterParams[K] | null
+  ) => {
+    setFilters({ [key]: value });
+  };
 
-  const search = searchParams.get('search');
-  if (search) params.search = search;
-
-  const category = searchParams.get('category');
-  if (category) params.category = category;
-
-  const minPrice = searchParams.get('minPrice');
-  if (minPrice) params.minPrice = parseFloat(minPrice);
-
-  const maxPrice = searchParams.get('maxPrice');
-  if (maxPrice) params.maxPrice = parseFloat(maxPrice);
-
-  const difficulty = searchParams.get('difficulty');
-  if (difficulty) params.difficulty = difficulty;
-
-  const isPlant = searchParams.get('isPlant');
-  if (isPlant) params.isPlant = isPlant === 'true';
-
-  // Care instruction difficulty filters
-  const careWater = searchParams.get('care_difficulty_water');
-  if (careWater) params.care_difficulty_water = parseInt(careWater);
-
-  const careLight = searchParams.get('care_difficulty_light');
-  if (careLight) params.care_difficulty_light = parseInt(careLight);
-
-  const careHumidity = searchParams.get('care_difficulty_humidity');
-  if (careHumidity) params.care_difficulty_humidity = parseInt(careHumidity);
-
-  const careFertilizer = searchParams.get('care_difficulty_fertilizer');
-  if (careFertilizer) params.care_difficulty_fertilizer = parseInt(careFertilizer);
-
-  const careTemperature = searchParams.get('care_difficulty_temperature');
-  if (careTemperature) params.care_difficulty_temperature = parseInt(careTemperature);
-
-  const maxCareDifficulty = searchParams.get('max_care_difficulty');
-  if (maxCareDifficulty) params.max_care_difficulty = parseInt(maxCareDifficulty);
-
-  const filters = params;
-
-  // Use useRef to maintain the same debounced function instance
-  const debouncedUpdateUrlRef = useRef<((newParams: URLSearchParams) => void) | null>(null);
-  
-  if (!debouncedUpdateUrlRef.current) {
-    debouncedUpdateUrlRef.current = debounce((newParams: URLSearchParams) => {
-      const qs = newParams.toString();
-      const url = qs ? `?${qs}` : window.location.pathname;
-      // Use transition to avoid blocking input typing
-      startTransition(() => {
-        router.replace(url, { scroll: false });
-      });
-    }, 300);
-  }
-
-  // Update a single filter parameter
-  const setParam = useCallback((key: keyof FilterParams, value: string | number | boolean | null) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-
-    if (value === null || value === undefined || value === '') {
-      newParams.delete(key);
-    } else {
-      newParams.set(key, value.toString());
-    }
-
-    // Skip if nothing actually changed
-    if (newParams.toString() === searchParams.toString()) return;
-
-    debouncedUpdateUrlRef.current?.(newParams);
-  }, [searchParams]);
-
-  // Update multiple filter parameters at once
-  const setParams = useCallback((newFilters: Partial<FilterParams>) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value === null || value === undefined || value === '') {
-        newParams.delete(key);
-      } else {
-        newParams.set(key, value.toString());
-      }
-    });
-
-    // Skip if nothing actually changed
-    if (newParams.toString() === searchParams.toString()) return;
-
-    debouncedUpdateUrlRef.current?.(newParams);
-  }, [searchParams]);
+  // Helper function to update multiple filter parameters at once
+  const setParams = (newFilters: Partial<FilterParams>) => {
+    setFilters(newFilters);
+  };
 
   // Clear all filters
-  const clearFilters = useCallback(() => {
-    router.replace(window.location.pathname, { scroll: false });
-  }, [router]);
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      categories: [],
+      minPrice: 0,
+      maxPrice: 1000,
+      difficulty: null,
+      isPlant: false,
+      care_difficulty_watering: null,
+      care_difficulty_sunlight: null,
+      care_difficulty_soil: null,
+      care_difficulty_water: null,
+      care_difficulty_light: null,
+      care_difficulty_humidity: null,
+      care_difficulty_fertilizer: null,
+      care_difficulty_temperature: null,
+      max_care_difficulty: null,
+    });
+  };
 
-  // Check if any filters are active
-  const hasActiveFilters = Object.keys(filters).length > 0;
+  // Check if any filters are active (excluding defaults)
+  const hasActiveFilters = 
+    filters.search !== '' ||
+    filters.categories.length > 0 ||
+    filters.minPrice !== 0 ||
+    filters.maxPrice !== 1000 ||
+    filters.difficulty !== null ||
+    filters.isPlant !== false ||
+    filters.care_difficulty_watering !== null ||
+    filters.care_difficulty_sunlight !== null ||
+    filters.care_difficulty_soil !== null ||
+    filters.care_difficulty_water !== null ||
+    filters.care_difficulty_light !== null ||
+    filters.care_difficulty_humidity !== null ||
+    filters.care_difficulty_fertilizer !== null ||
+    filters.care_difficulty_temperature !== null ||
+    filters.max_care_difficulty !== null;
 
   return {
     filters,
     setParam,
     setParams,
     clearFilters,
-    hasActiveFilters
+    hasActiveFilters,
   };
 };

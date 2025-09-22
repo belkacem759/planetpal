@@ -7,7 +7,7 @@ import { Product } from '@/lib/db';
 // Types
 
 export interface ProductsFilters extends Record<string, unknown> {
-  category?: string;
+  categories?: string[];
   search?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -32,7 +32,9 @@ export interface ProductsQueryResult extends ApiSuccessResponse<Product[]> {
 const fetchProducts = async (filters?: ProductsFilters): Promise<ApiSuccessResponse<Product[]>> => {
   const params = new URLSearchParams();
 
-  if (filters?.category) params.append('category', filters.category);
+  if (filters?.categories && filters.categories.length > 0) {
+    filters.categories.forEach(category => params.append('categories', category));
+  }
   if (filters?.search) params.append('search', filters.search);
   if (filters?.minPrice) params.append('minPrice', filters.minPrice.toString());
   if (filters?.maxPrice) params.append('maxPrice', filters.maxPrice.toString());

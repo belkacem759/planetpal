@@ -1,5 +1,4 @@
 import { chromium, FullConfig } from '@playwright/test';
-import path from 'path';
 
 async function globalSetup(config: FullConfig) {
   const { baseURL } = config.projects[0].use;

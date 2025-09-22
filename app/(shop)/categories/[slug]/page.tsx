@@ -34,17 +34,17 @@ export default function CategoryPage({
   // Fetch products for this category
   const { data: products, isLoading, error } = useProductsQuery({
     search: filters.search,
-    category: categoryData?.id || "",
+    categories: categoryData?.slug ? [categoryData.slug] : [],
     minPrice: filters.minPrice,
     maxPrice: filters.maxPrice,
-    difficulty: filters.difficulty,
+    difficulty: filters.difficulty || undefined,
     isPlant: filters.isPlant,
-    care_difficulty_water: filters.care_difficulty_water,
-    care_difficulty_light: filters.care_difficulty_light,
-    care_difficulty_humidity: filters.care_difficulty_humidity,
-    care_difficulty_fertilizer: filters.care_difficulty_fertilizer,
-    care_difficulty_temperature: filters.care_difficulty_temperature,
-    max_care_difficulty: filters.max_care_difficulty,
+    care_difficulty_water: filters.care_difficulty_water || undefined,
+    care_difficulty_light: filters.care_difficulty_light || undefined,
+    care_difficulty_humidity: filters.care_difficulty_humidity || undefined,
+    care_difficulty_fertilizer: filters.care_difficulty_fertilizer || undefined,
+    care_difficulty_temperature: filters.care_difficulty_temperature || undefined,
+    max_care_difficulty: filters.max_care_difficulty || undefined,
     limit: 20,
     offset: 0
   });

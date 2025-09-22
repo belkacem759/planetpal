@@ -23,22 +23,52 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '12');
     
     // Extract individual filter parameters
-    const categoryId = searchParams.get('category_id');
+    const categories = searchParams.getAll('categories'); // Get multiple categories
+    const search = searchParams.get('search');
+    const minPrice = searchParams.get('minPrice');
+    const maxPrice = searchParams.get('maxPrice');
+    const difficulty = searchParams.get('difficulty');
+    const isPlant = searchParams.get('isPlant');
     const difficultyLevel = searchParams.get('difficulty_level');
     const maxCareDifficulty = searchParams.get('max_care_difficulty');
-    const waterFilter = searchParams.get('water');
-    const lightFilter = searchParams.get('light');
-    const humidityFilter = searchParams.get('humidity');
-    const fertilizerFilter = searchParams.get('fertilizer');
-    const temperatureFilter = searchParams.get('temperature');
+    const waterFilter = searchParams.get('care_difficulty_water');
+    const lightFilter = searchParams.get('care_difficulty_light');
+    const humidityFilter = searchParams.get('care_difficulty_humidity');
+    const fertilizerFilter = searchParams.get('care_difficulty_fertilizer');
+    const temperatureFilter = searchParams.get('care_difficulty_temperature');
     
     // Start building the query
     const supabase = await createClient();
-    let query = supabase.from('products').select('*', { count: 'exact' });
+    let query = supabase.from('products').select(`
+      *,
+      categories!inner(slug, name)
+    `, { count: 'exact' });
     
     // Apply filters conditionally
-    if (categoryId) {
-      query = query.eq('category_id', categoryId);
+    if (categories && categories.length > 0) {
+      query = query.in('categories.slug', categories);
+    }
+    
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+    }
+    
+    if (minPrice) {
+      query = query.gte('price', parseFloat(minPrice));
+    }
+    
+    if (maxPrice) {
+      query = query.lte('price', parseFloat(maxPrice));
+    }
+    
+    if (difficulty) {
+      query = query.eq('difficulty', difficulty);
+    }
+    
+    if (isPlant === 'true') {
+      query = query.eq('is_plant', true);
+    } else if (isPlant === 'false') {
+      query = query.eq('is_plant', false);
     }
     
     if (difficultyLevel) {

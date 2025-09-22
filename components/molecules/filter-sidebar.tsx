@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Slider } from '@/components/ui/slider';
 import { Spinner } from '@/components/ui/spinner';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import { useUrlFilters, FilterParams } from '@/hooks/useUrlFilters';
-import { useCategoriesQuery, Category } from '@/hooks/useCategories';
+import { Category, useCategoriesQuery } from '@/hooks/useCategories';
+import { useUrlFilters } from '@/hooks/useUrlFilters';
+import { ChevronDown, X } from 'lucide-react';
 import type { ChangeEvent } from 'react';
+import { useState } from 'react';
 
 type CollapsibleSectionProps = {
   title: string;
@@ -29,53 +28,35 @@ const CollapsibleSection = ({ title, defaultOpen = true, children }: Collapsible
         className="flex w-full justify-between items-center font-medium py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-all duration-200 hover:shadow-sm group"
       >
         <h3 className="group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">{title}</h3>
-        {isOpen ? <ChevronUp className="h-4 w-4 group-hover:text-green-500 transition-all duration-200" /> : <ChevronDown className="h-4 w-4 group-hover:text-green-500 transition-all duration-200" />}
       </button>
-      {isOpen && <div className="mt-3">{children}</div>}
+      <div className="mt-3">{children}</div>
     </div>
   );
 };
 
 export function FilterSidebar() {
-  const { filters, setParam, setParams, clearFilters } = useUrlFilters();
+  const { filters, setParam, setParams, clearFilters, hasActiveFilters } = useUrlFilters();
   const { data: categoriesData, isLoading } = useCategoriesQuery();
   const categories: Category[] = categoriesData?.categories || [];
-
-  // Local search input state decoupled from URL to avoid lag
-  const [searchInput, setSearchInput] = useState(filters.search || '');
-
-  // Keep local input synced when URL search changes elsewhere
-  useEffect(() => {
-    setSearchInput(filters.search || '');
-  }, [filters.search]);
-
-  // Debounce URL updates from local input
-  // Removed local debounced effect to avoid double debouncing. The hook already debounces URL updates.
-
-  // Price range state
-  const [appliedRange, setAppliedRange] = useState<[number, number]>([
-    filters.minPrice || 0,
-    filters.maxPrice || 1000,
-  ]);
-
-  // Update local price range when URL params change
-  useEffect(() => {
-    setAppliedRange([filters.minPrice || 0, filters.maxPrice || 1000]);
-  }, [filters.minPrice, filters.maxPrice]);
 
   // Difficulty options
   const difficultyOptions = [
     { value: 'beginner', label: 'Beginner' },
     { value: 'intermediate', label: 'Intermediate' },
     { value: 'advanced', label: 'Advanced' },
-  ];
+  ] as const;
 
   // Care instruction types
   const careInstructionTypes = [
     { value: 'watering', label: 'Watering' },
     { value: 'sunlight', label: 'Sunlight' },
     { value: 'soil', label: 'Soil' },
-  ];
+    { value: 'water', label: 'Water' },
+    { value: 'light', label: 'Light' },
+    { value: 'humidity', label: 'Humidity' },
+    { value: 'fertilizer', label: 'Fertilizer' },
+    { value: 'temperature', label: 'Temperature' },
+  ] as const;
 
   // Care difficulty levels
   const careDifficultyLevels = [
@@ -86,21 +67,48 @@ export function FilterSidebar() {
     { value: 5, label: 'Level 5/5' },
   ];
 
-  // Selected category name
-  const selectedCategory = categories.find((c: Category) => c.id === filters.category);
-  const selectedCategoryName = selectedCategory?.name;
+  // Get selected categories by slug
+  const selectedCategories = categories.filter((c: Category) =>
+    filters.categories.includes(c.slug)
+  );
 
   // Selected difficulty label
   const selectedDifficultyOption = difficultyOptions.find((o) => o.value === filters.difficulty);
   const selectedDifficultyLabel = selectedDifficultyOption?.label || 'All Levels';
 
-  // Check if there are any active filters
-  const hasActiveFilters = Object.values(filters).some((value) => value !== undefined && value !== null);
+  // Handle category selection (multiple)
+  const handleCategoryToggle = (categorySlug: string) => {
+    const currentCategories = filters.categories;
+    const isSelected = currentCategories.includes(categorySlug);
+
+    if (isSelected) {
+      // Remove category
+      setParam('categories', currentCategories.filter(slug => slug !== categorySlug));
+    } else {
+      // Add category
+      setParam('categories', [...currentCategories, categorySlug]);
+    }
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setParam('search', value || '');
+  };
+
+  // Handle price range change
+  const handlePriceRangeChange = (range: number[]) => {
+    const [min, max] = range;
+    setParams({
+      minPrice: min > 0 ? min : 0,
+      maxPrice: max < 1000 ? max : 1000,
+    });
+  };
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
       {/* Sticky Header */}
-      <div className="sticky top-0 bg-black z-10 pb-4 border-b mb-4">
+      <div className="sticky top-0 bg-white dark:bg-gray-900 z-10 pb-4 border-b mb-4">
         <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
           <h2 className="font-semibold text-lg text-gray-900 dark:text-gray-100 flex items-center gap-2">
             Filters
@@ -122,17 +130,13 @@ export function FilterSidebar() {
           <input
             type="text"
             placeholder="Search products..."
-            value={searchInput}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const v = e.target.value;
-              setSearchInput(v);
-              setParam('search', v ? v : null);
-            }}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={filters.search}
+            onChange={handleSearchChange}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
           />
           {filters.search && (
             <button
-              onClick={() => setParam('search', null)}
+              onClick={() => setParam('search', '')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               <X className="h-4 w-4" />
@@ -143,25 +147,25 @@ export function FilterSidebar() {
         {/* Active Filters Badges */}
         {hasActiveFilters && (
           <div className="flex flex-wrap gap-2 max-h-[120px] overflow-y-auto pb-2 pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-            {selectedCategoryName && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800 transition-all duration-200 animate-in slide-in-from-left-2">
-                {selectedCategoryName}
+            {/* Selected Categories Badges */}
+            {selectedCategories.map((category) => (
+              <Badge key={category.slug} variant="secondary" className="flex items-center gap-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800 transition-all duration-200 animate-in slide-in-from-left-2">
+                {category.name}
                 <button
-                  onClick={() => setParam('category', null)}
+                  onClick={() => handleCategoryToggle(category.slug)}
                   className="ml-1 hover:bg-blue-300 dark:hover:bg-blue-700 rounded-full p-0.5 transition-colors duration-150 hover:scale-110"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
-            )}
+            ))}
 
-            {(filters.minPrice || filters.maxPrice) && (
+            {/* Price Range Badge */}
+            {(filters.minPrice !== 0 || filters.maxPrice !== 1000) && (
               <Badge variant="secondary" className="flex items-center gap-1">
-                ${filters.minPrice || 0} - ${filters.maxPrice || 1000}
+                ${filters.minPrice} - ${filters.maxPrice}
                 <button
-                  onClick={() => {
-                    setParams({ minPrice: undefined, maxPrice: undefined });
-                  }}
+                  onClick={() => setParams({ minPrice: 0, maxPrice: 1000 })}
                   className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
@@ -169,6 +173,7 @@ export function FilterSidebar() {
               </Badge>
             )}
 
+            {/* Difficulty Badge */}
             {filters.difficulty && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 {selectedDifficultyLabel}
@@ -181,11 +186,12 @@ export function FilterSidebar() {
               </Badge>
             )}
 
+            {/* Plants Only Badge */}
             {filters.isPlant && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 Plants Only
                 <button
-                  onClick={() => setParam('isPlant', null)}
+                  onClick={() => setParam('isPlant', false)}
                   className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
@@ -195,7 +201,7 @@ export function FilterSidebar() {
 
             {/* Care Instruction Difficulty Badges */}
             {careInstructionTypes.map(({ value, label }) => {
-              const filterKey = `care_difficulty_${value}` as keyof FilterParams;
+              const filterKey = `care_difficulty_${value}` as keyof typeof filters;
               const filterValue = filters[filterKey] as number | undefined;
               if (!filterValue) return null;
 
@@ -212,6 +218,7 @@ export function FilterSidebar() {
               );
             })}
 
+            {/* Max Care Difficulty Badge */}
             {filters.max_care_difficulty && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 Max Difficulty: {filters.max_care_difficulty}/5
@@ -229,8 +236,8 @@ export function FilterSidebar() {
 
       {/* Filter Sections */}
       <div className="flex-1 overflow-y-auto">
-        {/* Categories */}
-        <CollapsibleSection title="Category" defaultOpen={true}>
+        {/* Categories - Multiple Selection */}
+        <CollapsibleSection title="Categories" defaultOpen={true}>
           {isLoading ? (
             <div className="flex items-center gap-2">
               <Spinner size="sm" />
@@ -238,30 +245,37 @@ export function FilterSidebar() {
             </div>
           ) : (
             <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-              <button
-                onClick={() => setParam('category', null)}
-                className={cn(
-                  "block w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
-                  !filters.category
-                    ? "bg-blue-50 text-blue-700 font-medium"
-                    : "hover:bg-gray-50"
-                )}
-              >
-                All Categories
-              </button>
-              {categories.map((category: Category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setParam('category', category.id)}
-                  className={cn(
-                    "block w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
-                    filters.category === category.id
-                      ? "bg-blue-50 text-blue-700 font-medium"
-                      : "hover:bg-gray-50"
-                  )}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="all-categories"
+                  checked={filters.categories.length === 0}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setParam('categories', []);
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="all-categories"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  {category.name}
-                </button>
+                  All Categories
+                </label>
+              </div>
+              {categories.map((category: Category) => (
+                <div key={category.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`category-${category.slug}`}
+                    checked={filters.categories.includes(category.slug)}
+                    onCheckedChange={() => handleCategoryToggle(category.slug)}
+                  />
+                  <label
+                    htmlFor={`category-${category.slug}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    {category.name}
+                  </label>
+                </div>
               ))}
             </div>
           )}
@@ -271,23 +285,16 @@ export function FilterSidebar() {
         <CollapsibleSection title="Price Range">
           <div className="px-3">
             <Slider
-              key={`price-${appliedRange[0]}-${appliedRange[1]}`}
-              defaultValue={appliedRange}
-              onValueCommit={(range) => {
-                const [min, max] = range;
-                setParams({
-                  minPrice: min > 0 ? min : undefined,
-                  maxPrice: max < 1000 ? max : undefined,
-                });
-              }}
+              value={[filters.minPrice, filters.maxPrice]}
+              onValueChange={handlePriceRangeChange}
               max={1000}
               min={0}
               step={10}
               className="mb-4"
             />
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>${appliedRange[0]}</span>
-              <span>${appliedRange[1]}</span>
+            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+              <span>${filters.minPrice}</span>
+              <span>${filters.maxPrice}</span>
             </div>
           </div>
         </CollapsibleSection>
@@ -322,8 +329,8 @@ export function FilterSidebar() {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="plants-only"
-              checked={!!filters.isPlant}
-              onCheckedChange={(checked) => setParam('isPlant', checked || null)}
+              checked={filters.isPlant}
+              onCheckedChange={(checked) => setParam('isPlant', !!checked)}
             />
             <label
               htmlFor="plants-only"
@@ -340,7 +347,7 @@ export function FilterSidebar() {
             <CollapsibleSection title="Care Instruction Difficulty">
               <div className="space-y-4">
                 {careInstructionTypes.map(({ value, label }) => {
-                  const filterKey = `care_difficulty_${value}` as keyof FilterParams;
+                  const filterKey = `care_difficulty_${value}` as keyof typeof filters;
                   const currentValue = filters[filterKey] as number | undefined;
 
                   return (
