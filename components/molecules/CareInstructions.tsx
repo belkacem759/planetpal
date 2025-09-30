@@ -1,13 +1,9 @@
-import { Droplets, Leaf, Sun, Thermometer, Wind, Package, Zap, Wrench } from 'lucide-react';
-
-interface InstructionItem {
-  text: string;
-  difficulty?: number;
-}
+import { Product } from '@/types/types';
+import { Droplets, Leaf, Package, Sun, Thermometer, Wind, Wrench, Zap } from 'lucide-react';
 
 interface CareInstructionsProps {
-  careInstructions: Record<string, InstructionItem>;
-  isPlant?: boolean;
+  careInstructions: Product['care_instructions']
+  isPlant: boolean;
 }
 
 export default function CareInstructions({ careInstructions, isPlant = false }: CareInstructionsProps) {
@@ -71,9 +67,8 @@ export default function CareInstructions({ careInstructions, isPlant = false }: 
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full ${
-                i <= level ? getDifficultyColor(level) : 'bg-gray-200'
-              }`}
+              className={`w-2 h-2 rounded-full ${i <= level ? getDifficultyColor(level) : 'bg-gray-200'
+                }`}
             />
           ))}
         </div>
@@ -89,7 +84,7 @@ export default function CareInstructions({ careInstructions, isPlant = false }: 
       const IconComponent = careIcons[key as keyof typeof careIcons];
       const iconColor = iconColors[key as keyof typeof iconColors] || 'text-gray-500';
       const bgColor = backgroundColors[key as keyof typeof backgroundColors] || 'bg-gray-50 border-gray-100';
-      
+
       // Format the title
       const title = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
 

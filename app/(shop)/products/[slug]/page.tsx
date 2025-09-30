@@ -56,7 +56,7 @@ export default function ProductDetailsPage({
   };
 
   const handleBackToShop = () => {
-    router.push('/shop');
+    router.back();
   };
 
   if (isLoading) {

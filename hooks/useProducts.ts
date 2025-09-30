@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/api/client';
-import { Product } from '@/lib/db';
 import { ApiSuccessResponse } from '@/lib/errors';
 import { handleMutationError, invalidateQueries, queryKeys } from '@/lib/queryClient';
+import { Product } from '@/types/types';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 // Types

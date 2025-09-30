@@ -5,22 +5,7 @@ import ProductAttributes from '@/components/molecules/ProductAttributes';
 import { ProductDetails } from '@/components/molecules/ProductDetails';
 import { QuantitySelector } from '@/components/molecules/QuantitySelector';
 import { Button } from '@/components/ui/button';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description: string | null;
-  images: any;
-  difficulty_level?: number;
-  category_id?: string;
-  care_instructions?: any;
-  is_plant: boolean;
-  categories?: {
-    slug: string;
-    name: string;
-  };
-}
+import { Product } from '@/types/types';
 
 interface ProductPageLayoutProps {
   product: Product;
@@ -70,14 +55,13 @@ export function ProductPageLayout({
             name={product.name}
             price={product.price}
             description={product.description || undefined}
-            productId={product.id}
           />
 
           <ProductAttributes
             difficultyLevel={product.difficulty_level}
-            categoryId={product.category_id}
-            categoryName={product?.category_name}
-            categorySlug={product?.categories?.slug}
+            categoryId={product.categoryId}
+            categoryName={product?.category?.name}
+            categorySlug={product?.category?.slug}
           />
 
           <CareInstructions
