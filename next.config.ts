@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     turbo: {
       root: __dirname,
     },
+    viewTransition: true,
   },
 };
 

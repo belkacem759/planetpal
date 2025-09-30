@@ -329,7 +329,7 @@ export class ProductService extends BaseService {
     try {
       const { data, error } = await (this.client as any)
         .from('products')
-        .select('*')
+        .select('*, ...categories!inner(category_name:name)')
         .eq('slug', slug)
         .single();
 
@@ -400,7 +400,7 @@ export class CartService extends BaseService {
       if (existingItems && existingItems.length > 0) {
         const existingItem = existingItems[0];
         const newQuantity = existingItem.quantity + quantity;
-        
+
         const { data: updatedItem, error: updateError } = await (this.client as any)
           .from('cart')
           .update({ quantity: newQuantity })

@@ -36,8 +36,7 @@ const CollapsibleSection = ({ title, defaultOpen = true, children }: Collapsible
 
 export function FilterSidebar() {
   const { filters, setParam, setParams, clearFilters, hasActiveFilters } = useUrlFilters();
-  const { data: categoriesData, isLoading } = useCategoriesQuery();
-  const categories: Category[] = categoriesData?.categories || [];
+  const { data: categories = [], isLoading } = useCategoriesQuery();
 
   // Difficulty options
   const difficultyOptions = [
@@ -244,7 +243,7 @@ export function FilterSidebar() {
               <span className="text-sm text-gray-500">Loading categories...</span>
             </div>
           ) : (
-            <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-[250px] pr-1">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="all-categories"

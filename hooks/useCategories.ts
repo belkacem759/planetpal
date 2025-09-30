@@ -26,15 +26,10 @@ export interface CategoriesFilters extends Record<string, unknown> {
   offset?: number;
 }
 
-// Query result interface that includes both categories and metadata
-export interface CategoriesQueryResult extends ApiSuccessResponse<Category[]> {
-  categories: Category[];
-}
-
 // API functions
 const fetchCategories = async (filters?: CategoriesFilters): Promise<ApiSuccessResponse<Category[]>> => {
   const params = new URLSearchParams();
-  
+
   if (filters?.parent_id) params.append('parent_id', filters.parent_id);
   if (filters?.include_children !== undefined) params.append('include_children', filters.include_children.toString());
   if (filters?.include_products_count !== undefined) params.append('include_products_count', filters.include_products_count.toString());
@@ -42,42 +37,39 @@ const fetchCategories = async (filters?: CategoriesFilters): Promise<ApiSuccessR
   if (filters?.offset) params.append('offset', filters.offset.toString());
 
   const response = await fetch(`/api/categories?${params.toString()}`);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch categories: ${response.statusText}`);
   }
-  
+
   const apiResponse: ApiSuccessResponse<Category[]> = await response.json();
   return apiResponse;
 };
 
 const fetchCategory = async (slug: string): Promise<Category> => {
   const response = await fetch(`/api/categories/${slug}`);
-  
+
   if (!response.ok) {
     if (response.status === 404) {
       throw new Error('Category not found');
     }
     throw new Error(`Failed to fetch category: ${response.statusText}`);
   }
-  
+
   return response.json();
 };
 
 // Custom hooks
 export const useCategoriesQuery = (filters?: CategoriesFilters) => {
-  return useQuery<ApiSuccessResponse<Category[]>, Error, CategoriesQueryResult>({
+  return useQuery({
     queryKey: queryKeys.categories.list(filters),
     queryFn: () => fetchCategories(filters),
     // Enable the query by default
     enabled: true,
     // Keep previous data while fetching new data
     placeholderData: (previousData) => previousData,
-    // Transform the response to include categories property
-    select: (data) => ({
-      ...data,
-      categories: data.data,
-    }),
+    // Transform the response to extract categories directly
+    select: (data) => data.data, // Extract categories from ApiSuccessResponse.data
   });
 };
 
@@ -97,8 +89,8 @@ export const useRootCategoriesQuery = () => {
 
 // Get child categories of a parent
 export const useChildCategoriesQuery = (parentId: string) => {
-  return useCategoriesQuery({ 
-    parent_id: parentId, 
+  return useCategoriesQuery({
+    parent_id: parentId,
     include_products_count: true,
   });
 };
@@ -106,7 +98,7 @@ export const useChildCategoriesQuery = (parentId: string) => {
 // Category management mutations (for admin use)
 export const useCreateCategoryMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at'>) => {
       const response = await fetch('/api/categories', {
@@ -116,11 +108,11 @@ export const useCreateCategoryMutation = () => {
         },
         body: JSON.stringify(categoryData),
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to create category: ${response.statusText}`);
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -133,7 +125,7 @@ export const useCreateCategoryMutation = () => {
 
 export const useUpdateCategoryMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, ...categoryData }: Partial<Category> & { id: string }) => {
       const response = await fetch(`/api/categories/${id}`, {
@@ -143,11 +135,11 @@ export const useUpdateCategoryMutation = () => {
         },
         body: JSON.stringify(categoryData),
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to update category: ${response.statusText}`);
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
@@ -161,17 +153,17 @@ export const useUpdateCategoryMutation = () => {
 
 export const useDeleteCategoryMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/categories/${id}`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to delete category: ${response.statusText}`);
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -185,7 +177,7 @@ export const useDeleteCategoryMutation = () => {
 // Utility hooks
 export const usePrefetchCategory = () => {
   const queryClient = useQueryClient();
-  
+
   return (slug: string) => {
     queryClient.prefetchQuery({
       queryKey: [...queryKeys.categories.all, 'detail', slug],
@@ -198,7 +190,7 @@ export const usePrefetchCategory = () => {
 
 export const usePrefetchCategories = () => {
   const queryClient = useQueryClient();
-  
+
   return (filters?: CategoriesFilters) => {
     queryClient.prefetchQuery({
       queryKey: queryKeys.categories.list(filters),
@@ -212,7 +204,7 @@ export const usePrefetchCategories = () => {
 // Helper function to get category hierarchy
 export const useCategoryHierarchy = (categorySlug?: string) => {
   const { data: categoriesData } = useCategoriesQuery({ include_children: true });
-  
+
   const buildHierarchy = (cats: Category[], parentId?: string): Category[] => {
     return cats
       .filter(cat => cat.parent_id === parentId)
@@ -221,9 +213,9 @@ export const useCategoryHierarchy = (categorySlug?: string) => {
         children: buildHierarchy(cats, cat.id),
       }));
   };
-  
-  const hierarchy = categoriesData?.categories ? buildHierarchy(categoriesData.categories) : [];
-  
+
+  const hierarchy = categoriesData ? buildHierarchy(categoriesData) : [];
+
   const findCategoryPath = (cats: Category[], targetSlug: string, path: Category[] = []): Category[] | null => {
     for (const cat of cats) {
       const currentPath = [...path, cat];
@@ -239,9 +231,9 @@ export const useCategoryHierarchy = (categorySlug?: string) => {
     }
     return null;
   };
-  
+
   const breadcrumbs = categorySlug ? findCategoryPath(hierarchy, categorySlug) : [];
-  
+
   return {
     hierarchy,
     breadcrumbs: breadcrumbs || [],

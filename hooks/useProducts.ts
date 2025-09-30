@@ -1,8 +1,8 @@
+import { apiClient } from '@/lib/api/client';
+import { Product } from '@/lib/db';
 import { ApiSuccessResponse } from '@/lib/errors';
 import { handleMutationError, invalidateQueries, queryKeys } from '@/lib/queryClient';
-import { apiClient } from '@/lib/api/client';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-import { Product } from '@/lib/db';
 
 // Types
 
@@ -56,7 +56,9 @@ const fetchProducts = async (filters?: ProductsFilters): Promise<ApiSuccessRespo
 };
 
 const fetchProduct = async (slug: string): Promise<Product> => {
-  const response = await fetch(`/api/products/${slug}`);
+  const response = await fetch(`/api/products/${slug}`, {
+    cache: 'force-cache',
+  });
 
   if (!response.ok) {
     if (response.status === 404) {

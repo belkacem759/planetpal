@@ -20,7 +20,7 @@ export async function GET(
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const { id } = params;
+    const { id } = await params;
     const result = await productService.findBySlug(id);
 
     if (!result.success) {

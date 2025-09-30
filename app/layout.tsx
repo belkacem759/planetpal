@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import { QueryProvider } from '@/providers/query-provider';
-import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import { ViewTransitions } from "next-view-transitions";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { QueryProvider } from "@/providers/query-provider";
+import { TransitionProgress } from "@/components/ui/transition-progress";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -11,8 +13,8 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "PlanetPal - Your Plant Care Companion",
+  description: "Discover, care for, and grow your plant collection with PlanetPal",
 };
 
 const geistSans = Geist({
@@ -29,18 +31,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
-        <NuqsAdapter>
-          <QueryProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-            </ThemeProvider>
-          </QueryProvider>
-        </NuqsAdapter>
+        <ViewTransitions>
+          <TransitionProgress />
+          <NuqsAdapter>
+            <QueryProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+              </ThemeProvider>
+            </QueryProvider>
+          </NuqsAdapter>
+        </ViewTransitions>
       </body>
     </html>
   );
