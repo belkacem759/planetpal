@@ -1,16 +1,16 @@
 import { createServiceClient, supabase } from '@/lib/supabase/service';
-import * as v from '@/lib/validation';
+import { validateData, UserUpdateSchema, CartInsertSchema, OrderInsertSchema, UserPlantInsertSchema, ReminderInsertSchema } from '@/lib/validation';
 import { Database } from '@/types/database';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const serviceSupabase = createServiceClient();
 
 export type DbResult<T> = {
-  success: true;
   data: T;
+  success: true;
 } | {
-  success: false;
   error: string;
+  success: false;
 };
 
 // Database table types
@@ -63,14 +63,14 @@ export class BaseService {
       const { data, error } = await query.single();
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: data as T };
+      return { data: data as T, success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -98,14 +98,14 @@ export class BaseService {
       const { data, error } = await query;
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: (data || []) as T[] };
+      return { data: (data || []) as T[], success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -115,7 +115,7 @@ export class BaseService {
     limit: number = 10,
     filters?: Record<string, any>,
     userId?: string
-  ): Promise<DbResult<{ data: T[]; count: number; page: number; totalPages: number }>> {
+  ): Promise<DbResult<{ count: number; data: T[]; page: number; totalPages: number }>> {
     try {
       const offset = (page - 1) * limit;
 
@@ -135,29 +135,29 @@ export class BaseService {
         });
       }
 
-      const { data, error, count } = await query
+      const { count, data, error } = await query
         .range(offset, offset + limit - 1)
         .order('created_at', { ascending: false });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
       const totalPages = Math.ceil((count || 0) / limit);
 
       return {
-        success: true,
         data: {
-          data: (data || []) as T[],
           count: count || 0,
+          data: (data || []) as T[],
           page,
           totalPages
-        }
+        },
+        success: true
       };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -177,14 +177,14 @@ export class BaseService {
         .single();
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: result as T };
+      return { data: result as T, success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -210,14 +210,14 @@ export class BaseService {
       const { data: result, error } = await query.single();
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: result as T };
+      return { data: result as T, success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -238,14 +238,14 @@ export class BaseService {
       const { data: result, error } = await query;
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: result as T[] };
+      return { data: result as T[], success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -266,22 +266,22 @@ export class UserService extends BaseService {
         .single();
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: data as User };
+      return { data: data as User, success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
 
   async updateProfile(userId: string, profileData: Record<string, any>): Promise<DbResult<User>> {
-    const validation = v.validateData(v.UserUpdateSchema, profileData);
+    const validation = validateData(UserUpdateSchema, profileData);
     if (!validation.success) {
-      return { success: false, error: validation.errors?.join(', ') || 'Validation failed' };
+      return { error: validation.errors?.join(', ') || 'Validation failed', success: false };
     }
 
     return this.update<User>(userId, validation.data || {});
@@ -302,14 +302,14 @@ export class CategoryService extends BaseService {
         .single();
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: data as Category };
+      return { data: data as Category, success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -334,14 +334,14 @@ export class ProductService extends BaseService {
         .single();
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: data as Product };
+      return { data: data as Product, success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -371,14 +371,14 @@ export class CartService extends BaseService {
         .order('created_at', { ascending: false });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: data || [] };
+      return { data: data || [], success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -393,7 +393,7 @@ export class CartService extends BaseService {
         .eq('product_id', productId);
 
       if (findError) {
-        return { success: false, error: findError.message };
+        return { error: findError.message, success: false };
       }
 
       // If item exists, update the quantity
@@ -409,10 +409,10 @@ export class CartService extends BaseService {
           .single();
 
         if (updateError) {
-          return { success: false, error: updateError.message };
+          return { error: updateError.message, success: false };
         }
 
-        return { success: true, data: updatedItem as Cart };
+        return { data: updatedItem as Cart, success: true };
       }
 
       // If item doesn't exist, create a new cart item
@@ -421,16 +421,16 @@ export class CartService extends BaseService {
         quantity
       };
 
-      const validation = v.validateData(v.CartInsertSchema, cartData);
+      const validation = validateData(CartInsertSchema, cartData);
       if (!validation.success) {
-        return { success: false, error: validation.errors?.join(', ') || 'Validation failed' };
+        return { error: validation.errors?.join(', ') || 'Validation failed', success: false };
       }
 
       return this.create<Cart>(validation.data || {}, userId);
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -451,14 +451,14 @@ export class CartService extends BaseService {
         .eq('user_id', userId);
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: { cleared: true } };
+      return { data: { cleared: true }, success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -474,9 +474,9 @@ export class OrderService extends BaseService {
   }
 
   async createOrder(userId: string, orderData: Record<string, any>): Promise<DbResult<Order>> {
-    const validation = v.validateData(v.OrderInsertSchema, orderData);
+    const validation = validateData(OrderInsertSchema, orderData);
     if (!validation.success) {
-      return { success: false, error: validation.errors?.join(', ') || 'Validation failed' };
+      return { error: validation.errors?.join(', ') || 'Validation failed', success: false };
     }
 
     return this.create<Order>(validation.data || {}, userId);
@@ -496,14 +496,14 @@ export class OrderItemService extends BaseService {
         .select();
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: data as OrderItem[] };
+      return { data: data as OrderItem[], success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -525,14 +525,14 @@ export class OrderItemService extends BaseService {
         .order('created_at', { ascending: false });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: data || [] };
+      return { data: data || [], success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }
@@ -548,9 +548,9 @@ export class UserPlantService extends BaseService {
   }
 
   async createUserPlant(userId: string, plantData: Record<string, any>): Promise<DbResult<UserPlant>> {
-    const validation = v.validateData(v.UserPlantInsertSchema, plantData);
+    const validation = validateData(UserPlantInsertSchema, plantData);
     if (!validation.success) {
-      return { success: false, error: validation.errors?.join(', ') || 'Validation failed' };
+      return { error: validation.errors?.join(', ') || 'Validation failed', success: false };
     }
 
     return this.create<UserPlant>(validation.data || {}, userId);
@@ -567,9 +567,9 @@ export class ReminderService extends BaseService {
   }
 
   async createReminder(userId: string, reminderData: Record<string, any>): Promise<DbResult<Reminder>> {
-    const validation = v.validateData(v.ReminderInsertSchema, reminderData);
+    const validation = validateData(ReminderInsertSchema, reminderData);
     if (!validation.success) {
-      return { success: false, error: validation.errors?.join(', ') || 'Validation failed' };
+      return { error: validation.errors?.join(', ') || 'Validation failed', success: false };
     }
 
     return this.create<Reminder>(validation.data || {}, userId);
@@ -589,14 +589,14 @@ export class ReminderService extends BaseService {
         .order('reminder_date', { ascending: true });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { error: error.message, success: false };
       }
 
-      return { success: true, data: (data || []) as Reminder[] };
+      return { data: (data || []) as Reminder[], success: true };
     } catch (error) {
       return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
       };
     }
   }

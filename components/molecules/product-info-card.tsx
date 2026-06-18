@@ -8,48 +8,48 @@ import Link from "next/link";
 import * as React from "react";
 
 interface ProductInfoCardProps {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  images: { main?: string; gallery?: string[] }
-  description?: string;
-  difficultyLevel?: string;
-  isPlant?: boolean;
-  stockQuantity?: number;
   careInstructions?: CareInstructions | Json | null;
-  rating?: number;
-  reviewCount?: number;
   category?: string;
   className?: string;
+  description?: string;
+  difficultyLevel?: string;
+  id: string;
+  images: { gallery?: string[]; main?: string; }
+  isPlant?: boolean;
+  name: string;
+  price: number;
+  rating?: number;
+  reviewCount?: number;
+  slug: string;
+  stockQuantity?: number;
 }
 
 const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
   ({
-    id,
-    name,
-    slug,
-    price,
-    images,
-    description,
-    difficultyLevel,
-    isPlant,
-    stockQuantity = 0,
     careInstructions,
-    rating,
-    reviewCount,
     category,
     className,
+    description,
+    difficultyLevel,
+    id,
+    images,
+    isPlant,
+    name,
+    price,
+    rating,
+    reviewCount,
+    slug,
+    stockQuantity = 0,
     ...props
   }, ref) => {
     const isOutOfStock = stockQuantity <= 0;
 
     // Calculate average care difficulty for plants
     const getAverageDifficulty = () => {
-      if (!careInstructions || !isPlant) return null;
+      if (!careInstructions || !isPlant) {return null;}
 
       const difficulties = Object.values(careInstructions).map(instruction => instruction.difficulty);
-      if (difficulties.length === 0) return null;
+      if (difficulties.length === 0) {return null;}
 
       const average = difficulties.reduce((sum, diff) => sum + diff, 0) / difficulties.length;
       return Math.round(average);
@@ -61,26 +61,26 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
     const renderStars = (rating: number) => {
       return Array.from({ length: 5 }, (_, i) => (
         <Star
-          key={i}
           className={cn(
             "h-4 w-4",
             i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300 dark:text-gray-600"
           )}
+          key={i}
         />
       ));
     };
 
     return (
       <motion.div
-        whileHover={{ y: -4, scale: 1.02 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        transition={{ damping: 20, stiffness: 300, type: "spring" }}
+        whileHover={{ scale: 1.02, y: -4 }}
       >
         <Card
-          ref={ref}
           className={cn(
             "group cursor-pointer transition-all hover:shadow-xl border-0 bg-card overflow-hidden",
             className
           )}
+          ref={ref}
           {...props}
         >
           <Link href={`/products/${slug}`}>
@@ -88,23 +88,23 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
               {/* Image Section */}
               <div className="relative aspect-[4/3] overflow-hidden">
                 <motion.img
-                  src={images.main}
                   alt={name}
                   className="w-full h-full object-cover"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  src={images.main}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
                 />
 
                 {/* Overlay badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-2">
                   {category && (
-                    <Badge variant="secondary" className="bg-background/90 text-foreground backdrop-blur-sm">
+                    <Badge className="bg-background/90 text-foreground backdrop-blur-sm" variant="secondary">
                       {category}
                     </Badge>
                   )}
                   {isPlant && (difficultyLevel || avgDifficulty) && (
-                    <Badge variant="outline" className="bg-green-100/90 text-green-700 border-green-200 dark:bg-green-950/90 dark:text-green-300 dark:border-green-800 backdrop-blur-sm">
+                    <Badge className="bg-green-100/90 text-green-700 border-green-200 dark:bg-green-950/90 dark:text-green-300 dark:border-green-800 backdrop-blur-sm" variant="outline">
                       <Leaf className="h-3 w-3 mr-1" />
                       {difficultyLevel || `Level ${avgDifficulty}/5`}
                     </Badge>
@@ -114,11 +114,11 @@ const ProductInfoCard = React.forwardRef<HTMLDivElement, ProductInfoCardProps>(
                 {/* Stock status */}
                 <div className="absolute top-3 right-3">
                   {isOutOfStock ? (
-                    <Badge variant="destructive" className="bg-red-500/90 backdrop-blur-sm">
+                    <Badge className="bg-red-500/90 backdrop-blur-sm" variant="destructive">
                       Out of Stock
                     </Badge>
                   ) : stockQuantity <= 5 ? (
-                    <Badge variant="outline" className="bg-orange-100/90 text-orange-700 border-orange-200 dark:bg-orange-950/90 dark:text-orange-300 dark:border-orange-800 backdrop-blur-sm">
+                    <Badge className="bg-orange-100/90 text-orange-700 border-orange-200 dark:bg-orange-950/90 dark:text-orange-300 dark:border-orange-800 backdrop-blur-sm" variant="outline">
                       {stockQuantity} left
                     </Badge>
                   ) : null}

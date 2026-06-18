@@ -14,12 +14,12 @@ export default function ContactPage() {
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <a href="/about" className="text-blue-600 hover:underline">
+            <a className="text-blue-600 hover:underline" href="/about">
               About Us
             </a>
           </li>
           <li>
-            <a href="/shop" className="text-blue-600 hover:underline">
+            <a className="text-blue-600 hover:underline" href="/shop">
               Visit Our Shop
             </a>
           </li>

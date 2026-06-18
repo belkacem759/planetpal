@@ -12,7 +12,7 @@ import { startTransition } from 'react';
 
 function CartPageContent() {
   const router = useRouter();
-  const { data: cart, isLoading, error } = useCartQuery();
+  const { data: cart, error, isLoading } = useCartQuery();
   const updateCartItemMutation = useUpdateCartItemMutation();
   const removeFromCartMutation = useRemoveFromCartMutation();
 
@@ -53,14 +53,14 @@ function CartPageContent() {
       </div>
 
       <CartList
-        items={(cart?.items) || []}
-        isLoading={isLoading}
         error={error ? new Error(error.message) : null}
+        isCheckingOut={false}
+        isLoading={isLoading}
+        isUpdating={updateCartItemMutation.isPending || removeFromCartMutation.isPending ? 'updating' : null}
+        items={(cart?.items) || []}
+        onCheckout={handleCheckout}
         onQuantityChange={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
-        onCheckout={handleCheckout}
-        isUpdating={updateCartItemMutation.isPending || removeFromCartMutation.isPending ? 'updating' : null}
-        isCheckingOut={false}
       />
     </div>
   );

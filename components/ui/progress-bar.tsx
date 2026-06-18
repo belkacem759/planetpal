@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react';
 
 interface ProgressBarProps {
-  progress: number;
   className?: string;
+  progress: number;
   showPercentage?: boolean;
 }
 
 export function ProgressBar({ 
-  progress, 
   className = '', 
+  progress, 
   showPercentage = false 
 }: ProgressBarProps) {
   const [displayProgress, setDisplayProgress] = useState(0);

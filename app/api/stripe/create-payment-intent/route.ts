@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { StripeService } from '@/lib/stripe';
 import { createClient } from '@/lib/supabase/server';
 import { createErrorResponse, createSuccessResponse, createValidationErrorResponse } from '@/lib/api/responses';
-import * as v from 'valibot';
+import { object, pipe, number, minValue, optional, string, uuid, email, safeParse } from 'valibot';
 
 // Validation schema for payment intent creation
-const createPaymentIntentSchema = v.object({
-  amount: v.pipe(v.number(), v.minValue(0.5)), // Minimum $0.50
-  currency: v.optional(v.string(), 'usd'),
-  orderId: v.pipe(v.string(), v.uuid()),
-  customerEmail: v.pipe(v.string(), v.email()),
-  customerName: v.optional(v.string()),
+const createPaymentIntentSchema = object({
+  amount: pipe(number(), minValue(0.5)), // Minimum $0.50
+  currency: optional(string(), 'usd'),
+  customerEmail: pipe(string(), email()),
+  customerName: optional(string()),
+  orderId: pipe(string(), uuid()),
 });
 
 export async function POST(request: NextRequest) {
@@ -25,13 +25,13 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json();
-    const validation = v.safeParse(createPaymentIntentSchema, body);
+    const validation = safeParse(createPaymentIntentSchema, body);
     
     if (!validation.success) {
       return createValidationErrorResponse(validation.issues, 'Invalid request data');
     }
 
-    const { amount, currency, orderId, customerEmail, customerName } = validation.output;
+    const { amount, currency, customerEmail, customerName, orderId } = validation.output;
 
     // Verify the order belongs to the authenticated user
     const { data: order, error: orderError } = await supabase
@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
       currency,
       customerId: customer.id,
       metadata: {
+        customerEmail,
         orderId,
         userId: user.id,
-        customerEmail,
       },
     });
 
@@ -68,11 +68,11 @@ export async function POST(request: NextRequest) {
     const { error: updateError } = await supabase
       .from('orders')
       .update({
+        currency: currency.toUpperCase(),
+        payment_status: 'pending',
         stripe_customer_id: customer.id,
         stripe_payment_intent_id: paymentIntent.id,
-        payment_status: 'pending',
         total_amount: amount,
-        currency: currency.toUpperCase(),
         updated_at: new Date().toISOString(),
       })
       .eq('id', orderId);
@@ -84,8 +84,8 @@ export async function POST(request: NextRequest) {
 
     return createSuccessResponse({
       clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
       customerId: customer.id,
+      paymentIntentId: paymentIntent.id,
     });
 
   } catch (error) {

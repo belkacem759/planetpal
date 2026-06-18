@@ -6,34 +6,34 @@ import Link from "next/link";
 import * as React from "react";
 
 interface CartItemProps {
+  className?: string;
   id: string;
-  productId: string;
-  productName: string;
-  productSlug: string;
-  productImage: string;
-  price: number;
-  quantity: number;
+  isUpdating?: boolean;
   maxQuantity?: number;
   onQuantityChange: (itemId: string, newQuantity: number) => void;
   onRemove: (itemId: string) => void;
-  isUpdating?: boolean;
-  className?: string;
+  price: number;
+  productId: string;
+  productImage: string;
+  productName: string;
+  productSlug: string;
+  quantity: number;
 }
 
 const CartItem = React.forwardRef<HTMLDivElement, CartItemProps>(
   ({
+    className,
     id,
-    productId,
-    productName,
-    productSlug,
-    productImage,
-    price,
-    quantity,
+    isUpdating = false,
     maxQuantity = 99,
     onQuantityChange,
     onRemove,
-    isUpdating = false,
-    className,
+    price,
+    productId,
+    productImage,
+    productName,
+    productSlug,
+    quantity,
     ...props
   }, ref) => {
     const [localQuantity, setLocalQuantity] = React.useState(quantity.toString());
@@ -62,7 +62,7 @@ const CartItem = React.forwardRef<HTMLDivElement, CartItemProps>(
     };
 
     const handleQuantityInputBlur = () => {
-      const numValue = parseInt(localQuantity, 10);
+      const numValue = Number.parseInt(localQuantity, 10);
       if (isNaN(numValue) || numValue < 1) {
         setLocalQuantity("1");
         onQuantityChange(id, 1);
@@ -92,25 +92,25 @@ const CartItem = React.forwardRef<HTMLDivElement, CartItemProps>(
 
     return (
       <Card
-        ref={ref}
         className={cn(
           "transition-opacity",
           isUpdating && "opacity-50",
           className
         )}
+        ref={ref}
         {...props}
       >
         <CardContent className="p-4">
           <div className="flex gap-4">
             {/* Product Image */}
-            <Link href={`/products/${productSlug}`} className="shrink-0">
+            <Link className="shrink-0" href={`/products/${productSlug}`}>
               <div className="relative w-20 h-20 rounded-md overflow-hidden">
                 <img
-                  src={productImage || "/placeholder-plant.jpg"}
                   alt={productName}
                   // fill
                   className="object-cover"
                   sizes="80px"
+                  src={productImage || "/placeholder-plant.jpg"}
                 />
               </div>
             </Link>
@@ -118,8 +118,8 @@ const CartItem = React.forwardRef<HTMLDivElement, CartItemProps>(
             {/* Product Details */}
             <div className="flex-1 min-w-0">
               <Link
-                href={`/products/${productSlug}`}
                 className="hover:text-primary transition-colors"
+                href={`/products/${productSlug}`}
               >
                 <h3 className="font-semibold text-lg mb-1 line-clamp-2">
                   {productName}
@@ -137,55 +137,55 @@ const CartItem = React.forwardRef<HTMLDivElement, CartItemProps>(
             <div className="flex flex-col items-end gap-2">
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleQuantityDecrease}
-                  disabled={quantity <= 1 || isUpdating}
                   className="h-8 w-8"
+                  disabled={quantity <= 1 || isUpdating}
+                  onClick={handleQuantityDecrease}
+                  size="icon"
+                  variant="outline"
                 >
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                     <path
-                      fillRule="evenodd"
-                      d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
                       clipRule="evenodd"
+                      d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                      fillRule="evenodd"
                     />
                   </svg>
                 </Button>
 
                 {isEditing ? (
                   <Input
+                    autoFocus
+                    className="w-16 h-8 text-center"
+                    max={maxQuantity}
+                    min="1"
+                    onBlur={handleQuantityInputBlur}
+                    onChange={handleQuantityInputChange}
+                    onKeyDown={handleQuantityInputKeyDown}
                     type="number"
                     value={localQuantity}
-                    onChange={handleQuantityInputChange}
-                    onBlur={handleQuantityInputBlur}
-                    onKeyDown={handleQuantityInputKeyDown}
-                    className="w-16 h-8 text-center"
-                    min="1"
-                    max={maxQuantity}
-                    autoFocus
                   />
                 ) : (
                   <button
-                    onClick={() => setIsEditing(true)}
                     className="w-16 h-8 text-center border rounded-md hover:bg-accent transition-colors"
                     disabled={isUpdating}
+                    onClick={() => setIsEditing(true)}
                   >
                     {quantity}
                   </button>
                 )}
 
                 <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleQuantityIncrease}
-                  disabled={quantity >= maxQuantity || isUpdating}
                   className="h-8 w-8"
+                  disabled={quantity >= maxQuantity || isUpdating}
+                  onClick={handleQuantityIncrease}
+                  size="icon"
+                  variant="outline"
                 >
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                     <path
-                      fillRule="evenodd"
-                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                       clipRule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      fillRule="evenodd"
                     />
                   </svg>
                 </Button>
@@ -193,11 +193,11 @@ const CartItem = React.forwardRef<HTMLDivElement, CartItemProps>(
 
               {/* Remove Button */}
               <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleRemove}
-                disabled={isUpdating}
                 className="text-xs"
+                disabled={isUpdating}
+                onClick={handleRemove}
+                size="sm"
+                variant="destructive"
               >
                 Remove
               </Button>

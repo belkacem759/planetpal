@@ -7,28 +7,28 @@ import { Product } from '@/lib/db';
 
 // Types
 export interface CartItem {
-  id: string;
-  product_id: string;
-  quantity: number;
-  price: number; // Price at the time of adding to cart
   created_at: string;
-  updated_at: string;
+  id: string;
+  price: number; // Price at the time of adding to cart
   // Relations
   product: Product;
+  product_id: string;
+  quantity: number;
+  updated_at: string;
 }
 
 export interface Cart {
+  created_at: string;
   id: string;
-  user_id?: string;
-  session_id?: string;
   items: CartItem[];
-  total_items: number;
+  session_id?: string;
+  shipping_amount: number;
   subtotal: number;
   tax_amount: number;
-  shipping_amount: number;
   total_amount: number;
-  created_at: string;
+  total_items: number;
   updated_at: string;
+  user_id?: string;
 }
 
 export interface AddToCartData {
@@ -53,14 +53,14 @@ const fetchCart = async (): Promise<Cart> => {
       if (response.status === 404) {
         // Return empty cart if none exists
         return {
+          created_at: new Date().toISOString(),
           id: '',
           items: [],
-          total_items: 0,
+          shipping_amount: 0,
           subtotal: 0,
           tax_amount: 0,
-          shipping_amount: 0,
           total_amount: 0,
-          created_at: new Date().toISOString(),
+          total_items: 0,
           updated_at: new Date().toISOString(),
         };
       }
@@ -79,28 +79,28 @@ const fetchCart = async (): Promise<Cart> => {
     const total_amount = subtotal + tax_amount + shipping_amount;
 
     return {
+      created_at: cartItems.length > 0 ? cartItems[0].created_at : new Date().toISOString(),
       id: cartItems.id || 'temp-cart-id', // Use cart_id from response or temp ID
       items: cartItems,
-      total_items: cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0),
+      shipping_amount,
       subtotal,
       tax_amount,
-      shipping_amount,
       total_amount,
-      created_at: cartItems.length > 0 ? cartItems[0].created_at : new Date().toISOString(),
+      total_items: cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0),
       updated_at: cartItems.length > 0 ? cartItems[0].updated_at : new Date().toISOString(),
     };
   } catch (error) {
     // If not authenticated, return empty cart
     if (error instanceof Error && error.message.includes('No authentication token')) {
       return {
+        created_at: new Date().toISOString(),
         id: '',
         items: [],
-        total_items: 0,
+        shipping_amount: 0,
         subtotal: 0,
         tax_amount: 0,
-        shipping_amount: 0,
         total_amount: 0,
-        created_at: new Date().toISOString(),
+        total_items: 0,
         updated_at: new Date().toISOString(),
       };
     }
@@ -110,8 +110,8 @@ const fetchCart = async (): Promise<Cart> => {
 
 const addToCart = async (data: AddToCartData): Promise<CartItem> => {
   const response = await apiClient('/api/cart', {
-    method: 'POST',
     body: JSON.stringify(data),
+    method: 'POST',
     requiresAuth: true
   });
 
@@ -124,8 +124,8 @@ const addToCart = async (data: AddToCartData): Promise<CartItem> => {
 
 const updateCartItem = async (data: UpdateCartItemData): Promise<Cart> => {
   const response = await apiClient(`/api/cart/${data.item_id}`, {
-    method: 'PUT',
     body: JSON.stringify({ quantity: data.quantity }),
+    method: 'PUT',
     requiresAuth: true
   });
 
@@ -137,20 +137,20 @@ const updateCartItem = async (data: UpdateCartItemData): Promise<Cart> => {
 
   // Transform the API response to match the expected Cart interface
   const cartItems = (result.data || []).map((item: any) => ({
-    id: item.id,
-    product_id: item.product_id,
-    quantity: item.quantity,
-    price: item.product?.price || 0,
     created_at: item.created_at,
-    updated_at: item.updated_at,
+    id: item.id,
+    price: item.product?.price || 0,
     product: {
       id: item.product?.id || '',
-      name: item.product?.name || '',
-      slug: item.product?.slug || '',
-      price: item.product?.price || 0,
       image_url: item.product?.images?.[0] || null,
+      name: item.product?.name || '',
+      price: item.product?.price || 0,
+      slug: item.product?.slug || '',
       stock_quantity: item.product?.stock_quantity || 0,
     },
+    product_id: item.product_id,
+    quantity: item.quantity,
+    updated_at: item.updated_at,
   }));
 
   const subtotal = cartItems.reduce((sum: number, item: any) =>
@@ -161,14 +161,14 @@ const updateCartItem = async (data: UpdateCartItemData): Promise<Cart> => {
   const total_amount = subtotal + tax_amount + shipping_amount;
 
   return {
+    created_at: new Date().toISOString(),
     id: result.cart_id || 'temp-cart-id',
     items: cartItems,
-    total_items: cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0),
+    shipping_amount,
     subtotal,
     tax_amount,
-    shipping_amount,
     total_amount,
-    created_at: new Date().toISOString(),
+    total_items: cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0),
     updated_at: new Date().toISOString(),
   };
 };
@@ -198,8 +198,8 @@ const clearCart = async (): Promise<void> => {
 // Custom hooks
 export const useCartQuery = () => {
   return useQuery({
-    queryKey: queryKeys.cart.items(),
     queryFn: fetchCart,
+    queryKey: queryKeys.cart.items(),
     // Always enable cart query
     enabled: true,
     // Refetch on window focus to sync cart state
@@ -214,11 +214,11 @@ export const useAddToCartMutation = () => {
 
   return useMutation({
     mutationFn: addToCart,
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate cart to refetch updated data
       invalidateQueries.cart();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -227,11 +227,11 @@ export const useUpdateCartItemMutation = () => {
 
   return useMutation({
     mutationFn: updateCartItem,
+    onError: handleMutationError,
     onSuccess: (updatedCart: Cart) => {
       // Update the cart data directly with the response
       queryClient.setQueryData(queryKeys.cart.items(), updatedCart);
     },
-    onError: handleMutationError,
   });
 };
 
@@ -240,6 +240,12 @@ export const useOptimisticUpdateCartItem = () => {
 
   return useMutation({
     mutationFn: updateCartItem,
+    onError: (err, variables, context: { previousCart?: Cart } | undefined) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousCart) {
+        queryClient.setQueryData(queryKeys.cart.items(), context.previousCart);
+      }
+    },
     onMutate: async (variables) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: queryKeys.cart.items() });
@@ -279,12 +285,6 @@ export const useOptimisticUpdateCartItem = () => {
       // Return a context object with the snapshotted value
       return { previousCart };
     },
-    onError: (err, variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousCart) {
-        queryClient.setQueryData(queryKeys.cart.items(), context.previousCart);
-      }
-    },
     onSettled: () => {
       // Always refetch after error or success
       queryClient.invalidateQueries({ queryKey: queryKeys.cart.items() });
@@ -297,11 +297,11 @@ export const useRemoveFromCartMutation = () => {
 
   return useMutation({
     mutationFn: removeFromCart,
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate cart to refetch updated data
       invalidateQueries.cart();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -310,11 +310,11 @@ export const useClearCartMutation = () => {
 
   return useMutation({
     mutationFn: clearCart,
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate cart to refetch updated data
       invalidateQueries.cart();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -327,9 +327,9 @@ export const useCartItemCount = () => {
 export const useCartTotal = () => {
   const { data: cart } = useCartQuery();
   return {
+    shipping: cart?.shipping_amount || 0,
     subtotal: cart?.subtotal || 0,
     tax: cart?.tax_amount || 0,
-    shipping: cart?.shipping_amount || 0,
     total: cart?.total_amount || 0,
   };
 };
@@ -352,6 +352,13 @@ export const useOptimisticAddToCart = () => {
 
   return useMutation({
     mutationFn: addToCart,
+    onError: (err, newItem, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousCart) {
+        queryClient.setQueryData(queryKeys.cart.items(), context.previousCart);
+      }
+      handleMutationError(err, newItem, context);
+    },
     onMutate: async (newItem: AddToCartData) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: queryKeys.cart.items() });
@@ -365,7 +372,7 @@ export const useOptimisticAddToCart = () => {
           item => item.product_id === newItem.product_id
         );
 
-        let updatedItems = [...previousCart.items];
+        const updatedItems = [...previousCart.items];
 
         if (existingItemIndex >= 0) {
           // Update existing item
@@ -376,13 +383,13 @@ export const useOptimisticAddToCart = () => {
         } else {
           // Add new item (we don't have full product data, so this is simplified)
           const newCartItem: CartItem = {
+            created_at: new Date().toISOString(),
             id: `temp-${Date.now()}`,
+            price: 0, // Will be updated when real response comes
+            product: {} as Product, // Will be populated by server response
             product_id: newItem.product_id,
             quantity: newItem.quantity,
-            price: 0, // Will be updated when real response comes
-            created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            product: {} as Product, // Will be populated by server response
           };
           updatedItems.push(newCartItem);
         }
@@ -398,13 +405,6 @@ export const useOptimisticAddToCart = () => {
 
       // Return a context object with the snapshotted value
       return { previousCart };
-    },
-    onError: (err, newItem, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousCart) {
-        queryClient.setQueryData(queryKeys.cart.items(), context.previousCart);
-      }
-      handleMutationError(err, newItem, context);
     },
     onSettled: () => {
       // Always refetch after error or success to ensure we have correct data

@@ -16,17 +16,17 @@ export default function DashboardPage() {
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <Link href="/my-plants" className="text-blue-600 hover:underline">
+            <Link className="text-blue-600 hover:underline" href="/my-plants">
               My Plants
             </Link>
           </li>
           <li>
-            <Link href="/reminders" className="text-blue-600 hover:underline">
+            <Link className="text-blue-600 hover:underline" href="/reminders">
               Reminders
             </Link>
           </li>
           <li>
-            <Link href="/profile" className="text-blue-600 hover:underline">
+            <Link className="text-blue-600 hover:underline" href="/profile">
               Profile
             </Link>
           </li>

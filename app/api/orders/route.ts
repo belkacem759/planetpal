@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { createMiddleware } from '@/lib/middleware';
 import { orderService, orderItemService } from '@/lib/db';
 import { OrderInsertSchema, PaginationSchema } from '@/lib/validation';
-import { handleApiError, createSuccessResponse, createPaginatedResponse } from '@/lib/errors';
+import { handleApiError, createSuccessResponse } from '@/lib/errors';
 import { validateData } from '@/lib/validation';
 
 // GET /api/orders - Get user's orders (authenticated user)
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const user = (request as any).user;
     
@@ -25,11 +25,11 @@ export async function GET(request: NextRequest) {
     const userId = user.id;
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = Number.parseInt(searchParams.get('page') || '1');
+    const limit = Number.parseInt(searchParams.get('limit') || '10');
 
     // Validate pagination
-    const paginationValidation = validateData(PaginationSchema, { page, limit });
+    const paginationValidation = validateData(PaginationSchema, { limit, page });
     if (!paginationValidation.success) {
       return handleApiError(new Error('Invalid pagination parameters'));
     }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const user = (request as any).user;
     
@@ -89,9 +89,9 @@ export async function POST(request: NextRequest) {
     if (cart_items && Array.isArray(cart_items) && cart_items.length > 0) {
       const orderItems = cart_items.map((item: any) => ({
         order_id: orderResult.data.id,
+        price_at_purchase: item.price,
         product_id: item.product_id,
-        quantity: item.quantity,
-        price_at_purchase: item.price
+        quantity: item.quantity
       }));
 
       const orderItemsResult = await orderItemService.createOrderItems(orderItems);

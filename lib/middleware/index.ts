@@ -10,8 +10,8 @@ const supabase = createClient<Database>(
 
 export interface AuthenticatedRequest extends NextRequest {
   user: {
-    id: string;
     email: string;
+    id: string;
     role: string;
   };
 }
@@ -25,18 +25,18 @@ export async function withRateLimit(
   const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'anonymous';
   const key = identifier || ip;
   
-  const { success, limit, remaining, reset } = await rateLimit(key);
+  const { limit, remaining, reset, success } = await rateLimit(key);
   
   if (!success) {
     return NextResponse.json(
       { error: 'Rate limit exceeded' },
       { 
-        status: 429,
         headers: {
           'X-RateLimit-Limit': limit.toString(),
           'X-RateLimit-Remaining': remaining.toString(),
           'X-RateLimit-Reset': reset.toString(),
-        }
+        },
+        status: 429
       }
     );
   }
@@ -47,31 +47,31 @@ export async function withRateLimit(
 // Authentication middleware
 export async function withAuth(
   request: NextRequest
-): Promise<{ user: any; error?: NextResponse }> {
+): Promise<{ error?: NextResponse; user: any; }> {
   const authHeader = request.headers.get('authorization');
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return {
-      user: null,
       error: NextResponse.json(
         { error: 'Missing or invalid authorization header' },
         { status: 401 }
-      )
+      ),
+      user: null
     };
   }
   
-  const token = authHeader.substring(7);
+  const token = authHeader.slice(7);
   
   try {
     const { data: { user }, error } = await supabase.auth.getUser(token);
     
     if (error || !user) {
       return {
-        user: null,
         error: NextResponse.json(
           { error: 'Invalid or expired token' },
           { status: 401 }
-        )
+        ),
+        user: null
       };
     }
     
@@ -83,15 +83,15 @@ export async function withAuth(
       .single();
     
     return {
-      user: profile || { id: user.id, email: user.email, role: 'user' }
+      user: profile || { email: user.email, id: user.id, role: 'user' }
     };
-  } catch (error) {
+  } catch {
     return {
-      user: null,
       error: NextResponse.json(
         { error: 'Authentication failed' },
         { status: 401 }
-      )
+      ),
+      user: null
     };
   }
 }
@@ -192,7 +192,7 @@ export async function withOwnership(
     }
     
     return null;
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Ownership verification failed' },
       { status: 500 }
@@ -204,17 +204,17 @@ export async function withOwnership(
 
 // Combined middleware composer
 export function createMiddleware(options: {
-  requireAuth?: boolean;
-  requireAdmin?: boolean;
-  checkOwnership?: { resourceType: string; resourceIdParam: string };
+  checkOwnership?: { resourceIdParam: string; resourceType: string; };
   enableRateLimit?: boolean;
+  requireAdmin?: boolean;
+  requireAuth?: boolean;
 }) {
   return async function middleware(request: NextRequest) {
     try {
       // Rate limiting
       if (options.enableRateLimit) {
         const rateLimitResponse = await withRateLimit(request);
-        if (rateLimitResponse) return rateLimitResponse;
+        if (rateLimitResponse) {return rateLimitResponse;}
       }
       
 
@@ -224,14 +224,14 @@ export function createMiddleware(options: {
       // Authentication
       if (options.requireAuth || options.requireAdmin || options.checkOwnership) {
         const authResult = await withAuth(request);
-        if (authResult.error) return authResult.error;
+        if (authResult.error) {return authResult.error;}
         user = authResult.user;
       }
       
       // Admin role check
       if (options.requireAdmin) {
         const adminResponse = withAdminRole(user);
-        if (adminResponse) return adminResponse;
+        if (adminResponse) {return adminResponse;}
       }
       
       // Ownership check
@@ -244,7 +244,7 @@ export function createMiddleware(options: {
           options.checkOwnership.resourceType,
           resourceId
         );
-        if (ownershipResponse) return ownershipResponse;
+        if (ownershipResponse) {return ownershipResponse;}
       }
       
       // Add user to request for downstream handlers

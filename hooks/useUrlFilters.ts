@@ -9,8 +9,8 @@ const filterParsers = {
   categories: parseAsArrayOf(parseAsString).withDefault([]),
   
   // Price range
-  minPrice: parseAsInteger.withDefault(0),
   maxPrice: parseAsInteger.withDefault(1000),
+  minPrice: parseAsInteger.withDefault(0),
   
   // Difficulty level
   difficulty: parseAsStringEnum(['beginner', 'intermediate', 'advanced']),
@@ -19,35 +19,35 @@ const filterParsers = {
   isPlant: parseAsBoolean.withDefault(false),
   
   // Care instruction difficulty filters
-  care_difficulty_watering: parseAsInteger,
-  care_difficulty_sunlight: parseAsInteger,
-  care_difficulty_soil: parseAsInteger,
-  care_difficulty_water: parseAsInteger,
-  care_difficulty_light: parseAsInteger,
-  care_difficulty_humidity: parseAsInteger,
   care_difficulty_fertilizer: parseAsInteger,
+  care_difficulty_humidity: parseAsInteger,
+  care_difficulty_light: parseAsInteger,
+  care_difficulty_soil: parseAsInteger,
+  care_difficulty_sunlight: parseAsInteger,
   care_difficulty_temperature: parseAsInteger,
+  care_difficulty_water: parseAsInteger,
+  care_difficulty_watering: parseAsInteger,
   
   // Maximum care difficulty
   max_care_difficulty: parseAsInteger,
 };
 
 export type FilterParams = {
-  search: string;
+  care_difficulty_fertilizer?: number;
+  care_difficulty_humidity?: number;
+  care_difficulty_light?: number;
+  care_difficulty_soil?: number;
+  care_difficulty_sunlight?: number;
+  care_difficulty_temperature?: number;
+  care_difficulty_water?: number;
+  care_difficulty_watering?: number;
   categories: string[];
-  minPrice: number;
-  maxPrice: number;
   difficulty: 'beginner' | 'intermediate' | 'advanced' | null;
   isPlant: boolean;
-  care_difficulty_watering?: number;
-  care_difficulty_sunlight?: number;
-  care_difficulty_soil?: number;
-  care_difficulty_water?: number;
-  care_difficulty_light?: number;
-  care_difficulty_humidity?: number;
-  care_difficulty_fertilizer?: number;
-  care_difficulty_temperature?: number;
   max_care_difficulty?: number;
+  maxPrice: number;
+  minPrice: number;
+  search: string;
 };
 
 export const useUrlFilters = () => {
@@ -76,21 +76,21 @@ export const useUrlFilters = () => {
   // Clear all filters
   const clearFilters = () => {
     setFilters({
-      search: '',
+      care_difficulty_fertilizer: null,
+      care_difficulty_humidity: null,
+      care_difficulty_light: null,
+      care_difficulty_soil: null,
+      care_difficulty_sunlight: null,
+      care_difficulty_temperature: null,
+      care_difficulty_water: null,
+      care_difficulty_watering: null,
       categories: [],
-      minPrice: 0,
-      maxPrice: 1000,
       difficulty: null,
       isPlant: false,
-      care_difficulty_watering: null,
-      care_difficulty_sunlight: null,
-      care_difficulty_soil: null,
-      care_difficulty_water: null,
-      care_difficulty_light: null,
-      care_difficulty_humidity: null,
-      care_difficulty_fertilizer: null,
-      care_difficulty_temperature: null,
       max_care_difficulty: null,
+      maxPrice: 1000,
+      minPrice: 0,
+      search: '',
     });
   };
 
@@ -113,10 +113,10 @@ export const useUrlFilters = () => {
     filters.max_care_difficulty !== null;
 
   return {
+    clearFilters,
     filters,
+    hasActiveFilters,
     setParam,
     setParams,
-    clearFilters,
-    hasActiveFilters,
   };
 };

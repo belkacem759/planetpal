@@ -167,7 +167,7 @@ test.describe('Logout Flow', () => {
       }
       
       // Should eventually redirect to login
-      await expect(authenticatedPage).toHaveURL(/.*login.*/, { timeout: 10000 });
+      await expect(authenticatedPage).toHaveURL(/.*login.*/, { timeout: 10_000 });
     }
   });
 

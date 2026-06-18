@@ -31,26 +31,26 @@ export async function GET() {
       }
     } else {
       // Check individual fields in user_metadata
-      if (typeof user.user_metadata?.first_name === 'string') first_name = user.user_metadata.first_name;
-      if (typeof user.user_metadata?.last_name === 'string') last_name = user.user_metadata.last_name;
+      if (typeof user.user_metadata?.first_name === 'string') {first_name = user.user_metadata.first_name;}
+      if (typeof user.user_metadata?.last_name === 'string') {last_name = user.user_metadata.last_name;}
     }
 
     const responsePayload = {
-      id: user.id,
+      avatar_url: profile?.avatar_url ?? user.user_metadata?.avatar_url ?? undefined,
+      created_at: profile?.created_at ?? user.created_at,
       email: user.email ?? profile?.email ?? '',
+      email_verified: Boolean((user as any).email_confirmed_at),
       first_name,
+      id: user.id,
       last_name,
       phone: (user as any).phone ?? undefined,
-      avatar_url: profile?.avatar_url ?? user.user_metadata?.avatar_url ?? undefined,
-      email_verified: Boolean((user as any).email_confirmed_at),
-      created_at: profile?.created_at ?? user.created_at,
-      updated_at: profile?.updated_at ?? user.updated_at,
       role: profile?.role,
+      updated_at: profile?.updated_at ?? user.updated_at,
     };
 
     return NextResponse.json(responsePayload, { status: 200 });
-  } catch (err) {
-    console.error('GET /api/auth/me failed:', err);
+  } catch (error) {
+    console.error('GET /api/auth/me failed:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

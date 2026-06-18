@@ -60,7 +60,7 @@ export function ProductDetailsSkeleton() {
         <Skeleton className="h-7 w-48 mb-6" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white p-4 rounded-lg border">
+            <div className="bg-white p-4 rounded-lg border" key={i}>
               <div className="flex items-center gap-3 mb-2">
                 <Skeleton className="h-5 w-5" />
                 <Skeleton className="h-5 w-16" />

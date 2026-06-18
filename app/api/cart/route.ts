@@ -14,9 +14,9 @@ export async function GET(request: NextRequest) {
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
-    const { user, error: authError } = await getAuthenticatedUser();
+    const { error: authError, user } = await getAuthenticatedUser();
     if (authError || !user) {
       return handleApiError(authError || createError.unauthorized());
     }
@@ -42,9 +42,9 @@ export async function DELETE(request: NextRequest) {
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
-    const { user, error: authError } = await getAuthenticatedUser();
+    const { error: authError, user } = await getAuthenticatedUser();
     if (authError || !user) {
       return handleApiError(authError || createError.unauthorized());
     }
@@ -70,9 +70,9 @@ export async function POST(request: NextRequest) {
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
-    const { user, error: authError } = await getAuthenticatedUser();
+    const { error: authError, user } = await getAuthenticatedUser();
     if (authError || !user) {
       return handleApiError(authError || createError.unauthorized());
     }

@@ -28,7 +28,7 @@ export function WithAuth({ children, requiredRole }: WithAuthProps) {
         const { data, error } = await supabase.auth.getSession();
         console.log('WithAuth: Auth check:', { data, error });
         
-        if (!isMounted) return;
+        if (!isMounted) {return;}
         
         if (error || !data?.session) {
           setIsAuthenticated(false);
@@ -51,7 +51,7 @@ export function WithAuth({ children, requiredRole }: WithAuthProps) {
         setIsChecking(false);
       } catch (error) {
         console.error('WithAuth: Auth check failed:', error);
-        if (!isMounted) return;
+        if (!isMounted) {return;}
         setIsAuthenticated(false);
         setHasRequiredRole(false);
         setIsChecking(false);
@@ -62,7 +62,7 @@ export function WithAuth({ children, requiredRole }: WithAuthProps) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('WithAuth: Auth state changed:', event, !!session);
       
-      if (!isMounted) return;
+      if (!isMounted) {return;}
       
       if (event === 'SIGNED_OUT' || !session) {
         setIsAuthenticated(false);

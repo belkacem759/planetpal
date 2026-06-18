@@ -65,9 +65,9 @@ export function SignUpUserSteps() {
             </li>
           </ul>
           <Link
+            className="text-primary/50 hover:text-primary flex items-center text-sm gap-1 mt-4"
             href="https://supabase.com/docs/guides/auth/redirect-urls#vercel-preview-urls"
             target="_blank"
-            className="text-primary/50 hover:text-primary flex items-center text-sm gap-1 mt-4"
           >
             Redirect URLs Docs <ArrowUpRight size={14} />
           </Link>
@@ -77,8 +77,8 @@ export function SignUpUserSteps() {
         <p>
           Head over to the{" "}
           <Link
-            href="auth/sign-up"
             className="font-bold hover:underline text-foreground/80"
+            href="auth/sign-up"
           >
             Sign up
           </Link>{" "}

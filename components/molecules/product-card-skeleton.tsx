@@ -13,8 +13,8 @@ interface ProductCardSkeletonProps {
 const ProductCardSkeleton = React.memo(({ className, ref, ...props }: ProductCardSkeletonProps) => {
     return (
       <Card
-        ref={ref}
         className={cn("overflow-hidden", className)}
+        ref={ref}
         {...props}
       >
         <CardContent className="p-0">

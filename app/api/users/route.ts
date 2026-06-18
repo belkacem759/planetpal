@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createMiddleware } from '@/lib/middleware';
 import { UserService } from '@/lib/db';
-import { UserInsertSchema, UserUpdateSchema, PaginationSchema } from '@/lib/validation';
+import { UserInsertSchema, PaginationSchema } from '@/lib/validation';
 import { handleApiError, createSuccessResponse, createPaginatedResponse } from '@/lib/errors';
 import { validateData } from '@/lib/validation';
 
@@ -12,20 +12,20 @@ export async function GET(request: NextRequest) {
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
-      requireAuth: true,
-      requireAdmin: true
+      requireAdmin: true,
+      requireAuth: true
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = Number.parseInt(searchParams.get('page') || '1');
+    const limit = Number.parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || undefined;
 
     // Validate pagination
-    const paginationValidation = validateData(PaginationSchema, { page, limit });
+    const paginationValidation = validateData(PaginationSchema, { limit, page });
     if (!paginationValidation.success) {
       return handleApiError(new Error('Invalid pagination parameters'));
     }
@@ -37,8 +37,8 @@ export async function GET(request: NextRequest) {
     }
 
     return createPaginatedResponse(result.data.data, {
-      page,
       limit,
+      page,
       total: result.data.count
     });
   } catch (error) {
@@ -51,13 +51,13 @@ export async function POST(request: NextRequest) {
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
-      requireAuth: true,
       requireAdmin: true,
+      requireAuth: true,
   
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const body = await request.json();
     

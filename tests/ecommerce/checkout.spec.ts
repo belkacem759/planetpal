@@ -113,7 +113,7 @@ test.describe('Checkout Flow', () => {
       .or(authenticatedPage.locator('text=Please enter payment'))
       .or(authenticatedPage.locator('text=Card number is required'));
     
-    await expect(paymentError).toBeVisible({ timeout: 10000 });
+    await expect(paymentError).toBeVisible({ timeout: 10_000 });
   });
 
   test('should handle declined payment card', async ({ authenticatedPage }) => {
@@ -143,7 +143,7 @@ test.describe('Checkout Flow', () => {
       .or(authenticatedPage.locator('text=Payment declined'))
       .or(authenticatedPage.locator('text=Your card was declined'));
     
-    await expect(declinedError).toBeVisible({ timeout: 15000 });
+    await expect(declinedError).toBeVisible({ timeout: 15_000 });
   });
 
   test('should calculate correct order totals', async ({ authenticatedPage }) => {

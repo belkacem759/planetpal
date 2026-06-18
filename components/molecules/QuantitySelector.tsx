@@ -3,19 +3,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Minus, Plus, ShoppingCart } from 'lucide-react';
 
 interface QuantitySelectorProps {
-  quantity: number;
-  onIncrement: () => void;
-  onDecrement: () => void;
-  onAddToCart: () => void;
   isAddingToCart: boolean;
+  onAddToCart: () => void;
+  onDecrement: () => void;
+  onIncrement: () => void;
+  quantity: number;
 }
 
 export function QuantitySelector({ 
-  quantity, 
-  onIncrement, 
-  onDecrement, 
+  isAddingToCart, 
   onAddToCart, 
-  isAddingToCart 
+  onDecrement, 
+  onIncrement, 
+  quantity 
 }: QuantitySelectorProps) {
   return (
     <Card>
@@ -24,18 +24,18 @@ export function QuantitySelector({
           <span className="font-medium">Quantity:</span>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={onDecrement}
               disabled={quantity <= 1}
+              onClick={onDecrement}
+              size="sm"
+              variant="outline"
             >
               <Minus className="h-4 w-4" />
             </Button>
             <span className="w-12 text-center font-medium">{quantity}</span>
             <Button
-              variant="outline"
-              size="sm"
               onClick={onIncrement}
+              size="sm"
+              variant="outline"
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -43,9 +43,9 @@ export function QuantitySelector({
         </div>
 
         <Button
-          onClick={onAddToCart}
-          disabled={isAddingToCart}
           className="w-full"
+          disabled={isAddingToCart}
+          onClick={onAddToCart}
           size="lg"
         >
           <ShoppingCart className="h-5 w-5 mr-2" />

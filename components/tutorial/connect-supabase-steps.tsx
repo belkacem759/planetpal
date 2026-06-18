@@ -7,10 +7,10 @@ export function ConnectSupabaseSteps() {
         <p>
           Head over to{" "}
           <a
-            href="https://app.supabase.com/project/_/settings/api"
-            target="_blank"
             className="font-bold hover:underline text-foreground/80"
+            href="https://app.supabase.com/project/_/settings/api"
             rel="noreferrer"
+            target="_blank"
           >
             database.new
           </a>{" "}
@@ -30,10 +30,10 @@ export function ConnectSupabaseSteps() {
           </span>{" "}
           and populate with values from{" "}
           <a
-            href="https://app.supabase.com/project/_/settings/api"
-            target="_blank"
             className="font-bold hover:underline text-foreground/80"
+            href="https://app.supabase.com/project/_/settings/api"
             rel="noreferrer"
+            target="_blank"
           >
             your Supabase project&apos;s API Settings
           </a>

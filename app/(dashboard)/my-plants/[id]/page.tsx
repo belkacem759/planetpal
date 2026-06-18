@@ -18,12 +18,12 @@ export default async function PlantDetailsPage({ params }: { params: Promise<{ i
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <Link href="/my-plants" className="text-blue-600 hover:underline">
+            <Link className="text-blue-600 hover:underline" href="/my-plants">
               Back to My Plants
             </Link>
           </li>
           <li>
-            <Link href="/reminders" className="text-blue-600 hover:underline">
+            <Link className="text-blue-600 hover:underline" href="/reminders">
               View Reminders
             </Link>
           </li>

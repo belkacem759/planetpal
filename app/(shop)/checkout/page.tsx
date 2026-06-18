@@ -34,9 +34,9 @@ function CheckoutPageContent() {
   };
 
   const orderSummary = {
+    shipping: 0,
     subtotal: cart?.items?.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) || 0,
     tax: 0,
-    shipping: 0,
     total: 0
   };
 
@@ -47,21 +47,21 @@ function CheckoutPageContent() {
   // Create order and payment intent when cart is available
   useEffect(() => {
     const createOrder = async () => {
-      if (!cart?.items?.length || orderId) return;
+      if (!cart?.items?.length || orderId) {return;}
 
       setIsProcessing(true);
       setOrderError(null);
 
       try {
         const response = await api.post('/api/orders', {
-          total_amount: orderSummary.total,
-          status: 'pending',
-          payment_status: 'pending',
           cart_items: cart.items.map(item => ({
+            price: item.product.price,
             product_id: item.product.id,
-            quantity: item.quantity,
-            price: item.product.price
-          }))
+            quantity: item.quantity
+          })),
+          payment_status: 'pending',
+          status: 'pending',
+          total_amount: orderSummary.total
         }, { requiresAuth: true });
 
         if (!response.ok) {
@@ -81,11 +81,11 @@ function CheckoutPageContent() {
         const paymentResponse = await api.post('/api/stripe/create-payment-intent', {
           amount: Math.round(orderSummary.total * 100),
           currency: 'usd',
-          orderId: data.id,
           customerEmail: user?.email || 'customer@example.com',
           customerName: user?.first_name && user?.last_name 
             ? `${user.first_name} ${user.last_name}` 
-            : user?.first_name || 'Customer Name'
+            : user?.first_name || 'Customer Name',
+          orderId: data.id
         }, { requiresAuth: true });
 
         if (!paymentResponse.ok) {
@@ -113,7 +113,7 @@ function CheckoutPageContent() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <Link href="/cart" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
+        <Link className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4" href="/cart">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Cart
         </Link>
@@ -141,11 +141,11 @@ function CheckoutPageContent() {
           {orderId && (
             <StripeProvider clientSecret={clientSecret || undefined}>
               <StripeCheckoutForm
-                orderId={orderId}
                 amount={Math.round(orderSummary.total * 100)} // Convert to cents
                 currency="usd"
-                onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
+                onSuccess={handlePaymentSuccess}
+                orderId={orderId}
               />
             </StripeProvider>
           )}
@@ -159,7 +159,7 @@ function CheckoutPageContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               {cart?.items?.map((item) => (
-                <div key={item.id} className="flex justify-between items-center">
+                <div className="flex justify-between items-center" key={item.id}>
                   <div className="flex-1">
                     <p className="font-medium">{item.product.name}</p>
                     <p className="text-sm text-gray-600">Qty: {item.quantity}</p>

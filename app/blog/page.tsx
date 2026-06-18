@@ -14,7 +14,7 @@ export default function BlogPage() {
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <a href="/blog/sample-post" className="text-blue-600 hover:underline">
+            <a className="text-blue-600 hover:underline" href="/blog/sample-post">
               View Sample Blog Post
             </a>
           </li>

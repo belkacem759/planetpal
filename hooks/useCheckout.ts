@@ -1,118 +1,117 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys, handleMutationError, invalidateQueries } from '@/lib/queryClient';
-import { Cart } from './useCart';
 import { apiClient } from '@/lib/api/client';
 
 
 
 // Types
 export interface CheckoutData {
-  // Contact Information
-  email: string;
-  phone?: string;
-  
-  // Shipping Address
-  shipping_address: {
-    first_name: string;
-    last_name: string;
-    address_line_1: string;
-    address_line_2?: string;
-    city: string;
-    state: string;
-    postal_code: string;
-    country: string;
-  };
-  
   // Billing Address (optional, defaults to shipping)
   billing_address?: {
-    first_name: string;
-    last_name: string;
     address_line_1: string;
     address_line_2?: string;
     city: string;
-    state: string;
-    postal_code: string;
     country: string;
+    first_name: string;
+    last_name: string;
+    postal_code: string;
+    state: string;
   };
+  // Contact Information
+  email: string;
+  
+  // Order Notes
+  notes?: string;
   
   // Payment Information (in a real app, this would be handled by a payment processor)
   payment_method: 'credit_card' | 'paypal' | 'stripe';
   
-  // Order Notes
-  notes?: string;
+  phone?: string;
+  
+  // Shipping Address
+  shipping_address: {
+    address_line_1: string;
+    address_line_2?: string;
+    city: string;
+    country: string;
+    first_name: string;
+    last_name: string;
+    postal_code: string;
+    state: string;
+  };
 }
 
 export interface Order {
-  id: string;
-  order_number: string;
-  user_id?: string;
-  session_id?: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  
+  billing_address: CheckoutData['billing_address'];
+  created_at: string;
+  discount_amount: number;
   // Contact Information
   email: string;
-  phone?: string;
-  
-  // Addresses
-  shipping_address: CheckoutData['shipping_address'];
-  billing_address: CheckoutData['billing_address'];
+  id: string;
   
   // Order Items
   items: OrderItem[];
+  // Metadata
+  notes?: string;
   
-  // Pricing
-  subtotal: number;
-  tax_amount: number;
-  shipping_amount: number;
-  discount_amount: number;
-  total_amount: number;
+  order_number: string;
+  payment_id?: string;
   
   // Payment
   payment_method: string;
-  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
-  payment_id?: string;
   
-  // Metadata
-  notes?: string;
-  created_at: string;
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
+  phone?: string;
+  session_id?: string;
+  // Addresses
+  shipping_address: CheckoutData['shipping_address'];
+  shipping_amount: number;
+  
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  // Pricing
+  subtotal: number;
+  tax_amount: number;
+  
+  total_amount: number;
   updated_at: string;
+  user_id?: string;
 }
 
 export interface OrderItem {
+  created_at: string;
   id: string;
   order_id: string;
   product_id: string;
+  product_image_url?: string;
   product_name: string;
   product_slug: string;
-  product_image_url?: string;
   quantity: number;
-  unit_price: number;
   total_price: number;
-  created_at: string;
+  unit_price: number;
   updated_at: string;
 }
 
 export interface CheckoutResponse {
+  message: string;
   order: Order;
   payment_url?: string; // For external payment processors
   success: boolean;
-  message: string;
 }
 
 export interface OrdersFilters extends Record<string, unknown> {
-  status?: Order['status'];
   email?: string;
+  end_date?: string;
   limit?: number;
   offset?: number;
   start_date?: string;
-  end_date?: string;
+  status?: Order['status'];
 }
 
 // API functions
 const processCheckout = async (checkoutData: CheckoutData): Promise<CheckoutResponse> => {
   const response = await apiClient('/api/orders', {
-    method: 'POST',
     body: JSON.stringify(checkoutData),
+    method: 'POST',
     requiresAuth: true
   });
   
@@ -142,12 +141,12 @@ const fetchOrder = async (orderId: string): Promise<Order> => {
 const fetchOrders = async (filters?: OrdersFilters): Promise<Order[]> => {
   const params = new URLSearchParams();
   
-  if (filters?.status) params.append('status', filters.status);
-  if (filters?.email) params.append('email', filters.email);
-  if (filters?.limit) params.append('limit', filters.limit.toString());
-  if (filters?.offset) params.append('offset', filters.offset.toString());
-  if (filters?.start_date) params.append('start_date', filters.start_date);
-  if (filters?.end_date) params.append('end_date', filters.end_date);
+  if (filters?.status) {params.append('status', filters.status);}
+  if (filters?.email) {params.append('email', filters.email);}
+  if (filters?.limit) {params.append('limit', filters.limit.toString());}
+  if (filters?.offset) {params.append('offset', filters.offset.toString());}
+  if (filters?.start_date) {params.append('start_date', filters.start_date);}
+  if (filters?.end_date) {params.append('end_date', filters.end_date);}
 
   const response = await fetch(`/api/orders?${params.toString()}`, {
     credentials: 'include',
@@ -172,13 +171,13 @@ const validateCheckoutData = (data: CheckoutData): string[] => {
   
   // Shipping address validation
   const shipping = data.shipping_address;
-  if (!shipping.first_name) errors.push('First name is required');
-  if (!shipping.last_name) errors.push('Last name is required');
-  if (!shipping.address_line_1) errors.push('Address is required');
-  if (!shipping.city) errors.push('City is required');
-  if (!shipping.state) errors.push('State is required');
-  if (!shipping.postal_code) errors.push('Postal code is required');
-  if (!shipping.country) errors.push('Country is required');
+  if (!shipping.first_name) {errors.push('First name is required');}
+  if (!shipping.last_name) {errors.push('Last name is required');}
+  if (!shipping.address_line_1) {errors.push('Address is required');}
+  if (!shipping.city) {errors.push('City is required');}
+  if (!shipping.state) {errors.push('State is required');}
+  if (!shipping.postal_code) {errors.push('Postal code is required');}
+  if (!shipping.country) {errors.push('Country is required');}
   
   // Payment method validation
   if (!data.payment_method) {
@@ -194,6 +193,7 @@ export const useCheckoutMutation = () => {
   
   return useMutation({
     mutationFn: processCheckout,
+    onError: handleMutationError,
     onSuccess: (data) => {
       // Clear cart after successful checkout
       invalidateQueries.cart();
@@ -207,22 +207,21 @@ export const useCheckoutMutation = () => {
         data.order
       );
     },
-    onError: handleMutationError,
   });
 };
 
 export const useOrderQuery = (orderId: string) => {
   return useQuery({
-    queryKey: queryKeys.orders.detail(orderId),
-    queryFn: () => fetchOrder(orderId),
     enabled: !!orderId,
+    queryFn: () => fetchOrder(orderId),
+    queryKey: queryKeys.orders.detail(orderId),
   });
 };
 
 export const useOrdersQuery = (filters?: OrdersFilters) => {
   return useQuery({
-    queryKey: queryKeys.orders.list(filters),
     queryFn: () => fetchOrders(filters),
+    queryKey: queryKeys.orders.list(filters),
     // Keep previous data while fetching new data
     placeholderData: (previousData) => previousData,
   });
@@ -233,20 +232,24 @@ export const useCheckoutValidation = () => {
   return {
     validateCheckoutData,
     validateEmail: (email: string) => {
-      if (!email) return 'Email is required';
+      if (!email) {return 'Email is required';}
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return 'Please enter a valid email address';
       }
       return null;
     },
-    validateRequired: (value: string, fieldName: string) => {
-      if (!value || value.trim() === '') {
-        return `${fieldName} is required`;
+    validatePhone: (phone?: string) => {
+      if (!phone) {return null;} // Phone is optional
+      
+      // Basic phone validation
+      if (!/^\+?[1-9][\d\s()\-]{7,15}$/.test(phone.replaceAll(/\s/g, ''))) {
+        return 'Please enter a valid phone number';
       }
+      
       return null;
     },
     validatePostalCode: (postalCode: string, country: string = 'US') => {
-      if (!postalCode) return 'Postal code is required';
+      if (!postalCode) {return 'Postal code is required';}
       
       // Basic validation - can be extended for different countries
       if (country === 'US') {
@@ -257,14 +260,10 @@ export const useCheckoutValidation = () => {
       
       return null;
     },
-    validatePhone: (phone?: string) => {
-      if (!phone) return null; // Phone is optional
-      
-      // Basic phone validation
-      if (!/^[\+]?[1-9][\d\s\-\(\)]{7,15}$/.test(phone.replace(/\s/g, ''))) {
-        return 'Please enter a valid phone number';
+    validateRequired: (value: string, fieldName: string) => {
+      if (!value || value.trim() === '') {
+        return `${fieldName} is required`;
       }
-      
       return null;
     },
   };
@@ -286,19 +285,19 @@ export const useCheckoutForm = () => {
   };
   
   return {
-    submitCheckout,
-    isLoading: checkoutMutation.isPending,
-    error: checkoutMutation.error,
-    isSuccess: checkoutMutation.isSuccess,
     data: checkoutMutation.data,
+    error: checkoutMutation.error,
+    isLoading: checkoutMutation.isPending,
+    isSuccess: checkoutMutation.isSuccess,
     reset: checkoutMutation.reset,
+    submitCheckout,
   };
 };
 
 // Hook for order tracking
 export const useOrderTracking = (orderNumber: string) => {
   return useQuery({
-    queryKey: ['order-tracking', orderNumber],
+    enabled: !!orderNumber,
     queryFn: async () => {
       const response = await fetch(`/api/orders/track/${orderNumber}`);
       if (!response.ok) {
@@ -306,8 +305,8 @@ export const useOrderTracking = (orderNumber: string) => {
       }
       return response.json();
     },
-    enabled: !!orderNumber,
+    queryKey: ['order-tracking', orderNumber],
     // Refetch every 30 seconds for real-time tracking
-    refetchInterval: 30000,
+    refetchInterval: 30_000,
   });
 };

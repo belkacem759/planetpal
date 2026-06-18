@@ -7,43 +7,43 @@ interface CareInstructionsProps {
 }
 
 export default function CareInstructions({ careInstructions, isPlant = false }: CareInstructionsProps) {
-  if (!careInstructions) return null;
+  if (!careInstructions) {return null;}
 
   const careIcons = {
-    water: Droplets,
-    light: Sun,
-    humidity: Wind,
-    fertilizer: Leaf,
-    temperature: Thermometer,
     capacity: Package,
     features: Zap,
+    fertilizer: Leaf,
+    humidity: Wind,
+    light: Sun,
     material: Wrench,
+    temperature: Thermometer,
+    water: Droplets,
   };
 
   const iconColors = {
-    water: 'text-blue-500',
-    light: 'text-yellow-500',
-    humidity: 'text-cyan-500',
-    fertilizer: 'text-green-500',
-    temperature: 'text-red-500',
     capacity: 'text-purple-500',
     features: 'text-orange-500',
+    fertilizer: 'text-green-500',
+    humidity: 'text-cyan-500',
+    light: 'text-yellow-500',
     material: 'text-gray-600',
+    temperature: 'text-red-500',
+    water: 'text-blue-500',
   };
 
   const backgroundColors = {
-    water: 'bg-blue-50 border-blue-100',
-    light: 'bg-yellow-50 border-yellow-100',
-    humidity: 'bg-cyan-50 border-cyan-100',
-    fertilizer: 'bg-green-50 border-green-100',
-    temperature: 'bg-red-50 border-red-100',
     capacity: 'bg-purple-50 border-purple-100',
     features: 'bg-orange-50 border-orange-100',
+    fertilizer: 'bg-green-50 border-green-100',
+    humidity: 'bg-cyan-50 border-cyan-100',
+    light: 'bg-yellow-50 border-yellow-100',
     material: 'bg-gray-50 border-gray-100',
+    temperature: 'bg-red-50 border-red-100',
+    water: 'bg-blue-50 border-blue-100',
   };
 
   const getDifficultyLevel = (difficulty?: number): number => {
-    if (!difficulty) return 1;
+    if (!difficulty) {return 1;}
     return Math.min(Math.max(difficulty, 1), 3);
   };
 
@@ -58,7 +58,7 @@ export default function CareInstructions({ careInstructions, isPlant = false }: 
 
   const DifficultyKnob = ({ difficulty }: { difficulty?: number }) => {
     const level = getDifficultyLevel(difficulty);
-    if (level === 0) return null;
+    if (level === 0) {return null;}
 
     return (
       <div className="flex items-center gap-1 mt-1">
@@ -66,9 +66,9 @@ export default function CareInstructions({ careInstructions, isPlant = false }: 
         <div className="flex gap-0.5">
           {[1, 2, 3].map((i) => (
             <div
-              key={i}
               className={`w-2 h-2 rounded-full ${i <= level ? getDifficultyColor(level) : 'bg-gray-200'
                 }`}
+              key={i}
             />
           ))}
         </div>
@@ -78,7 +78,7 @@ export default function CareInstructions({ careInstructions, isPlant = false }: 
 
   const renderInstructions = () => {
     return Object.entries(careInstructions).map(([key, value]) => {
-      if (!value || !value.text) return null;
+      if (!value || !value.text) {return null;}
 
       // Get icon and colors for the key
       const IconComponent = careIcons[key as keyof typeof careIcons];
@@ -86,10 +86,10 @@ export default function CareInstructions({ careInstructions, isPlant = false }: 
       const bgColor = backgroundColors[key as keyof typeof backgroundColors] || 'bg-gray-50 border-gray-100';
 
       // Format the title
-      const title = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+      const title = key.charAt(0).toUpperCase() + key.slice(1).replaceAll(/([A-Z])/g, ' $1');
 
       return (
-        <div key={key} className={`flex items-start gap-2 p-2 rounded-lg border ${bgColor} transition-all hover:shadow-sm`}>
+        <div className={`flex items-start gap-2 p-2 rounded-lg border ${bgColor} transition-all hover:shadow-sm`} key={key}>
           <div className={`${iconColor} mt-0.5 shrink-0`}>
             {IconComponent ? (
               <IconComponent className="h-4 w-4" />

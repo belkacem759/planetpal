@@ -32,7 +32,7 @@ export function UpdatePasswordForm({
 
     try {
       const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
+      if (error) {throw error;}
       // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push("/protected");
     } catch (error: unknown) {
@@ -58,15 +58,15 @@ export function UpdatePasswordForm({
                 <Label htmlFor="password">New password</Label>
                 <Input
                   id="password"
-                  type="password"
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="New password"
                   required
+                  type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button className="w-full" disabled={isLoading} type="submit">
                 {isLoading ? "Saving..." : "Save new password"}
               </Button>
             </div>

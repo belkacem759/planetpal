@@ -23,7 +23,7 @@ function OrderSuccessContent() {
   const paymentIntentId = searchParams.get('paymentIntentId');
   
   // Fetch real order data from the database
-  const { data: orderDetails, isLoading, error } = useOrderQuery(orderId || '');
+  const { data: orderDetails, error, isLoading } = useOrderQuery(orderId || '');
 
   // Clear cart when payment is successful (without useEffect)
   const shouldClearCart = paymentIntentId && orderId && !cartCleared && orderDetails?.payment_status === 'paid';
@@ -127,11 +127,11 @@ function OrderSuccessContent() {
             <CardContent>
               <div className="space-y-3">
                 {orderDetails.items.map((item: any) => (
-                  <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg" key={item.id}>
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
                         {item.image_url ? (
-                          <img src={item.image_url || '/placeholder.jpg'} alt={item.name} width={80} height={80} className="w-full h-full object-cover rounded-lg" />
+                          <img alt={item.name} className="w-full h-full object-cover rounded-lg" height={80} src={item.image_url || '/placeholder.jpg'} width={80} />
                         ) : (
                           <span className="text-2xl">🌱</span>
                         )}
@@ -190,15 +190,15 @@ function OrderSuccessContent() {
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
         <Button 
-          variant="outline" 
+          className="flex-1 sm:flex-none" 
           onClick={() => router.push('/shop')}
-          className="flex-1 sm:flex-none"
+          variant="outline"
         >
           Continue Shopping
         </Button>
         <Button 
-          onClick={() => router.push('/dashboard')}
           className="flex-1 sm:flex-none"
+          onClick={() => router.push('/dashboard')}
         >
           Go to Dashboard
         </Button>

@@ -6,35 +6,35 @@ import { Product } from "@/types/types";
 import * as React from "react";
 
 interface ProductGridInfoProps {
-  products: Product[];
-  isLoading?: boolean;
-  error?: Error | null;
   className?: string;
   emptyMessage?: string;
+  error?: Error | null;
+  isLoading?: boolean;
+  products: Product[];
 }
 
 const ProductGridInfo = React.forwardRef<HTMLDivElement, ProductGridInfoProps>(
   ({
-    products,
-    isLoading = false,
-    error = null,
     className,
     emptyMessage = "No products found.",
+    error = null,
+    isLoading = false,
+    products,
     ...props
   }, ref) => {
     // Loading state
     if (isLoading) {
       return (
         <div
-          ref={ref}
           className={cn(
             "flex items-center justify-center min-h-[400px]",
             className
           )}
+          ref={ref}
           {...props}
         >
           <div className="text-center">
-            <Spinner size="lg" className="mb-4" />
+            <Spinner className="mb-4" size="lg" />
             <p className="text-muted-foreground">Loading products...</p>
           </div>
         </div>
@@ -45,8 +45,8 @@ const ProductGridInfo = React.forwardRef<HTMLDivElement, ProductGridInfoProps>(
     if (error) {
       return (
         <div
-          ref={ref}
           className={cn("min-h-[400px]", className)}
+          ref={ref}
           {...props}
         >
           <Alert variant="destructive">
@@ -62,11 +62,11 @@ const ProductGridInfo = React.forwardRef<HTMLDivElement, ProductGridInfoProps>(
     if (!products || products.length === 0) {
       return (
         <div
-          ref={ref}
           className={cn(
             "flex items-center justify-center min-h-[400px]",
             className
           )}
+          ref={ref}
           {...props}
         >
           <div className="text-center">
@@ -77,10 +77,10 @@ const ProductGridInfo = React.forwardRef<HTMLDivElement, ProductGridInfoProps>(
               viewBox="0 0 24 24"
             >
               <path
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={1.5}
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
               />
             </svg>
             <h3 className="text-lg font-semibold mb-2">No Products Found</h3>
@@ -93,26 +93,26 @@ const ProductGridInfo = React.forwardRef<HTMLDivElement, ProductGridInfoProps>(
     // Products grid with info cards
     return (
       <div
-        ref={ref}
         className={cn(
           "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6",
           className
         )}
+        ref={ref}
         {...props}
       >
         {products.map((product) => (
           <ProductInfoCard
-            key={product.id}
-            id={product.id}
-            name={product.name}
-            slug={product.slug}
-            price={product.price}
-            images={product.images ?? { main: "", gallery: [] }}
-            stockQuantity={product.stock_quantity}
-            difficultyLevel={product.difficulty_level ? String(product.difficulty_level) : undefined}
-            isPlant={product.is_plant || undefined}
-            description={product.description || undefined}
             careInstructions={product.care_instructions}
+            description={product.description || undefined}
+            difficultyLevel={product.difficulty_level ? String(product.difficulty_level) : undefined}
+            id={product.id}
+            images={product.images ?? { gallery: [], main: "" }}
+            isPlant={product.is_plant || undefined}
+            key={product.id}
+            name={product.name}
+            price={product.price}
+            slug={product.slug}
+            stockQuantity={product.stock_quantity}
           />
         ))}
       </div>

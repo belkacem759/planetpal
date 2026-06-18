@@ -6,8 +6,8 @@ import { createMiddleware } from '@/lib/middleware';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 const middleware = createMiddleware({
-  requireAuth: true,
   enableRateLimit: true,
+  requireAuth: true,
 
 });
 
@@ -15,10 +15,10 @@ const middleware = createMiddleware({
 export async function PUT(request: NextRequest) {
   // Apply middleware
   const middlewareResponse = await middleware(request);
-  if (middlewareResponse) return middlewareResponse;
+  if (middlewareResponse) {return middlewareResponse;}
 
   try {
-    const { user, error: authError } = await getAuthenticatedUser();
+    const { error: authError, user } = await getAuthenticatedUser();
     if (authError || !user) {
       return handleApiError(authError || createError.unauthorized());
     }

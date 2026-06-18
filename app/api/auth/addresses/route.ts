@@ -6,18 +6,18 @@ import { createMiddleware } from '@/lib/middleware';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 const middleware = createMiddleware({
-  requireAuth: true,
-  enableRateLimit: true
+  enableRateLimit: true,
+  requireAuth: true
 });
 
 // GET /api/auth/addresses - Get user's addresses
 export async function GET(request: NextRequest) {
   // Apply middleware
   const middlewareResponse = await middleware(request);
-  if (middlewareResponse) return middlewareResponse;
+  if (middlewareResponse) {return middlewareResponse;}
 
   try {
-    const { user, error: authError } = await getAuthenticatedUser();
+    const { error: authError, user } = await getAuthenticatedUser();
     if (authError || !user) {
       return handleApiError(authError || createError.unauthorized());
     }
@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
 }
 
 const postMiddleware = createMiddleware({
-  requireAuth: true,
   enableRateLimit: true,
+  requireAuth: true,
   
 });
 
@@ -53,10 +53,10 @@ const postMiddleware = createMiddleware({
 export async function POST(request: NextRequest) {
   // Apply middleware
   const middlewareResponse = await postMiddleware(request);
-  if (middlewareResponse) return middlewareResponse;
+  if (middlewareResponse) {return middlewareResponse;}
 
   try {
-    const { user, error: authError } = await getAuthenticatedUser();
+    const { error: authError, user } = await getAuthenticatedUser();
     if (authError || !user) {
       return handleApiError(authError || createError.unauthorized());
     }

@@ -56,10 +56,10 @@ export function FetchDataSteps() {
         <p>
           Head over to the{" "}
           <a
-            href="https://supabase.com/dashboard/project/_/editor"
             className="font-bold hover:underline text-foreground/80"
-            target="_blank"
+            href="https://supabase.com/dashboard/project/_/editor"
             rel="noreferrer"
+            target="_blank"
           >
             Table Editor
           </a>{" "}
@@ -67,10 +67,10 @@ export function FetchDataSteps() {
           data. If you&apos;re stuck for creativity, you can copy and paste the
           following into the{" "}
           <a
-            href="https://supabase.com/dashboard/project/_/sql/new"
             className="font-bold hover:underline text-foreground/80"
-            target="_blank"
+            href="https://supabase.com/dashboard/project/_/sql/new"
             rel="noreferrer"
+            target="_blank"
           >
             SQL Editor
           </a>{" "}
@@ -85,19 +85,19 @@ export function FetchDataSteps() {
           from your <code>notes</code> table, you need to add a policy. You can
           do this in the{" "}
           <a
-            href="https://supabase.com/dashboard/project/_/editor"
             className="font-bold hover:underline text-foreground/80"
-            target="_blank"
+            href="https://supabase.com/dashboard/project/_/editor"
             rel="noreferrer"
+            target="_blank"
           >
             Table Editor
           </a>{" "}
           or via the{" "}
           <a
-            href="https://supabase.com/dashboard/project/_/sql/new"
             className="font-bold hover:underline text-foreground/80"
-            target="_blank"
+            href="https://supabase.com/dashboard/project/_/sql/new"
             rel="noreferrer"
+            target="_blank"
           >
             SQL Editor
           </a>
@@ -111,10 +111,10 @@ export function FetchDataSteps() {
         <p>
           You can learn more about RLS in the{" "}
           <a
-            href="https://supabase.com/docs/guides/auth/row-level-security"
             className="font-bold hover:underline text-foreground/80"
-            target="_blank"
+            href="https://supabase.com/docs/guides/auth/row-level-security"
             rel="noreferrer"
+            target="_blank"
           >
             Supabase docs
           </a>
@@ -140,8 +140,8 @@ export function FetchDataSteps() {
         <p>
           Head over to the{" "}
           <a
-            href="https://supabase.com/ui"
             className="font-bold hover:underline text-foreground/80"
+            href="https://supabase.com/ui"
           >
             Supabase UI library
           </a>{" "}

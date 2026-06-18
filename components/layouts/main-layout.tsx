@@ -15,8 +15,8 @@ const MainLayout = React.forwardRef<HTMLDivElement, MainLayoutProps>(
   ({ children, className, ...props }, ref) => {
     return (
       <div
-        ref={ref}
         className={cn("min-h-screen flex flex-col", className)}
+        ref={ref}
         {...props}
       >
         {/* Header/Navbar */}
@@ -41,9 +41,9 @@ const MainLayout = React.forwardRef<HTMLDivElement, MainLayoutProps>(
                       viewBox="0 0 20 20"
                     >
                       <path
-                        fillRule="evenodd"
-                        d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
                         clipRule="evenodd"
+                        d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                        fillRule="evenodd"
                       />
                     </svg>
                   </div>
@@ -59,22 +59,22 @@ const MainLayout = React.forwardRef<HTMLDivElement, MainLayoutProps>(
                 <h4 className="font-semibold">Quick Links</h4>
                 <ul className="space-y-2 text-sm">
                   <li>
-                    <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">
+                    <Link className="text-muted-foreground hover:text-primary transition-colors" href="/products">
                       All Products
                     </Link>
                   </li>
                   <li>
-                    <Link href="/products?category=indoor-plants" className="text-muted-foreground hover:text-primary transition-colors">
+                    <Link className="text-muted-foreground hover:text-primary transition-colors" href="/products?category=indoor-plants">
                       Indoor Plants
                     </Link>
                   </li>
                   <li>
-                    <Link href="/products?category=outdoor-plants" className="text-muted-foreground hover:text-primary transition-colors">
+                    <Link className="text-muted-foreground hover:text-primary transition-colors" href="/products?category=outdoor-plants">
                       Outdoor Plants
                     </Link>
                   </li>
                   <li>
-                    <Link href="/products?category=plant-care" className="text-muted-foreground hover:text-primary transition-colors">
+                    <Link className="text-muted-foreground hover:text-primary transition-colors" href="/products?category=plant-care">
                       Plant Care
                     </Link>
                   </li>
@@ -86,22 +86,22 @@ const MainLayout = React.forwardRef<HTMLDivElement, MainLayoutProps>(
                 <h4 className="font-semibold">Customer Service</h4>
                 <ul className="space-y-2 text-sm">
                   <li>
-                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                    <a className="text-muted-foreground hover:text-primary transition-colors" href="#">
                       Contact Us
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                    <a className="text-muted-foreground hover:text-primary transition-colors" href="#">
                       Shipping Info
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                    <a className="text-muted-foreground hover:text-primary transition-colors" href="#">
                       Returns
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                    <a className="text-muted-foreground hover:text-primary transition-colors" href="#">
                       Plant Care Guide
                     </a>
                   </li>
@@ -116,9 +116,9 @@ const MainLayout = React.forwardRef<HTMLDivElement, MainLayoutProps>(
                 </p>
                 <div className="flex space-x-2">
                   <input
-                    type="email"
-                    placeholder="Enter your email"
                     className="flex-1 px-3 py-2 text-sm border rounded-md bg-background"
+                    placeholder="Enter your email"
+                    type="email"
                   />
                   <Button size="sm">Subscribe</Button>
                 </div>

@@ -18,12 +18,12 @@ export default function ProductDetailsPage({ params }: { params: Params }) {
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   // Fetch product data
-  const { data: product, isLoading, error } = useProductQuery(slug);
+  const { data: product, error, isLoading } = useProductQuery(slug);
 
   const addToCartMutation = useAddToCartMutation();
 
   const handleAddToCart = async () => {
-    if (!product) return;
+    if (!product) {return;}
 
     setIsAddingToCart(true);
     try {
@@ -66,7 +66,7 @@ export default function ProductDetailsPage({ params }: { params: Params }) {
   if (error) {
     return (
       <div className="container mx-auto p-6">
-        <Alert variant="destructive" className="mb-6">
+        <Alert className="mb-6" variant="destructive">
           Failed to load product. Please try again.
         </Alert>
         <Button onClick={handleBackToShop}>Back to Shop</Button>
@@ -77,7 +77,7 @@ export default function ProductDetailsPage({ params }: { params: Params }) {
   if (!product) {
     return (
       <div className="container mx-auto p-6">
-        <Alert variant="destructive" className="mb-6">
+        <Alert className="mb-6" variant="destructive">
           Product "{slug}" not found.
         </Alert>
         <Button onClick={handleBackToShop}>Back to Shop</Button>
@@ -88,15 +88,15 @@ export default function ProductDetailsPage({ params }: { params: Params }) {
   return (
     <ViewTransition>
       <ProductPageLayout
+        isAddingToCart={isAddingToCart}
+        onAddToCart={handleAddToCart}
+        onBackToShop={handleBackToShop}
+        onBuyNow={handleBuyNow}
+        onQuantityDecrement={decrementQuantity}
+        onQuantityIncrement={incrementQuantity}
+        onViewCart={handleViewCart}
         product={product}
         quantity={quantity}
-        isAddingToCart={isAddingToCart}
-        onQuantityIncrement={incrementQuantity}
-        onQuantityDecrement={decrementQuantity}
-        onAddToCart={handleAddToCart}
-        onViewCart={handleViewCart}
-        onBuyNow={handleBuyNow}
-        onBackToShop={handleBackToShop}
       />
     </ViewTransition>
   );

@@ -1,17 +1,17 @@
 import { ViewTransition } from '@/components/ui/view-transition';
 
 interface ProductImageProps {
+  className?: string;
   images: any;
   name: string;
   slug: string;
-  className?: string;
 }
 
 export function ProductImage({
+  className = '',
   images,
   name,
   slug,
-  className = '',
 }: ProductImageProps) {
   const renderImage = () => {
     // Handle nested object structure with main and gallery
@@ -19,11 +19,11 @@ export function ProductImage({
       return (
         <ViewTransition name={`img-${slug}`}>
           <img
-            src={images.main || '/placeholder.jpg'}
             alt={name}
-            width={400}
-            height={400}
             className={`w-full h-full object-cover rounded-lg ${className}`}
+            height={400}
+            src={images.main || '/placeholder.jpg'}
+            width={400}
           />
         </ViewTransition>
       );
@@ -34,11 +34,11 @@ export function ProductImage({
       return (
         <ViewTransition name={`img-${slug}`}>
           <img
-            src={images[0] || '/placeholder.jpg'}
             alt={name}
-            width={400}
-            height={400}
             className={`w-full h-full object-cover rounded-lg ${className}`}
+            height={400}
+            src={images[0] || '/placeholder.jpg'}
+            width={400}
           />
         </ViewTransition>
       );

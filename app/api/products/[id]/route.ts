@@ -19,7 +19,7 @@ export async function GET(
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const result = await productService.findBySlug(id);
 
@@ -42,13 +42,13 @@ export async function PUT(
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
-      requireAuth: true,
       requireAdmin: true,
+      requireAuth: true,
 
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const body = await request.json();
 
@@ -82,13 +82,13 @@ export async function DELETE(
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
-      requireAuth: true,
       requireAdmin: true,
+      requireAuth: true,
 
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const result = await productService.delete(id);
 

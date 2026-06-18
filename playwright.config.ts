@@ -34,10 +34,10 @@ export default defineConfig({
     video: 'retain-on-failure',
     
     /* Global timeout for each action */
-    actionTimeout: 10000,
+    actionTimeout: 10_000,
     
     /* Global timeout for navigation */
-    navigationTimeout: 30000,
+    navigationTimeout: 30_000,
   },
 
   /* Configure projects for major browsers */
@@ -47,7 +47,7 @@ export default defineConfig({
       use: { 
         ...devices['Desktop Chrome'],
         // Use a consistent viewport for reproducible tests
-        viewport: { width: 1280, height: 720 }
+        viewport: { height: 720, width: 1280 }
       },
     },
 
@@ -55,7 +55,7 @@ export default defineConfig({
       name: 'firefox',
       use: { 
         ...devices['Desktop Firefox'],
-        viewport: { width: 1280, height: 720 }
+        viewport: { height: 720, width: 1280 }
       },
     },
 
@@ -63,7 +63,7 @@ export default defineConfig({
       name: 'webkit',
       use: { 
         ...devices['Desktop Safari'],
-        viewport: { width: 1280, height: 720 }
+        viewport: { height: 720, width: 1280 }
       },
     },
 
@@ -91,9 +91,9 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    url: 'http://localhost:3000',
   },
 
   /* Global setup and teardown */
@@ -101,11 +101,11 @@ export default defineConfig({
   globalTeardown: require.resolve('./tests/global-teardown.ts'),
 
   /* Test timeout */
-  timeout: 30 * 1000,
   expect: {
     /* Timeout for expect() assertions */
     timeout: 5000,
   },
+  timeout: 30 * 1000,
 
   /* Output directory for test artifacts */
   outputDir: 'test-results/',

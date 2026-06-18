@@ -16,12 +16,12 @@ export default function MyPlantsPage() {
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <Link href="/dashboard" className="text-blue-600 hover:underline">
+            <Link className="text-blue-600 hover:underline" href="/dashboard">
               Back to Dashboard
             </Link>
           </li>
           <li>
-            <Link href="/my-plants/example-id" className="text-blue-600 hover:underline">
+            <Link className="text-blue-600 hover:underline" href="/my-plants/example-id">
               View Sample Plant
             </Link>
           </li>

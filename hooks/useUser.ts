@@ -22,44 +22,44 @@ const getAuthHeaders = async (): Promise<Record<string, string>> => {
 
 // Types
 export interface User {
-  id: string;
+  // Addresses
+  addresses?: Address[];
+  avatar_url?: string;
+  created_at: string;
   email: string;
+  email_verified: boolean;
   first_name?: string;
+  id: string;
   last_name?: string;
   phone?: string;
-  avatar_url?: string;
-  email_verified: boolean;
-  created_at: string;
-  updated_at: string;
   
   // Preferences
   preferences?: {
-    newsletter_subscribed: boolean;
     marketing_emails: boolean;
+    newsletter_subscribed: boolean;
     order_notifications: boolean;
   };
   
-  // Addresses
-  addresses?: Address[];
+  updated_at: string;
 }
 
 export interface Address {
-  id: string;
-  user_id: string;
-  type: 'shipping' | 'billing';
-  is_default: boolean;
-  first_name: string;
-  last_name: string;
-  company?: string;
   address_line_1: string;
   address_line_2?: string;
   city: string;
-  state: string;
-  postal_code: string;
+  company?: string;
   country: string;
-  phone?: string;
   created_at: string;
+  first_name: string;
+  id: string;
+  is_default: boolean;
+  last_name: string;
+  phone?: string;
+  postal_code: string;
+  state: string;
+  type: 'shipping' | 'billing';
   updated_at: string;
+  user_id: string;
 }
 
 export interface LoginData {
@@ -70,9 +70,9 @@ export interface LoginData {
 
 export interface RegisterData {
   email: string;
-  password: string;
   first_name?: string;
   last_name?: string;
+  password: string;
   phone?: string;
 }
 
@@ -84,15 +84,15 @@ export interface UpdateUserData {
 }
 
 export interface ChangePasswordData {
+  confirm_password: string;
   current_password: string;
   new_password: string;
-  confirm_password: string;
 }
 
 export interface AuthResponse {
-  user: User;
-  token?: string;
   message: string;
+  token?: string;
+  user: User;
 }
 
 // API functions
@@ -100,8 +100,8 @@ const fetchCurrentUser = async (): Promise<User | null> => {
   try {
     const authHeaders = await getAuthHeaders();
     const response = await fetch('/api/auth/me', {
-      headers: authHeaders,
       credentials: 'include',
+      headers: authHeaders,
     });
     
     if (response.status === 401) {
@@ -125,12 +125,12 @@ const fetchCurrentUser = async (): Promise<User | null> => {
 
 const login = async (data: LoginData): Promise<AuthResponse> => {
   const response = await fetch('/api/auth/login', {
-    method: 'POST',
+    body: JSON.stringify(data),
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include',
-    body: JSON.stringify(data),
+    method: 'POST',
   });
   
   if (!response.ok) {
@@ -143,12 +143,12 @@ const login = async (data: LoginData): Promise<AuthResponse> => {
 
 const register = async (data: RegisterData): Promise<AuthResponse> => {
   const response = await fetch('/api/auth/register', {
-    method: 'POST',
+    body: JSON.stringify(data),
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include',
-    body: JSON.stringify(data),
+    method: 'POST',
   });
   
   if (!response.ok) {
@@ -161,8 +161,8 @@ const register = async (data: RegisterData): Promise<AuthResponse> => {
 
 const logout = async (): Promise<void> => {
   const response = await fetch('/api/auth/logout', {
-    method: 'POST',
     credentials: 'include',
+    method: 'POST',
   });
   
   if (!response.ok) {
@@ -172,8 +172,8 @@ const logout = async (): Promise<void> => {
 
 const updateUser = async (data: UpdateUserData): Promise<User> => {
   const response = await apiClient('/api/auth/profile', {
-    method: 'PUT',
     body: JSON.stringify(data),
+    method: 'PUT',
     requiresAuth: true
   });
   
@@ -187,8 +187,8 @@ const updateUser = async (data: UpdateUserData): Promise<User> => {
 
 const changePassword = async (data: ChangePasswordData): Promise<{ message: string }> => {
   const response = await apiClient('/api/auth/change-password', {
-    method: 'POST',
     body: JSON.stringify(data),
+    method: 'POST',
     requiresAuth: true
   });
   
@@ -203,8 +203,8 @@ const changePassword = async (data: ChangePasswordData): Promise<{ message: stri
 const fetchUserAddresses = async (): Promise<Address[]> => {
   const authHeaders = await getAuthHeaders();
   const response = await fetch('/api/auth/addresses', {
-    headers: authHeaders,
     credentials: 'include',
+    headers: authHeaders,
   });
   
   if (!response.ok) {
@@ -216,8 +216,8 @@ const fetchUserAddresses = async (): Promise<Address[]> => {
 
 const createAddress = async (address: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Address> => {
   const response = await apiClient('/api/auth/addresses', {
-    method: 'POST',
     body: JSON.stringify(address),
+    method: 'POST',
     requiresAuth: true
   });
   
@@ -231,8 +231,8 @@ const createAddress = async (address: Omit<Address, 'id' | 'user_id' | 'created_
 
 const updateAddress = async ({ id, ...address }: Partial<Address> & { id: string }): Promise<Address> => {
   const response = await apiClient(`/api/auth/addresses/${id}`, {
-    method: 'PUT',
     body: JSON.stringify(address),
+    method: 'PUT',
     requiresAuth: true
   });
   
@@ -258,13 +258,13 @@ const deleteAddress = async (id: string): Promise<void> => {
 // Custom hooks
 export const useUserQuery = () => {
   return useQuery({
-    queryKey: queryKeys.user.profile(),
     queryFn: fetchCurrentUser,
+    queryKey: queryKeys.user.profile(),
     // Always enable to check auth status
     enabled: true,
     // Don't retry on 401 (unauthorized)
     retry: (failureCount, error: any) => {
-      if (error?.status === 401) return false;
+      if (error?.status === 401) {return false;}
       return failureCount < 3;
     },
     // Refetch on window focus to sync auth state
@@ -279,6 +279,7 @@ export const useLoginMutation = () => {
   
   return useMutation({
     mutationFn: login,
+    onError: handleMutationError,
     onSuccess: (data) => {
       // Set user data in cache
       queryClient.setQueryData(queryKeys.user.profile(), data.user);
@@ -286,7 +287,6 @@ export const useLoginMutation = () => {
       // Invalidate cart to sync with authenticated user
       invalidateQueries.cart();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -295,6 +295,7 @@ export const useRegisterMutation = () => {
   
   return useMutation({
     mutationFn: register,
+    onError: handleMutationError,
     onSuccess: (data) => {
       // Set user data in cache
       queryClient.setQueryData(queryKeys.user.profile(), data.user);
@@ -302,7 +303,6 @@ export const useRegisterMutation = () => {
       // Invalidate cart to sync with authenticated user
       invalidateQueries.cart();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -311,6 +311,7 @@ export const useLogoutMutation = () => {
   
   return useMutation({
     mutationFn: logout,
+    onError: handleMutationError,
     onSuccess: () => {
       // Clear user data from cache
       queryClient.setQueryData(queryKeys.user.profile(), null);
@@ -318,7 +319,6 @@ export const useLogoutMutation = () => {
       // Clear all cached data
       queryClient.clear();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -327,11 +327,11 @@ export const useUpdateUserMutation = () => {
   
   return useMutation({
     mutationFn: updateUser,
+    onError: handleMutationError,
     onSuccess: (data) => {
       // Update user data in cache
       queryClient.setQueryData(queryKeys.user.profile(), data);
     },
-    onError: handleMutationError,
   });
 };
 
@@ -347,8 +347,8 @@ export const useUserAddressesQuery = () => {
   const { data: user } = useUserQuery();
   
   return useQuery({
-    queryKey: [...queryKeys.user.all, 'addresses'],
     queryFn: fetchUserAddresses,
+    queryKey: [...queryKeys.user.all, 'addresses'],
     // Only fetch if user is authenticated
     enabled: !!user,
   });
@@ -359,11 +359,11 @@ export const useCreateAddressMutation = () => {
   
   return useMutation({
     mutationFn: createAddress,
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate addresses to refetch
       queryClient.invalidateQueries({ queryKey: [...queryKeys.user.all, 'addresses'] });
     },
-    onError: handleMutationError,
   });
 };
 
@@ -372,11 +372,11 @@ export const useUpdateAddressMutation = () => {
   
   return useMutation({
     mutationFn: updateAddress,
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate addresses to refetch
       queryClient.invalidateQueries({ queryKey: [...queryKeys.user.all, 'addresses'] });
     },
-    onError: handleMutationError,
   });
 };
 
@@ -385,11 +385,11 @@ export const useDeleteAddressMutation = () => {
   
   return useMutation({
     mutationFn: deleteAddress,
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate addresses to refetch
       queryClient.invalidateQueries({ queryKey: [...queryKeys.user.all, 'addresses'] });
     },
-    onError: handleMutationError,
   });
 };
 
@@ -398,8 +398,8 @@ export const useIsAuthenticated = () => {
   const { data: user, isLoading } = useUserQuery();
   return {
     isAuthenticated: !!user,
-    user,
     isLoading,
+    user,
   };
 };
 
@@ -422,14 +422,14 @@ export const useRequireAuth = () => {
 export const useAuthValidation = () => {
   return {
     validateEmail: (email: string) => {
-      if (!email) return 'Email is required';
+      if (!email) {return 'Email is required';}
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return 'Please enter a valid email address';
       }
       return null;
     },
     validatePassword: (password: string) => {
-      if (!password) return 'Password is required';
+      if (!password) {return 'Password is required';}
       if (password.length < 8) {
         return 'Password must be at least 8 characters long';
       }
@@ -439,7 +439,7 @@ export const useAuthValidation = () => {
       return null;
     },
     validatePasswordConfirmation: (password: string, confirmation: string) => {
-      if (!confirmation) return 'Please confirm your password';
+      if (!confirmation) {return 'Please confirm your password';}
       if (password !== confirmation) {
         return 'Passwords do not match';
       }

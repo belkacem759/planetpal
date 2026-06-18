@@ -7,21 +7,21 @@ import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack
 // Types
 
 export interface ProductsFilters extends Record<string, unknown> {
-  categories?: string[];
-  search?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  difficulty?: string;
-  isPlant?: boolean;
-  inStock?: boolean;
-  care_difficulty_water?: number;
-  care_difficulty_light?: number;
-  care_difficulty_humidity?: number;
   care_difficulty_fertilizer?: number;
+  care_difficulty_humidity?: number;
+  care_difficulty_light?: number;
   care_difficulty_temperature?: number;
-  max_care_difficulty?: number;
+  care_difficulty_water?: number;
+  categories?: string[];
+  difficulty?: string;
+  inStock?: boolean;
+  isPlant?: boolean;
   limit?: number;
+  max_care_difficulty?: number;
+  maxPrice?: number;
+  minPrice?: number;
   offset?: number;
+  search?: string;
 }
 
 export interface ProductsQueryResult extends ApiSuccessResponse<Product[]> {
@@ -35,14 +35,14 @@ const fetchProducts = async (filters?: ProductsFilters): Promise<ApiSuccessRespo
   if (filters?.categories && filters.categories.length > 0) {
     filters.categories.forEach(category => params.append('categories', category));
   }
-  if (filters?.search) params.append('search', filters.search);
-  if (filters?.minPrice) params.append('minPrice', filters.minPrice.toString());
-  if (filters?.maxPrice) params.append('maxPrice', filters.maxPrice.toString());
-  if (filters?.difficulty) params.append('difficulty', filters.difficulty);
-  if (filters?.isPlant !== undefined) params.append('isPlant', filters.isPlant.toString());
-  if (filters?.inStock !== undefined) params.append('inStock', filters.inStock.toString());
-  if (filters?.limit) params.append('limit', filters.limit.toString());
-  if (filters?.offset) params.append('offset', filters.offset.toString());
+  if (filters?.search) {params.append('search', filters.search);}
+  if (filters?.minPrice) {params.append('minPrice', filters.minPrice.toString());}
+  if (filters?.maxPrice) {params.append('maxPrice', filters.maxPrice.toString());}
+  if (filters?.difficulty) {params.append('difficulty', filters.difficulty);}
+  if (filters?.isPlant !== undefined) {params.append('isPlant', filters.isPlant.toString());}
+  if (filters?.inStock !== undefined) {params.append('inStock', filters.inStock.toString());}
+  if (filters?.limit) {params.append('limit', filters.limit.toString());}
+  if (filters?.offset) {params.append('offset', filters.offset.toString());}
 
   const response = await apiClient(`/api/products?${params.toString()}`, {
     method: 'GET'
@@ -74,8 +74,8 @@ const fetchProduct = async (slug: string): Promise<Product> => {
 // Custom hooks
 export const useProductsQuery = (filters?: ProductsFilters): UseQueryResult<ProductsQueryResult, Error> => {
   return useQuery({
-    queryKey: queryKeys.products.list(filters),
     queryFn: () => fetchProducts(filters),
+    queryKey: queryKeys.products.list(filters),
     // Enable the query by default
     enabled: true,
     // Keep previous data while fetching new data
@@ -90,8 +90,8 @@ export const useProductsQuery = (filters?: ProductsFilters): UseQueryResult<Prod
 
 export const useProductQuery = (slug: string) => {
   return useQuery({
-    queryKey: queryKeys.products.detail(slug),
     queryFn: () => fetchProduct(slug),
+    queryKey: queryKeys.products.detail(slug),
     // Only enable if slug is provided
     enabled: !!slug,
   });
@@ -104,11 +104,11 @@ export const useCreateProductMutation = () => {
   return useMutation({
     mutationFn: async (productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
       const response = await fetch('/api/products', {
-        method: 'POST',
+        body: JSON.stringify(productData),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(productData),
+        method: 'POST',
       });
 
       if (!response.ok) {
@@ -117,11 +117,11 @@ export const useCreateProductMutation = () => {
 
       return response.json();
     },
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate and refetch products
       invalidateQueries.products();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -131,11 +131,11 @@ export const useUpdateProductMutation = () => {
   return useMutation({
     mutationFn: async ({ id, ...productData }: Partial<Product> & { id: string }) => {
       const response = await fetch(`/api/products/${id}`, {
-        method: 'PUT',
+        body: JSON.stringify(productData),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(productData),
+        method: 'PUT',
       });
 
       if (!response.ok) {
@@ -144,12 +144,12 @@ export const useUpdateProductMutation = () => {
 
       return response.json();
     },
+    onError: handleMutationError,
     onSuccess: (data, variables) => {
       // Invalidate specific product and products list
       queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(data.slug) });
       invalidateQueries.products();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -168,11 +168,11 @@ export const useDeleteProductMutation = () => {
 
       return response.json();
     },
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate products list
       invalidateQueries.products();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -182,8 +182,8 @@ export const usePrefetchProduct = () => {
 
   return (slug: string) => {
     queryClient.prefetchQuery({
-      queryKey: queryKeys.products.detail(slug),
       queryFn: () => fetchProduct(slug),
+      queryKey: queryKeys.products.detail(slug),
       // Cache for 5 minutes
       staleTime: 1000 * 60 * 5,
     });
@@ -195,8 +195,8 @@ export const usePrefetchProducts = () => {
 
   return (filters?: ProductsFilters) => {
     queryClient.prefetchQuery({
-      queryKey: queryKeys.products.list(filters),
       queryFn: () => fetchProducts(filters),
+      queryKey: queryKeys.products.list(filters),
       // Cache for 5 minutes
       staleTime: 1000 * 60 * 5,
     });

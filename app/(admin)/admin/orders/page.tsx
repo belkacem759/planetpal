@@ -14,7 +14,7 @@ export default function AdminOrdersPage() {
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <a href="/admin" className="text-blue-600 hover:underline">
+            <a className="text-blue-600 hover:underline" href="/admin">
               Back to Admin Dashboard
             </a>
           </li>

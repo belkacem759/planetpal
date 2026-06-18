@@ -42,7 +42,7 @@ export function LoginForm({
         email,
         password,
       });
-      if (error) throw error;
+      if (error) {throw error;}
       // Redirect to the intended page or default to dashboard
       const redirectUrl = redirectTo || "/dashboard";
       router.push(redirectUrl);
@@ -69,41 +69,41 @@ export function LoginForm({
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  type="email"
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="m@example.com"
                   required
+                  type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <Link
-                    href="/forgot-password"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    href="/forgot-password"
                   >
                     Forgot your password?
                   </Link>
                 </div>
                 <Input
                   id="password"
-                  type="password"
-                  required
-                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
+                  type="password"
+                  value={password}
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button className="w-full" disabled={isLoading} type="submit">
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link
-                href="/sign-up"
                 className="underline underline-offset-4"
+                href="/sign-up"
               >
                 Sign up
               </Link>

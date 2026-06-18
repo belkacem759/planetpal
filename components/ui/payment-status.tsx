@@ -9,50 +9,50 @@ import { cn } from '@/lib/utils';
 export type PaymentStatus = 'idle' | 'processing' | 'succeeded' | 'failed' | 'requires_action';
 
 interface PaymentStatusProps {
-  status: PaymentStatus;
-  message?: string;
   className?: string;
+  message?: string;
+  status: PaymentStatus;
 }
 
 const statusConfig = {
+  failed: {
+    bgColor: 'bg-red-50',
+    borderColor: 'border-red-200',
+    color: 'text-red-600',
+    icon: XCircle,
+    message: 'Payment failed. Please try again.'
+  },
   idle: {
-    icon: CreditCard,
-    color: 'text-gray-500',
     bgColor: 'bg-gray-50',
     borderColor: 'border-gray-200',
+    color: 'text-gray-500',
+    icon: CreditCard,
     message: 'Ready to process payment'
   },
   processing: {
-    icon: Spinner,
-    color: 'text-blue-600',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
+    color: 'text-blue-600',
+    icon: Spinner,
     message: 'Processing your payment...'
   },
-  succeeded: {
-    icon: CheckCircle,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
-    message: 'Payment successful!'
-  },
-  failed: {
-    icon: XCircle,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200',
-    message: 'Payment failed. Please try again.'
-  },
   requires_action: {
-    icon: Clock,
-    color: 'text-yellow-600',
     bgColor: 'bg-yellow-50',
     borderColor: 'border-yellow-200',
+    color: 'text-yellow-600',
+    icon: Clock,
     message: 'Additional authentication required'
+  },
+  succeeded: {
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+    color: 'text-green-600',
+    icon: CheckCircle,
+    message: 'Payment successful!'
   }
 };
 
-export function PaymentStatus({ status, message, className }: PaymentStatusProps) {
+export function PaymentStatus({ className, message, status }: PaymentStatusProps) {
   const config = statusConfig[status];
   const Icon = config.icon;
   const displayMessage = message || config.message;
@@ -94,9 +94,9 @@ export function usePaymentStatus() {
   }, []);
 
   return {
-    status,
     message,
-    updateStatus,
-    reset
+    reset,
+    status,
+    updateStatus
   };
 }

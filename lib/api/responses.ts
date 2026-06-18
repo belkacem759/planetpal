@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 
 // Standard API response structure
 interface ApiResponse<T = any> {
-  success: boolean;
   data?: T;
   error?: string;
   errors?: any[];
   message?: string;
+  success: boolean;
 }
 
 // Success response helper
@@ -17,9 +17,9 @@ export function createSuccessResponse<T>(
 ): NextResponse<ApiResponse<T>> {
   return NextResponse.json(
     {
-      success: true,
       data,
       message,
+      success: true,
     },
     { status }
   );
@@ -33,9 +33,9 @@ export function createErrorResponse(
 ): NextResponse<ApiResponse> {
   return NextResponse.json(
     {
-      success: false,
       error,
       errors,
+      success: false,
     },
     { status }
   );
@@ -48,9 +48,9 @@ export function createValidationErrorResponse(
 ): NextResponse<ApiResponse> {
   return NextResponse.json(
     {
-      success: false,
       error: message,
       errors,
+      success: false,
     },
     { status: 400 }
   );

@@ -24,9 +24,9 @@ export default function ProfilePage() {
   });
 
   const [passwordForm, setPasswordForm] = useState({
+    confirm_password: '',
     current_password: '',
-    new_password: '',
-    confirm_password: ''
+    new_password: ''
   });
 
   // Initialize form when user data loads
@@ -57,11 +57,11 @@ export default function ProfilePage() {
     }
     try {
       await changePasswordMutation.mutateAsync({
+        confirm_password: passwordForm.confirm_password,
         current_password: passwordForm.current_password,
-        new_password: passwordForm.new_password,
-        confirm_password: passwordForm.confirm_password
+        new_password: passwordForm.new_password
       });
-      setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
+      setPasswordForm({ confirm_password: '', current_password: '', new_password: '' });
     } catch (error) {
       console.error('Password change failed:', error);
     }
@@ -84,17 +84,17 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs className="space-y-6" defaultValue="profile">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="profile" className="flex items-center gap-2">
+          <TabsTrigger className="flex items-center gap-2" value="profile">
             <User className="h-4 w-4" />
             Profile
           </TabsTrigger>
-          <TabsTrigger value="addresses" className="flex items-center gap-2">
+          <TabsTrigger className="flex items-center gap-2" value="addresses">
             <MapPin className="h-4 w-4" />
             Addresses
           </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
+          <TabsTrigger className="flex items-center gap-2" value="security">
             <Lock className="h-4 w-4" />
             Security
           </TabsTrigger>
@@ -106,16 +106,16 @@ export default function ProfilePage() {
               <CardTitle>Personal Information</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleProfileUpdate} className="space-y-4">
+              <form className="space-y-4" onSubmit={handleProfileUpdate}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="email">Email</Label>
                     <Input
+                      className="bg-gray-50"
+                      disabled
                       id="email"
                       type="email"
                       value={user?.email || ''}
-                      disabled
-                      className="bg-gray-50"
                     />
                     <p className="text-sm text-gray-500 mt-1">
                       Email cannot be changed
@@ -125,25 +125,25 @@ export default function ProfilePage() {
                     <Label htmlFor="phone">Phone</Label>
                     <Input
                       id="phone"
+                      onChange={(e) => setProfileForm(prev => ({ ...prev, phone: e.target.value }))}
                       type="tel"
                       value={profileForm.phone}
-                      onChange={(e) => setProfileForm(prev => ({ ...prev, phone: e.target.value }))}
                     />
                   </div>
                   <div>
                     <Label htmlFor="firstName">First Name</Label>
                     <Input
                       id="firstName"
-                      value={profileForm.first_name}
                       onChange={(e) => setProfileForm(prev => ({ ...prev, first_name: e.target.value }))}
+                      value={profileForm.first_name}
                     />
                   </div>
                   <div>
                     <Label htmlFor="lastName">Last Name</Label>
                     <Input
                       id="lastName"
-                      value={profileForm.last_name}
                       onChange={(e) => setProfileForm(prev => ({ ...prev, last_name: e.target.value }))}
+                      value={profileForm.last_name}
                     />
                   </div>
                 </div>
@@ -159,9 +159,9 @@ export default function ProfilePage() {
                 ) : null}
 
                 <Button
-                  type="submit"
-                  disabled={updateUserMutation.isPending}
                   className="w-full md:w-auto"
+                  disabled={updateUserMutation.isPending}
+                  type="submit"
                 >
                   {updateUserMutation.isPending ? (
                     <>
@@ -190,7 +190,7 @@ export default function ProfilePage() {
               ) : addresses && addresses.length > 0 ? (
                 <div className="space-y-4">
                   {addresses.map((address) => (
-                    <div key={address.id} className="p-4 border rounded-lg">
+                    <div className="p-4 border rounded-lg" key={address.id}>
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium">
@@ -205,7 +205,7 @@ export default function ProfilePage() {
                           </p>
                           <p className="text-sm text-gray-600">{address.country}</p>
                         </div>
-                        <Button variant="outline" size="sm">
+                        <Button size="sm" variant="outline">
                           Edit
                         </Button>
                       </div>
@@ -231,35 +231,35 @@ export default function ProfilePage() {
               <CardTitle>Change Password</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handlePasswordChange} className="space-y-4">
+              <form className="space-y-4" onSubmit={handlePasswordChange}>
                 <div>
                   <Label htmlFor="currentPassword">Current Password</Label>
                   <Input
                     id="currentPassword"
-                    type="password"
-                    value={passwordForm.current_password}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, current_password: e.target.value }))}
                     required
+                    type="password"
+                    value={passwordForm.current_password}
                   />
                 </div>
                 <div>
                   <Label htmlFor="newPassword">New Password</Label>
                   <Input
                     id="newPassword"
-                    type="password"
-                    value={passwordForm.new_password}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password: e.target.value }))}
                     required
+                    type="password"
+                    value={passwordForm.new_password}
                   />
                 </div>
                 <div>
                   <Label htmlFor="confirmPassword">Confirm New Password</Label>
                   <Input
                     id="confirmPassword"
-                    type="password"
-                    value={passwordForm.confirm_password}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, confirm_password: e.target.value }))}
                     required
+                    type="password"
+                    value={passwordForm.confirm_password}
                   />
                 </div>
 
@@ -274,9 +274,9 @@ export default function ProfilePage() {
                 ) : null}
 
                 <Button
-                  type="submit"
-                  disabled={changePasswordMutation.isPending}
                   className="w-full md:w-auto"
+                  disabled={changePasswordMutation.isPending}
+                  type="submit"
                 >
                   {changePasswordMutation.isPending ? (
                     <>

@@ -32,21 +32,21 @@ export default function CategoryPage({
   // Fetch category data
   const { data: categoryData } = useCategoryQuery(slug);
   // Fetch products for this category
-  const { data: products, isLoading, error } = useProductsQuery({
-    search: filters.search,
+  const { data: products, error, isLoading } = useProductsQuery({
+    care_difficulty_fertilizer: filters.care_difficulty_fertilizer || undefined,
+    care_difficulty_humidity: filters.care_difficulty_humidity || undefined,
+    care_difficulty_light: filters.care_difficulty_light || undefined,
+    care_difficulty_temperature: filters.care_difficulty_temperature || undefined,
+    care_difficulty_water: filters.care_difficulty_water || undefined,
     categories: categoryData?.slug ? [categoryData.slug] : [],
-    minPrice: filters.minPrice,
-    maxPrice: filters.maxPrice,
     difficulty: filters.difficulty || undefined,
     isPlant: filters.isPlant,
-    care_difficulty_water: filters.care_difficulty_water || undefined,
-    care_difficulty_light: filters.care_difficulty_light || undefined,
-    care_difficulty_humidity: filters.care_difficulty_humidity || undefined,
-    care_difficulty_fertilizer: filters.care_difficulty_fertilizer || undefined,
-    care_difficulty_temperature: filters.care_difficulty_temperature || undefined,
-    max_care_difficulty: filters.max_care_difficulty || undefined,
     limit: 20,
-    offset: 0
+    max_care_difficulty: filters.max_care_difficulty || undefined,
+    maxPrice: filters.maxPrice,
+    minPrice: filters.minPrice,
+    offset: 0,
+    search: filters.search
   });
 
   console.log({ categoryData, products })
@@ -87,9 +87,9 @@ export default function CategoryPage({
         header={
           <div className="mb-6">
             <Button
-              variant="outline"
-              onClick={() => router.push('/shop')}
               className="mb-4"
+              onClick={() => router.push('/shop')}
+              variant="outline"
             >
               ← Back to Shop
             </Button>
@@ -110,16 +110,16 @@ export default function CategoryPage({
         )}
 
         {error && (
-          <Alert variant="destructive" className="mb-6">
+          <Alert className="mb-6" variant="destructive">
             Failed to load products. Please try again.
           </Alert>
         )}
 
         {products && (
           <ProductGrid
-            products={products?.data || []}
-            onAddToCart={handleAddToCart}
             isAddingToCart={addingToCart}
+            onAddToCart={handleAddToCart}
+            products={products?.data || []}
           />
         )}
 

@@ -4,19 +4,19 @@ import { ValiError } from 'valibot';
 // Error types
 export enum ErrorCode {
   // Authentication & Authorization
-  UNAUTHORIZED = 'UNAUTHORIZED',
   FORBIDDEN = 'FORBIDDEN',
   INVALID_TOKEN = 'INVALID_TOKEN',
   TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+  UNAUTHORIZED = 'UNAUTHORIZED',
   
   // Validation
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
   INVALID_INPUT = 'INVALID_INPUT',
   MISSING_REQUIRED_FIELD = 'MISSING_REQUIRED_FIELD',
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
   
   // Resources
-  NOT_FOUND = 'NOT_FOUND',
   ALREADY_EXISTS = 'ALREADY_EXISTS',
+  NOT_FOUND = 'NOT_FOUND',
   RESOURCE_CONFLICT = 'RESOURCE_CONFLICT',
   
   // Rate Limiting
@@ -25,8 +25,8 @@ export enum ErrorCode {
 
   
   // Database
-  DATABASE_ERROR = 'DATABASE_ERROR',
   CONNECTION_ERROR = 'CONNECTION_ERROR',
+  DATABASE_ERROR = 'DATABASE_ERROR',
   
   // Server
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
@@ -40,29 +40,29 @@ export enum ErrorCode {
 
 // Error response interface
 export interface ApiErrorResponse {
-  success: false;
   error: {
     code: ErrorCode;
-    message: string;
     details?: any;
-    timestamp: string;
+    message: string;
     path?: string;
+    timestamp: string;
   };
+  success: false;
 }
 
 // Success response interface
 export interface ApiSuccessResponse<T = any> {
-  success: true;
   data: T;
   meta?: {
     pagination?: {
-      page: number;
       limit: number;
+      page: number;
       total: number;
       totalPages: number;
     };
     timestamp: string;
   };
+  success: true;
 }
 
 // Custom error class
@@ -92,11 +92,24 @@ export class ApiError extends Error {
 
 // Predefined error creators
 export const createError = {
-  unauthorized: (message = 'Authentication required') => 
-    new ApiError(ErrorCode.UNAUTHORIZED, message, 401),
+  conflict: (message = 'Resource conflict') => 
+    new ApiError(ErrorCode.RESOURCE_CONFLICT, message, 409),
+    
+  database: (message = 'Database operation failed', details?: any) => 
+    new ApiError(ErrorCode.DATABASE_ERROR, message, 500, details),
     
   forbidden: (message = 'Access denied') => 
     new ApiError(ErrorCode.FORBIDDEN, message, 403),
+    
+  insufficientStock: (productName?: string) => 
+    new ApiError(
+      ErrorCode.INSUFFICIENT_STOCK,
+      `Insufficient stock${productName ? ` for ${productName}` : ''}`,
+      400
+    ),
+    
+  internal: (message = 'Internal server error', details?: any) => 
+    new ApiError(ErrorCode.INTERNAL_SERVER_ERROR, message, 500, details),
     
   notFound: (resource = 'Resource', id?: string) => 
     new ApiError(
@@ -105,29 +118,16 @@ export const createError = {
       404
     ),
     
-  validation: (message = 'Validation failed', details?: any) => 
-    new ApiError(ErrorCode.VALIDATION_ERROR, message, 400, details),
-    
-  conflict: (message = 'Resource conflict') => 
-    new ApiError(ErrorCode.RESOURCE_CONFLICT, message, 409),
+  
     
   rateLimit: (message = 'Rate limit exceeded') => 
     new ApiError(ErrorCode.RATE_LIMIT_EXCEEDED, message, 429),
     
-  
+  unauthorized: (message = 'Authentication required') => 
+    new ApiError(ErrorCode.UNAUTHORIZED, message, 401),
     
-  database: (message = 'Database operation failed', details?: any) => 
-    new ApiError(ErrorCode.DATABASE_ERROR, message, 500, details),
-    
-  internal: (message = 'Internal server error', details?: any) => 
-    new ApiError(ErrorCode.INTERNAL_SERVER_ERROR, message, 500, details),
-    
-  insufficientStock: (productName?: string) => 
-    new ApiError(
-      ErrorCode.INSUFFICIENT_STOCK,
-      `Insufficient stock${productName ? ` for ${productName}` : ''}`,
-      400
-    ),
+  validation: (message = 'Validation failed', details?: any) => 
+    new ApiError(ErrorCode.VALIDATION_ERROR, message, 400, details),
 };
 
 // Error handler function
@@ -178,14 +178,14 @@ export function handleApiError(error: unknown, path?: string): NextResponse<ApiE
   }
 
   const errorResponse: ApiErrorResponse = {
-    success: false,
     error: {
       code: apiError.code,
-      message: apiError.message,
       details: apiError.details,
-      timestamp: new Date().toISOString(),
+      message: apiError.message,
       path,
+      timestamp: new Date().toISOString(),
     },
+    success: false,
   };
 
   return NextResponse.json(errorResponse, { status: apiError.statusCode });
@@ -197,12 +197,12 @@ export function createSuccessResponse<T>(
   meta?: ApiSuccessResponse<T>['meta']
 ): NextResponse<ApiSuccessResponse<T>> {
   const response: ApiSuccessResponse<T> = {
-    success: true,
     data,
     meta: {
       ...meta,
       timestamp: new Date().toISOString(),
     },
+    success: true,
   };
 
   return NextResponse.json(response);
@@ -212,8 +212,8 @@ export function createSuccessResponse<T>(
 export function createPaginatedResponse<T>(
   data: T[],
   pagination: {
-    page: number;
     limit: number;
+    page: number;
     total: number;
   }
 ): NextResponse<ApiSuccessResponse<T[]>> {
@@ -286,11 +286,18 @@ export function isApiSuccessResponse<T>(response: unknown): response is ApiSucce
 export const logger = {
   error: (message: string, error?: unknown, context?: Record<string, any>) => {
     console.error(`[ERROR] ${message}`, {
+      context,
       error: error instanceof Error ? {
-        name: error.name,
         message: error.message,
+        name: error.name,
         stack: error.stack,
       } : error,
+      timestamp: new Date().toISOString(),
+    });
+  },
+  
+  info: (message: string, context?: Record<string, any>) => {
+    console.info(`[INFO] ${message}`, {
       context,
       timestamp: new Date().toISOString(),
     });
@@ -298,13 +305,6 @@ export const logger = {
   
   warn: (message: string, context?: Record<string, any>) => {
     console.warn(`[WARN] ${message}`, {
-      context,
-      timestamp: new Date().toISOString(),
-    });
-  },
-  
-  info: (message: string, context?: Record<string, any>) => {
-    console.info(`[INFO] ${message}`, {
       context,
       timestamp: new Date().toISOString(),
     });

@@ -6,18 +6,18 @@ import { Button } from '../ui/button';
 
 interface ShopLayoutProps {
   children?: React.ReactNode; // Main content area (product grid)
-  sidebar?: React.ReactNode; // Sidebar content (filters)
+  className?: string; // Optional additional classes
   header?: React.ReactNode; // Optional header content
   isSidebarOpenDefault?: boolean; // Default sidebar state
-  className?: string; // Optional additional classes
+  sidebar?: React.ReactNode; // Sidebar content (filters)
 }
 
 const ShopLayout = ({
   children,
-  sidebar,
+  className,
   header,
   isSidebarOpenDefault = true,
-  className,
+  sidebar,
 }: ShopLayoutProps) => {
   // State for sidebar visibility
   const [isSidebarOpen, setIsSidebarOpen] = useState(isSidebarOpenDefault);
@@ -46,17 +46,17 @@ const ShopLayout = ({
 
   // Touch gesture handlers for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isLargeScreen) return;
+    if (isLargeScreen) {return;}
     touchStartX.current = e.touches[0].clientX;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (isLargeScreen) return;
+    if (isLargeScreen) {return;}
     touchCurrentX.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = () => {
-    if (isLargeScreen) return;
+    if (isLargeScreen) {return;}
     
     const touchDiff = touchCurrentX.current - touchStartX.current;
     const threshold = 50; // Minimum swipe distance
@@ -107,13 +107,13 @@ const ShopLayout = ({
         {/* Mobile sidebar toggle - Improved for better mobile UX */}
         <div className="lg:hidden sticky top-0 z-10 bg-white dark:bg-gray-900 py-2 flex items-center px-4 mb-2">
           <Button 
-            variant="outline" 
-            size="icon"
-            onClick={toggleSidebar}
-            aria-label={isSidebarOpen ? "Close filters" : "Open filters"}
+            aria-controls="filters-sidebar" 
             aria-expanded={isSidebarOpen}
-            aria-controls="filters-sidebar"
+            aria-label={isSidebarOpen ? "Close filters" : "Open filters"}
             className="shrink-0"
+            onClick={toggleSidebar}
+            size="icon"
+            variant="outline"
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">{isSidebarOpen ? "Close" : "Open"} filters</span>
@@ -123,8 +123,8 @@ const ShopLayout = ({
         
         {/* Sidebar - Filter Panel */}
         <aside 
-          ref={sidebarRef}
-          id="filters-sidebar"
+          aria-expanded={isSidebarOpen}
+          aria-label="Product filters"
           className={`
             ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             fixed lg:relative lg:translate-x-0 top-0 left-0 z-40 
@@ -136,24 +136,24 @@ const ShopLayout = ({
             border-r border-gray-200 dark:border-gray-800
             p-4 focus-within:ring-2 focus-within:ring-blue-500
           `}
-          aria-expanded={isSidebarOpen}
-          aria-label="Product filters"
+          id="filters-sidebar"
+          onTouchEnd={handleTouchEnd}
+          onTouchMove={handleTouchMove}
+          onTouchStart={handleTouchStart}
+          ref={sidebarRef}
           role="complementary"
           tabIndex={isSidebarOpen ? 0 : -1}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
         >
           {/* Mobile close button */}
           <div className="flex justify-between items-center mb-4 lg:hidden sticky top-0 bg-white dark:bg-gray-900 z-10 py-2">
             <h2 className="text-lg font-semibold">Filters</h2>
             <Button 
-              variant="ghost" 
-              size="icon" 
+              aria-label="Close filters" 
+              className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" 
               onClick={toggleSidebar}
-              aria-label="Close filters"
+              size="icon"
               tabIndex={isSidebarOpen ? 0 : -1}
-              className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              variant="ghost"
             >
               <X className="h-5 w-5" />
               <span className="sr-only">Close filters</span>
@@ -169,7 +169,8 @@ const ShopLayout = ({
         {/* Overlay for mobile when sidebar is open */}
         {isSidebarOpen && !isLargeScreen && (
           <div 
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden transition-opacity duration-300 ease-in-out" 
+            aria-label="Close filters overlay" 
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden transition-opacity duration-300 ease-in-out"
             onClick={toggleSidebar}
             onKeyDown={(e) => {
               if (e.key === 'Escape') {
@@ -178,18 +179,17 @@ const ShopLayout = ({
             }}
             role="button"
             tabIndex={0}
-            aria-label="Close filters overlay"
           />
         )}
         
         {/* Main content area */}
         <main 
-          className="flex-1 p-4 md:p-6 min-w-0 focus:outline-none"
-          role="main"
           aria-label="Product listings"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
+          className="flex-1 p-4 md:p-6 min-w-0 focus:outline-none"
           onTouchEnd={handleTouchEnd}
+          onTouchMove={handleTouchMove}
+          onTouchStart={handleTouchStart}
+          role="main"
         >
           {/* Main content */}
           {children}

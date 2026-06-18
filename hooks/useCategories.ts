@@ -1,40 +1,40 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { queryKeys, handleQueryError, handleMutationError, invalidateQueries } from '@/lib/queryClient';
+import { queryKeys, handleMutationError, invalidateQueries } from '@/lib/queryClient';
 import { ApiSuccessResponse } from '@/lib/errors';
 
 // Types
 export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  image_url?: string;
-  parent_id?: string;
+  children?: Category[];
   created_at: string;
-  updated_at: string;
+  description?: string;
+  id: string;
+  image_url?: string;
+  name: string;
   // Relations
   parent?: Category;
-  children?: Category[];
+  parent_id?: string;
   products_count?: number;
+  slug: string;
+  updated_at: string;
 }
 
 export interface CategoriesFilters extends Record<string, unknown> {
-  parent_id?: string;
   include_children?: boolean;
   include_products_count?: boolean;
   limit?: number;
   offset?: number;
+  parent_id?: string;
 }
 
 // API functions
 const fetchCategories = async (filters?: CategoriesFilters): Promise<ApiSuccessResponse<Category[]>> => {
   const params = new URLSearchParams();
 
-  if (filters?.parent_id) params.append('parent_id', filters.parent_id);
-  if (filters?.include_children !== undefined) params.append('include_children', filters.include_children.toString());
-  if (filters?.include_products_count !== undefined) params.append('include_products_count', filters.include_products_count.toString());
-  if (filters?.limit) params.append('limit', filters.limit.toString());
-  if (filters?.offset) params.append('offset', filters.offset.toString());
+  if (filters?.parent_id) {params.append('parent_id', filters.parent_id);}
+  if (filters?.include_children !== undefined) {params.append('include_children', filters.include_children.toString());}
+  if (filters?.include_products_count !== undefined) {params.append('include_products_count', filters.include_products_count.toString());}
+  if (filters?.limit) {params.append('limit', filters.limit.toString());}
+  if (filters?.offset) {params.append('offset', filters.offset.toString());}
 
   const response = await fetch(`/api/categories?${params.toString()}`);
 
@@ -62,8 +62,8 @@ const fetchCategory = async (slug: string): Promise<Category> => {
 // Custom hooks
 export const useCategoriesQuery = (filters?: CategoriesFilters) => {
   return useQuery({
-    queryKey: queryKeys.categories.list(filters),
     queryFn: () => fetchCategories(filters),
+    queryKey: queryKeys.categories.list(filters),
     // Enable the query by default
     enabled: true,
     // Keep previous data while fetching new data
@@ -75,8 +75,8 @@ export const useCategoriesQuery = (filters?: CategoriesFilters) => {
 
 export const useCategoryQuery = (slug: string) => {
   return useQuery({
-    queryKey: [...queryKeys.categories.all, 'detail', slug],
     queryFn: () => fetchCategory(slug),
+    queryKey: [...queryKeys.categories.all, 'detail', slug],
     // Only enable if slug is provided
     enabled: !!slug,
   });
@@ -84,14 +84,14 @@ export const useCategoryQuery = (slug: string) => {
 
 // Get root categories (no parent)
 export const useRootCategoriesQuery = () => {
-  return useCategoriesQuery({ parent_id: undefined, include_products_count: true });
+  return useCategoriesQuery({ include_products_count: true, parent_id: undefined });
 };
 
 // Get child categories of a parent
 export const useChildCategoriesQuery = (parentId: string) => {
   return useCategoriesQuery({
-    parent_id: parentId,
     include_products_count: true,
+    parent_id: parentId,
   });
 };
 
@@ -102,11 +102,11 @@ export const useCreateCategoryMutation = () => {
   return useMutation({
     mutationFn: async (categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at'>) => {
       const response = await fetch('/api/categories', {
-        method: 'POST',
+        body: JSON.stringify(categoryData),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(categoryData),
+        method: 'POST',
       });
 
       if (!response.ok) {
@@ -115,11 +115,11 @@ export const useCreateCategoryMutation = () => {
 
       return response.json();
     },
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate and refetch categories
       invalidateQueries.categories();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -129,11 +129,11 @@ export const useUpdateCategoryMutation = () => {
   return useMutation({
     mutationFn: async ({ id, ...categoryData }: Partial<Category> & { id: string }) => {
       const response = await fetch(`/api/categories/${id}`, {
-        method: 'PUT',
+        body: JSON.stringify(categoryData),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(categoryData),
+        method: 'PUT',
       });
 
       if (!response.ok) {
@@ -142,12 +142,12 @@ export const useUpdateCategoryMutation = () => {
 
       return response.json();
     },
+    onError: handleMutationError,
     onSuccess: (data) => {
       // Invalidate specific category and categories list
       queryClient.invalidateQueries({ queryKey: [...queryKeys.categories.all, 'detail', data.slug] });
       invalidateQueries.categories();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -166,11 +166,11 @@ export const useDeleteCategoryMutation = () => {
 
       return response.json();
     },
+    onError: handleMutationError,
     onSuccess: () => {
       // Invalidate categories list
       invalidateQueries.categories();
     },
-    onError: handleMutationError,
   });
 };
 
@@ -180,8 +180,8 @@ export const usePrefetchCategory = () => {
 
   return (slug: string) => {
     queryClient.prefetchQuery({
-      queryKey: [...queryKeys.categories.all, 'detail', slug],
       queryFn: () => fetchCategory(slug),
+      queryKey: [...queryKeys.categories.all, 'detail', slug],
       // Cache for 5 minutes
       staleTime: 1000 * 60 * 5,
     });
@@ -193,8 +193,8 @@ export const usePrefetchCategories = () => {
 
   return (filters?: CategoriesFilters) => {
     queryClient.prefetchQuery({
-      queryKey: queryKeys.categories.list(filters),
       queryFn: () => fetchCategories(filters),
+      queryKey: queryKeys.categories.list(filters),
       // Cache for 5 minutes
       staleTime: 1000 * 60 * 5,
     });
@@ -235,8 +235,8 @@ export const useCategoryHierarchy = (categorySlug?: string) => {
   const breadcrumbs = categorySlug ? findCategoryPath(hierarchy, categorySlug) : [];
 
   return {
-    hierarchy,
     breadcrumbs: breadcrumbs || [],
+    hierarchy,
     isLoading: !categoriesData,
   };
 };

@@ -2,18 +2,18 @@ import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 
 interface ProductAttributesProps {
-  difficultyLevel?: number;
   categoryId?: string;
   categoryName?: string;
   categorySlug?: string;
+  difficultyLevel?: number;
 }
 
-export function ProductAttributes({ difficultyLevel, categoryId, categoryName, categorySlug }: ProductAttributesProps) {
+export function ProductAttributes({ categoryId, categoryName, categorySlug, difficultyLevel }: ProductAttributesProps) {
   const router = useRouter();
   console.log("categoryName", categoryName)
   const getDifficultyColor = (difficulty: number) => {
-    if (difficulty <= 2) return "bg-green-100 text-green-800";
-    if (difficulty <= 3) return "bg-yellow-100 text-yellow-800";
+    if (difficulty <= 2) {return "bg-green-100 text-green-800";}
+    if (difficulty <= 3) {return "bg-yellow-100 text-yellow-800";}
     return "bg-red-100 text-red-800";
   };
 
@@ -29,7 +29,7 @@ export function ProductAttributes({ difficultyLevel, categoryId, categoryName, c
       {difficultyLevel && (
         <div className="flex items-center gap-2">
           <span className="font-medium">Difficulty:</span>
-          <Badge variant="secondary" className={getDifficultyColor(difficultyLevel)}>
+          <Badge className={getDifficultyColor(difficultyLevel)} variant="secondary">
             {difficultyLevel}
           </Badge>
         </div>
@@ -39,8 +39,8 @@ export function ProductAttributes({ difficultyLevel, categoryId, categoryName, c
         <div className="flex items-center gap-2">
           <span className="font-medium">Category:</span>
           <Badge
-            variant="outline"
             className="cursor-pointer hover:bg-gray-100 transition-colors"
+            variant="outline"
           >
             {categoryName}
           </Badge>

@@ -19,7 +19,7 @@ import { useState, type ChangeEvent } from 'react';
 
 export function FilterBar() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { filters, setParam, clearFilters, hasActiveFilters, setParams } = useUrlFilters();
+  const { clearFilters, filters, hasActiveFilters, setParam, setParams } = useUrlFilters();
 
   const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesQuery({
     limit: 100,
@@ -30,25 +30,25 @@ export function FilterBar() {
   const isLoading = categoriesLoading;
 
   const difficultyOptions = [
-    { value: 'beginner', label: 'Beginner' },
-    { value: 'intermediate', label: 'Intermediate' },
-    { value: 'advanced', label: 'Advanced' },
+    { label: 'Beginner', value: 'beginner' },
+    { label: 'Intermediate', value: 'intermediate' },
+    { label: 'Advanced', value: 'advanced' },
   ] as const;
   
   const careInstructionTypes = [
-    { value: 'water', label: 'Water Care' },
-    { value: 'light', label: 'Light Requirements' },
-    { value: 'humidity', label: 'Humidity Needs' },
-    { value: 'fertilizer', label: 'Fertilizer Schedule' },
-    { value: 'temperature', label: 'Temperature Range' },
+    { label: 'Water Care', value: 'water' },
+    { label: 'Light Requirements', value: 'light' },
+    { label: 'Humidity Needs', value: 'humidity' },
+    { label: 'Fertilizer Schedule', value: 'fertilizer' },
+    { label: 'Temperature Range', value: 'temperature' },
   ] as const;
   
   const careDifficultyLevels = [
-    { value: 1, label: 'Very Easy (1)' },
-    { value: 2, label: 'Easy (2)' },
-    { value: 3, label: 'Moderate (3)' },
-    { value: 4, label: 'Hard (4)' },
-    { value: 5, label: 'Very Hard (5)' },
+    { label: 'Very Easy (1)', value: 1 },
+    { label: 'Easy (2)', value: 2 },
+    { label: 'Moderate (3)', value: 3 },
+    { label: 'Hard (4)', value: 4 },
+    { label: 'Very Hard (5)', value: 5 },
   ];
 
   // Get selected categories by slug
@@ -84,8 +84,8 @@ export function FilterBar() {
   const handlePriceRangeChange = (range: number[]) => {
     const [min, max] = range;
     setParams({
-      minPrice: min > 0 ? min : 0,
       maxPrice: max < 1000 ? max : 1000,
+      minPrice: min > 0 ? min : 0,
     });
   };
 
@@ -97,16 +97,16 @@ export function FilterBar() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            type="text"
-            placeholder="Search products..."
-            value={filters.search}
-            onChange={handleSearchChange}
             className="pl-10"
+            onChange={handleSearchChange}
+            placeholder="Search products..."
+            type="text"
+            value={filters.search}
           />
           {filters.search && (
             <button
-              onClick={() => setParam('search', '')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              onClick={() => setParam('search', '')}
             >
               <X className="h-4 w-4" />
             </button>
@@ -115,9 +115,9 @@ export function FilterBar() {
 
         {/* Filter Toggle Button */}
         <Button
-          variant="outline"
-          onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-2"
+          onClick={() => setIsExpanded(!isExpanded)}
+          variant="outline"
         >
           <Filter className="h-4 w-4" />
           Filters
@@ -127,9 +127,9 @@ export function FilterBar() {
         {/* Clear Filters Button */}
         {hasActiveFilters && (
           <Button
-            variant="ghost"
-            onClick={clearFilters}
             className="text-gray-500 hover:text-gray-700"
+            onClick={clearFilters}
+            variant="ghost"
           >
             Clear all
           </Button>
@@ -140,11 +140,11 @@ export function FilterBar() {
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2">
           {filters.search && (
-            <Badge variant="secondary" className="flex items-center gap-1">
+            <Badge className="flex items-center gap-1" variant="secondary">
               Search: {filters.search}
               <button
-                onClick={() => setParam('search', '')}
                 className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                onClick={() => setParam('search', '')}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -153,11 +153,11 @@ export function FilterBar() {
 
           {/* Selected Categories Badges */}
           {selectedCategories.map((category) => (
-            <Badge key={category.slug} variant="secondary" className="flex items-center gap-1">
+            <Badge className="flex items-center gap-1" key={category.slug} variant="secondary">
               {category.name}
               <button
-                onClick={() => handleCategoryToggle(category.slug)}
                 className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                onClick={() => handleCategoryToggle(category.slug)}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -166,11 +166,11 @@ export function FilterBar() {
 
           {/* Price Range Badge */}
           {(filters.minPrice !== 0 || filters.maxPrice !== 1000) && (
-            <Badge variant="secondary" className="flex items-center gap-1">
+            <Badge className="flex items-center gap-1" variant="secondary">
               ${filters.minPrice} - ${filters.maxPrice}
               <button
-                onClick={() => setParams({ minPrice: 0, maxPrice: 1000 })}
                 className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                onClick={() => setParams({ maxPrice: 1000, minPrice: 0 })}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -179,11 +179,11 @@ export function FilterBar() {
 
           {/* Difficulty Badge */}
           {filters.difficulty && (
-            <Badge variant="secondary" className="flex items-center gap-1">
+            <Badge className="flex items-center gap-1" variant="secondary">
               {selectedDifficultyLabel}
               <button
-                onClick={() => setParam('difficulty', null)}
                 className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                onClick={() => setParam('difficulty', null)}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -192,11 +192,11 @@ export function FilterBar() {
 
           {/* Plants Only Badge */}
           {filters.isPlant && (
-            <Badge variant="secondary" className="flex items-center gap-1">
+            <Badge className="flex items-center gap-1" variant="secondary">
               Plants Only
               <button
-                onClick={() => setParam('isPlant', false)}
                 className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                onClick={() => setParam('isPlant', false)}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -204,17 +204,17 @@ export function FilterBar() {
           )}
 
           {/* Care Instruction Difficulty Badges */}
-          {careInstructionTypes.map(({ value, label }) => {
+          {careInstructionTypes.map(({ label, value }) => {
             const filterKey = `care_difficulty_${value}` as keyof typeof filters;
             const filterValue = filters[filterKey] as number | undefined;
-            if (!filterValue) return null;
+            if (!filterValue) {return null;}
 
             return (
-              <Badge key={value} variant="secondary" className="flex items-center gap-1">
+              <Badge className="flex items-center gap-1" key={value} variant="secondary">
                 {label}: {filterValue}/5
                 <button
-                  onClick={() => setParam(filterKey, null)}
                   className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                  onClick={() => setParam(filterKey, null)}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -224,11 +224,11 @@ export function FilterBar() {
 
           {/* Max Care Difficulty Badge */}
           {filters.max_care_difficulty && (
-            <Badge variant="secondary" className="flex items-center gap-1">
+            <Badge className="flex items-center gap-1" variant="secondary">
               Max Difficulty: {filters.max_care_difficulty}/5
               <button
-                onClick={() => setParam('max_care_difficulty', null)}
                 className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                onClick={() => setParam('max_care_difficulty', null)}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -252,8 +252,8 @@ export function FilterBar() {
               <div className="space-y-2 max-h-[200px] overflow-y-auto">
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="all-categories-bar"
                     checked={filters.categories.length === 0}
+                    id="all-categories-bar"
                     onCheckedChange={(checked) => {
                       if (checked) {
                         setParam('categories', []);
@@ -261,22 +261,22 @@ export function FilterBar() {
                     }}
                   />
                   <label
-                    htmlFor="all-categories-bar"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    htmlFor="all-categories-bar"
                   >
                     All Categories
                   </label>
                 </div>
                 {categories.map((category) => (
-                  <div key={category.id} className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2" key={category.id}>
                     <Checkbox
-                      id={`category-bar-${category.slug}`}
                       checked={filters.categories.includes(category.slug)}
+                      id={`category-bar-${category.slug}`}
                       onCheckedChange={() => handleCategoryToggle(category.slug)}
                     />
                     <label
-                      htmlFor={`category-bar-${category.slug}`}
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      htmlFor={`category-bar-${category.slug}`}
                     >
                       {category.name}
                     </label>
@@ -291,12 +291,12 @@ export function FilterBar() {
             <h3 className="font-medium mb-3">Price Range</h3>
             <div className="px-3">
               <Slider
-                value={[filters.minPrice, filters.maxPrice]}
-                onValueChange={handlePriceRangeChange}
+                className="mb-4"
                 max={1000}
                 min={0}
+                onValueChange={handlePriceRangeChange}
                 step={10}
-                className="mb-4"
+                value={[filters.minPrice, filters.maxPrice]}
               />
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                 <span>${filters.minPrice}</span>
@@ -310,7 +310,7 @@ export function FilterBar() {
             <h3 className="font-medium mb-3">Difficulty Level</h3>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
+                <Button className="w-full justify-between" variant="outline">
                   {selectedDifficultyLabel}
                   <ChevronDown className="h-4 w-4" />
                 </Button>
@@ -336,13 +336,13 @@ export function FilterBar() {
             <h3 className="font-medium mb-3">Plants Only</h3>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="plants-only-bar"
                 checked={filters.isPlant}
+                id="plants-only-bar"
                 onCheckedChange={(checked) => setParam('isPlant', !!checked)}
               />
               <label
-                htmlFor="plants-only-bar"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                htmlFor="plants-only-bar"
               >
                 Show only plants
               </label>
@@ -355,7 +355,7 @@ export function FilterBar() {
               <div>
                 <h3 className="font-medium mb-3">Care Instruction Difficulty</h3>
                 <div className="space-y-4">
-                  {careInstructionTypes.map(({ value, label }) => {
+                  {careInstructionTypes.map(({ label, value }) => {
                     const filterKey = `care_difficulty_${value}` as keyof typeof filters;
                     const currentValue = filters[filterKey] as number | undefined;
 
@@ -364,7 +364,7 @@ export function FilterBar() {
                         <label className="text-sm font-medium mb-2 block">{label}</label>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full justify-between">
+                            <Button className="w-full justify-between" variant="outline">
                               {currentValue ? `Level ${currentValue}/5` : 'Any Level'}
                               <ChevronDown className="h-4 w-4" />
                             </Button>
@@ -393,7 +393,7 @@ export function FilterBar() {
                 <h3 className="font-medium mb-3">Maximum Care Difficulty</h3>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
+                    <Button className="w-full justify-between" variant="outline">
                       {filters.max_care_difficulty ? `Max ${filters.max_care_difficulty}/5` : 'No Limit'}
                       <ChevronDown className="h-4 w-4" />
                     </Button>

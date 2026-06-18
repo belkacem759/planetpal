@@ -15,16 +15,16 @@ export async function GET(
   const { id } = await params;
   try {
     const middleware = createMiddleware({
-      enableRateLimit: true,
-      requireAuth: true,
       checkOwnership: {
-        resourceType: 'users',
-        resourceIdParam: 'id'
-      }
+        resourceIdParam: 'id',
+        resourceType: 'users'
+      },
+      enableRateLimit: true,
+      requireAuth: true
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const result = await userService.findById(id);
 
@@ -46,17 +46,17 @@ export async function PUT(
   const { id } = await params;
   try {
     const middleware = createMiddleware({
-      enableRateLimit: true,
-      requireAuth: true,
-
       checkOwnership: {
-        resourceType: 'users',
-        resourceIdParam: 'id'
-      }
+        resourceIdParam: 'id',
+        resourceType: 'users'
+      },
+      enableRateLimit: true,
+
+      requireAuth: true
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const body = await request.json();
     
@@ -90,13 +90,13 @@ export async function DELETE(
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
-      requireAuth: true,
       requireAdmin: true,
+      requireAuth: true,
 
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const result = await userService.delete(id);
 

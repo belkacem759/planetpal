@@ -68,7 +68,7 @@ export function useViewTransition() {
 
   return {
     isTransitioning,
-    progress,
     navigateWithTransition,
+    progress,
   };
 }

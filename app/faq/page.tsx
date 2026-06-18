@@ -14,12 +14,12 @@ export default function FAQPage() {
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <a href="/contact" className="text-blue-600 hover:underline">
+            <a className="text-blue-600 hover:underline" href="/contact">
               Contact Us
             </a>
           </li>
           <li>
-            <a href="/about" className="text-blue-600 hover:underline">
+            <a className="text-blue-600 hover:underline" href="/about">
               About Us
             </a>
           </li>

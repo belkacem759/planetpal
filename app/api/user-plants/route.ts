@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { createMiddleware } from '@/lib/middleware';
 import { UserPlantService } from '@/lib/db';
 import { UserPlantInsertSchema, PaginationSchema } from '@/lib/validation';
-import { handleApiError, createSuccessResponse, createPaginatedResponse } from '@/lib/errors';
+import { handleApiError, createSuccessResponse } from '@/lib/errors';
 import { validateData } from '@/lib/validation';
 
 const userPlantService = new UserPlantService();
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const userId = request.headers.get('x-user-id');
     
@@ -25,11 +25,11 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = Number.parseInt(searchParams.get('page') || '1');
+    const limit = Number.parseInt(searchParams.get('limit') || '10');
 
     // Validate pagination
-    const paginationValidation = validateData(PaginationSchema, { page, limit });
+    const paginationValidation = validateData(PaginationSchema, { limit, page });
     if (!paginationValidation.success) {
       return handleApiError(new Error('Invalid pagination parameters'));
     }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const userId = request.headers.get('x-user-id');
     

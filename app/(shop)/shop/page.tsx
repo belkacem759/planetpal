@@ -16,24 +16,24 @@ export default function ShopPage() {
 
   const {
     data: productsData,
-    isLoading,
     error,
+    isLoading,
   } = useProductsQuery({
-    search: filters.search,
-    categories: filters.categories,
-    minPrice: filters.minPrice,
-    maxPrice: filters.maxPrice,
-    difficulty: filters.difficulty || undefined,
-    isPlant: filters.isPlant,
-    care_difficulty_water: filters.care_difficulty_water || undefined,
-    care_difficulty_light: filters.care_difficulty_light || undefined,
-    care_difficulty_humidity: filters.care_difficulty_humidity || undefined,
     care_difficulty_fertilizer: filters.care_difficulty_fertilizer || undefined,
+    care_difficulty_humidity: filters.care_difficulty_humidity || undefined,
+    care_difficulty_light: filters.care_difficulty_light || undefined,
     care_difficulty_temperature:
       filters.care_difficulty_temperature || undefined,
-    max_care_difficulty: filters.max_care_difficulty || undefined,
+    care_difficulty_water: filters.care_difficulty_water || undefined,
+    categories: filters.categories,
+    difficulty: filters.difficulty || undefined,
+    isPlant: filters.isPlant,
     limit: 20,
+    max_care_difficulty: filters.max_care_difficulty || undefined,
+    maxPrice: filters.maxPrice,
+    minPrice: filters.minPrice,
     offset: 0,
+    search: filters.search,
   });
 
   const products = productsData?.products || [];
@@ -67,12 +67,12 @@ export default function ShopPage() {
         >
           {/* Product Grid */}
           <ProductGrid
-            products={products}
-            isLoading={isLoading}
-            error={error ? new Error(error.message) : null}
-            onAddToCart={handleAddToCart}
-            isAddingToCart={addToCartMutation.isPending ? 'loading' : ''}
             emptyMessage="No plants found. Try adjusting your filters."
+            error={error ? new Error(error.message) : null}
+            isAddingToCart={addToCartMutation.isPending ? 'loading' : ''}
+            isLoading={isLoading}
+            onAddToCart={handleAddToCart}
+            products={products}
           />
         </ShopLayout>
       </ViewTransition>

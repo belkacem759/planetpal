@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { createMiddleware } from '@/lib/middleware';
 import { ReminderService } from '@/lib/db';
-import { ReminderInsertSchema, PaginationSchema } from '@/lib/validation';
-import { handleApiError, createSuccessResponse, createPaginatedResponse } from '@/lib/errors';
+import { ReminderInsertSchema } from '@/lib/validation';
+import { handleApiError, createSuccessResponse } from '@/lib/errors';
 import { validateData } from '@/lib/validation';
 
 const reminderService = new ReminderService();
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const userId = request.headers.get('x-user-id');
     
@@ -26,14 +26,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const upcoming = searchParams.get('upcoming') === 'true';
-    const days = parseInt(searchParams.get('days') || '7');
+    const days = Number.parseInt(searchParams.get('days') || '7');
 
     let result;
-    if (upcoming) {
-      result = await reminderService.getUpcomingReminders(userId, days);
-    } else {
-      result = await reminderService.getUserReminders(userId);
-    }
+    result = await (upcoming ? reminderService.getUpcomingReminders(userId, days) : reminderService.getUserReminders(userId));
     
     if (!result.success) {
       return handleApiError(new Error(result.error));
@@ -55,7 +51,7 @@ export async function POST(request: NextRequest) {
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const userId = request.headers.get('x-user-id');
     

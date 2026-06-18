@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 
 export class TestHelpers {
   constructor(public readonly page: Page) {}
@@ -41,15 +41,15 @@ export class TestHelpers {
     await this.page.click('[data-testid="login-button"]');
     
     // Wait for navigation or success indicator
-    await this.page.waitForURL('/', { timeout: 10000 });
+    await this.page.waitForURL('/', { timeout: 10_000 });
   }
 
   async register(userData: {
-    email: string;
-    password: string;
     confirmPassword: string;
+    email: string;
     firstName?: string;
     lastName?: string;
+    password: string;
   }) {
     await this.navigateToRegister();
     
@@ -84,7 +84,7 @@ export class TestHelpers {
       await this.page.click('[data-testid="logout-button"]');
     }
     
-    await this.page.waitForURL('/login', { timeout: 10000 });
+    await this.page.waitForURL('/login', { timeout: 10_000 });
   }
 
   // Product and shopping helpers
@@ -121,13 +121,13 @@ export class TestHelpers {
 
   // Checkout helpers
   async fillShippingAddress(address: {
-    firstName: string;
-    lastName: string;
     address1: string;
     city: string;
+    country?: string;
+    firstName: string;
+    lastName: string;
     state: string;
     zipCode: string;
-    country?: string;
   }) {
     await this.page.fill('[data-testid="shipping-first-name"]', address.firstName);
     await this.page.fill('[data-testid="shipping-last-name"]', address.lastName);
@@ -142,11 +142,11 @@ export class TestHelpers {
   }
 
   async fillPaymentInfo(paymentData: {
+    cardholderName?: string;
     cardNumber: string;
+    cvc: string;
     expiryMonth: string;
     expiryYear: string;
-    cvc: string;
-    cardholderName?: string;
   }) {
     // Handle Stripe Elements or regular inputs
     const cardNumberFrame = this.page.frameLocator('[name*="cardnumber"]');
@@ -214,7 +214,7 @@ export class TestHelpers {
   }
 
   // Utility helpers
-  async waitForElement(selector: string, timeout = 10000) {
+  async waitForElement(selector: string, timeout = 10_000) {
     await this.page.waitForSelector(selector, { timeout });
   }
 
@@ -234,44 +234,44 @@ export class TestHelpers {
   generateTestUser() {
     const timestamp = Date.now();
     return {
-      email: `test-${timestamp}@example.com`,
-      password: 'TestPassword123!',
       confirmPassword: 'TestPassword123!',
+      email: `test-${timestamp}@example.com`,
       firstName: 'Test',
-      lastName: 'User'
+      lastName: 'User',
+      password: 'TestPassword123!'
     };
   }
 
   generateTestAddress() {
     return {
-      firstName: 'John',
-      lastName: 'Doe',
       address1: '123 Test Street',
       city: 'Test City',
+      country: 'US',
+      firstName: 'John',
+      lastName: 'Doe',
       state: 'CA',
-      zipCode: '12345',
-      country: 'US'
+      zipCode: '12345'
     };
   }
 
   // Stripe test card data
   getTestCardData() {
     return {
+      cardholderName: 'Test User',
       cardNumber: '4242424242424242', // Visa test card
-      expiryMonth: '12',
-      expiryYear: '2030',
       cvc: '123',
-      cardholderName: 'Test User'
+      expiryMonth: '12',
+      expiryYear: '2030'
     };
   }
 
   getDeclinedCardData() {
     return {
+      cardholderName: 'Test User',
       cardNumber: '4000000000000002', // Declined card
-      expiryMonth: '12',
-      expiryYear: '2030',
       cvc: '123',
-      cardholderName: 'Test User'
+      expiryMonth: '12',
+      expiryYear: '2030'
     };
   }
 }

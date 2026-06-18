@@ -1,8 +1,8 @@
 interface RateLimitResult {
-  success: boolean;
   limit: number;
   remaining: number;
   reset: number;
+  success: boolean;
 }
 
 // Simple in-memory rate limiter (use Redis in production)
@@ -34,10 +34,10 @@ export async function rateLimit(identifier: string): Promise<RateLimitResult> {
   const success = current.count <= RATE_LIMIT_MAX_REQUESTS;
   
   return {
-    success,
     limit: RATE_LIMIT_MAX_REQUESTS,
     remaining,
-    reset: Math.ceil(current.resetTime / 1000)
+    reset: Math.ceil(current.resetTime / 1000),
+    success
   };
 }
 

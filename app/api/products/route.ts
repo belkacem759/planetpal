@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createMiddleware } from '@/lib/middleware';
 import { ProductService } from '@/lib/db';
-import { ProductInsertSchema, PaginationSchema } from '@/lib/validation';
+import { ProductInsertSchema } from '@/lib/validation';
 import { handleApiError, createSuccessResponse, createPaginatedResponse } from '@/lib/errors';
 import { validateData } from '@/lib/validation';
 import { createClient } from '@/lib/supabase/server';
@@ -16,11 +16,11 @@ export async function GET(request: NextRequest) {
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '12');
+    const page = Number.parseInt(searchParams.get('page') || '1');
+    const limit = Number.parseInt(searchParams.get('limit') || '12');
     
     // Extract individual filter parameters
     const categories = searchParams.getAll('categories'); // Get multiple categories
@@ -54,11 +54,11 @@ export async function GET(request: NextRequest) {
     }
     
     if (minPrice) {
-      query = query.gte('price', parseFloat(minPrice));
+      query = query.gte('price', Number.parseFloat(minPrice));
     }
     
     if (maxPrice) {
-      query = query.lte('price', parseFloat(maxPrice));
+      query = query.lte('price', Number.parseFloat(maxPrice));
     }
     
     if (difficulty) {
@@ -76,27 +76,27 @@ export async function GET(request: NextRequest) {
     }
     
     if (waterFilter) {
-      query = query.lte('care_instructions->water->difficulty', parseInt(waterFilter));
+      query = query.lte('care_instructions->water->difficulty', Number.parseInt(waterFilter));
     }
     
     if (lightFilter) {
-      query = query.lte('care_instructions->light->difficulty', parseInt(lightFilter));
+      query = query.lte('care_instructions->light->difficulty', Number.parseInt(lightFilter));
     }
     
     if (humidityFilter) {
-      query = query.lte('care_instructions->humidity->difficulty', parseInt(humidityFilter));
+      query = query.lte('care_instructions->humidity->difficulty', Number.parseInt(humidityFilter));
     }
     
     if (fertilizerFilter) {
-      query = query.lte('care_instructions->fertilizer->difficulty', parseInt(fertilizerFilter));
+      query = query.lte('care_instructions->fertilizer->difficulty', Number.parseInt(fertilizerFilter));
     }
     
     if (temperatureFilter) {
-      query = query.lte('care_instructions->temperature->difficulty', parseInt(temperatureFilter));
+      query = query.lte('care_instructions->temperature->difficulty', Number.parseInt(temperatureFilter));
     }
     
     if (maxCareDifficulty) {
-      const maxDiff = parseInt(maxCareDifficulty);
+      const maxDiff = Number.parseInt(maxCareDifficulty);
       query = query.or(`care_instructions->light->difficulty.lte.${maxDiff},care_instructions->water->difficulty.lte.${maxDiff},care_instructions->humidity->difficulty.lte.${maxDiff},care_instructions->fertilizer->difficulty.lte.${maxDiff},care_instructions->temperature->difficulty.lte.${maxDiff}`);
     }
     
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
     query = query.range(offset, offset + limit - 1);
     
     // Execute the query
-    const { data, error, count } = await query;
+    const { count, data, error } = await query;
     
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -114,18 +114,18 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.ceil((count || 0) / limit);
     
     const result = {
-      success: true,
       data: {
-        data: data || [],
         count: count || 0,
+        data: data || [],
         page,
         totalPages
-      }
+      },
+      success: true
     };
     
     return createPaginatedResponse(result.data.data, {
-      page,
       limit,
+      page,
       total: result.data.count
     })
   } catch (error) {
@@ -138,13 +138,13 @@ export async function POST(request: NextRequest) {
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
-      requireAuth: true,
       requireAdmin: true,
+      requireAuth: true,
   
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const body = await request.json();
 

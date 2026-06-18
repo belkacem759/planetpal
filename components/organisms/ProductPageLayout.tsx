@@ -8,35 +8,35 @@ import { Button } from '@/components/ui/button';
 import { Product } from '@/types/types';
 
 interface ProductPageLayoutProps {
+  isAddingToCart: boolean;
+  onAddToCart: () => void;
+  onBackToShop: () => void;
+  onBuyNow: () => void;
+  onQuantityDecrement: () => void;
+  onQuantityIncrement: () => void;
+  onViewCart: () => void;
   product: Product;
   quantity: number;
-  isAddingToCart: boolean;
-  onQuantityIncrement: () => void;
-  onQuantityDecrement: () => void;
-  onAddToCart: () => void;
-  onViewCart: () => void;
-  onBuyNow: () => void;
-  onBackToShop: () => void;
 }
 
 export function ProductPageLayout({
+  isAddingToCart,
+  onAddToCart,
+  onBackToShop,
+  onBuyNow,
+  onQuantityDecrement,
+  onQuantityIncrement,
+  onViewCart,
   product,
   quantity,
-  isAddingToCart,
-  onQuantityIncrement,
-  onQuantityDecrement,
-  onAddToCart,
-  onViewCart,
-  onBuyNow,
-  onBackToShop,
 }: ProductPageLayoutProps) {
 
   return (
     <div className="container mx-auto p-6">
       <Button
-        variant="outline"
-        onClick={onBackToShop}
         className="mb-6"
+        onClick={onBackToShop}
+        variant="outline"
       >
         ← Back to Shop
       </Button>
@@ -52,17 +52,17 @@ export function ProductPageLayout({
         {/* Product Details */}
         <div className="space-y-6">
           <ProductDetails
-            slug={product.slug}
+            description={product.description || undefined}
             name={product.name}
             price={product.price}
-            description={product.description || undefined}
+            slug={product.slug}
           />
 
           <ProductAttributes
-            difficultyLevel={product.difficulty_level}
             categoryId={product.categoryId}
             categoryName={product?.category?.name}
             categorySlug={product?.category?.slug}
+            difficultyLevel={product.difficulty_level}
           />
 
           <CareInstructions
@@ -71,16 +71,16 @@ export function ProductPageLayout({
           />
 
           <QuantitySelector
-            quantity={quantity}
-            onIncrement={onQuantityIncrement}
-            onDecrement={onQuantityDecrement}
-            onAddToCart={onAddToCart}
             isAddingToCart={isAddingToCart}
+            onAddToCart={onAddToCart}
+            onDecrement={onQuantityDecrement}
+            onIncrement={onQuantityIncrement}
+            quantity={quantity}
           />
 
           <ProductActions
-            onViewCart={onViewCart}
             onBuyNow={onBuyNow}
+            onViewCart={onViewCart}
           />
         </div>
       </div>

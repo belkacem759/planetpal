@@ -4,7 +4,7 @@ import { useCategoriesQuery } from "@/hooks";
 import { useRouter } from "next/navigation";
 
 export default function CategoriesPage() {
-  const { data: categories, isLoading, error } = useCategoriesQuery();
+  const { data: categories, error, isLoading } = useCategoriesQuery();
   const router = useRouter();
 
   if (isLoading) {
@@ -43,16 +43,16 @@ export default function CategoriesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categoriesArray.map((category) => (
             <div
-              key={category.id}
               className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
+              key={category.id}
               onClick={() => handleCategoryClick(category.slug)}
             >
               {
                 category.image_url && (
                   <img
-                    src={category.image_url}
                     alt={category.name}
                     className="w-full h-48 object-cover rounded-md mb-4"
+                    src={category.image_url}
                   />
                 )
               }

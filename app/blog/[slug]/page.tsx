@@ -16,7 +16,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <h2 className="text-xl font-semibold mb-2">Navigation</h2>
         <ul className="list-disc pl-5">
           <li>
-            <a href="/blog" className="text-blue-600 hover:underline">
+            <a className="text-blue-600 hover:underline" href="/blog">
               Back to Blog
             </a>
           </li>

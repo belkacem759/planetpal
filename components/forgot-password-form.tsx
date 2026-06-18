@@ -35,7 +35,7 @@ export function ForgotPasswordForm({
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/update-password`,
       });
-      if (error) throw error;
+      if (error) {throw error;}
       setSuccess(true);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -75,23 +75,23 @@ export function ForgotPasswordForm({
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
-                    type="email"
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="m@example.com"
                     required
+                    type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button className="w-full" disabled={isLoading} type="submit">
                   {isLoading ? "Sending..." : "Send reset email"}
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
                 Already have an account?{" "}
                 <Link
-                  href="/login"
                   className="underline underline-offset-4"
+                  href="/login"
                 >
                   Login
                 </Link>

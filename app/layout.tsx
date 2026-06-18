@@ -13,16 +13,16 @@ const defaultUrl = process.env.VERCEL_URL
   : 'http://localhost:3000';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: 'PlanetPal - Your Plant Care Companion',
   description:
     'Discover, care for, and grow your plant collection with PlanetPal',
+  metadataBase: new URL(defaultUrl),
+  title: 'PlanetPal - Your Plant Care Companion',
 };
 
 const geistSans = Geist({
-  variable: '--font-geist-sans',
   display: 'swap',
   subsets: ['latin'],
+  variable: '--font-geist-sans',
 });
 
 export default function RootLayout({
@@ -39,8 +39,8 @@ export default function RootLayout({
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
-              enableSystem
               disableTransitionOnChange
+              enableSystem
             >
               {children}
             </ThemeProvider>

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { headers } from 'next/headers';
 import { StripeService } from '@/lib/stripe';
 import { createClient } from '@/lib/supabase/server';
@@ -42,15 +42,15 @@ export async function POST(request: NextRequest) {
           const { error } = await supabase
             .from('orders')
             .update({
-              payment_status: 'paid',
-              status: 'confirmed',
-              payment_method: paymentIntent.payment_method_types[0] || 'card',
               payment_metadata: {
-                payment_intent_id: paymentIntent.id,
                 amount_received: paymentIntent.amount_received,
                 currency: paymentIntent.currency,
+                payment_intent_id: paymentIntent.id,
                 payment_method_types: paymentIntent.payment_method_types,
               },
+              payment_method: paymentIntent.payment_method_types[0] || 'card',
+              payment_status: 'paid',
+              status: 'confirmed',
               updated_at: new Date().toISOString(),
             })
             .eq('stripe_payment_intent_id', paymentIntent.id);
@@ -73,13 +73,13 @@ export async function POST(request: NextRequest) {
           const { error } = await supabase
             .from('orders')
             .update({
+              payment_metadata: {
+                failure_reason: paymentIntent.last_payment_error?.message || 'Payment failed',
+                last_payment_error: paymentIntent.last_payment_error,
+                payment_intent_id: paymentIntent.id,
+              },
               payment_status: 'failed',
               status: 'payment_failed',
-              payment_metadata: {
-                payment_intent_id: paymentIntent.id,
-                last_payment_error: paymentIntent.last_payment_error,
-                failure_reason: paymentIntent.last_payment_error?.message || 'Payment failed',
-              },
               updated_at: new Date().toISOString(),
             })
             .eq('stripe_payment_intent_id', paymentIntent.id);
@@ -102,12 +102,12 @@ export async function POST(request: NextRequest) {
           const { error } = await supabase
             .from('orders')
             .update({
+              payment_metadata: {
+                cancellation_reason: paymentIntent.cancellation_reason || 'Payment canceled',
+                payment_intent_id: paymentIntent.id,
+              },
               payment_status: 'canceled',
               status: 'canceled',
-              payment_metadata: {
-                payment_intent_id: paymentIntent.id,
-                cancellation_reason: paymentIntent.cancellation_reason || 'Payment canceled',
-              },
               updated_at: new Date().toISOString(),
             })
             .eq('stripe_payment_intent_id', paymentIntent.id);

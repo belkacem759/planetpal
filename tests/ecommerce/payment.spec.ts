@@ -76,7 +76,7 @@ test.describe('Payment Processing', () => {
         .or(authenticatedPage.locator('text=Invalid card number'))
         .or(authenticatedPage.locator('text=Please enter a valid card number'));
       
-      await expect(cardError).toBeVisible({ timeout: 10000 });
+      await expect(cardError).toBeVisible({ timeout: 10_000 });
     }
   });
 
@@ -120,7 +120,7 @@ test.describe('Payment Processing', () => {
         .or(authenticatedPage.locator('text=Card has expired'))
         .or(authenticatedPage.locator('text=Invalid expiry date'));
       
-      await expect(expiryError).toBeVisible({ timeout: 10000 });
+      await expect(expiryError).toBeVisible({ timeout: 10_000 });
     }
   });
 
@@ -165,7 +165,7 @@ test.describe('Payment Processing', () => {
         .or(authenticatedPage.locator('text=Invalid CVV'))
         .or(authenticatedPage.locator('text=CVV must be 3 digits'));
       
-      await expect(cvvError).toBeVisible({ timeout: 10000 });
+      await expect(cvvError).toBeVisible({ timeout: 10_000 });
     }
   });
 
@@ -196,7 +196,7 @@ test.describe('Payment Processing', () => {
       .or(authenticatedPage.locator('text=Payment declined'))
       .or(authenticatedPage.locator('text=Your card was declined'));
     
-    await expect(declinedError).toBeVisible({ timeout: 15000 });
+    await expect(declinedError).toBeVisible({ timeout: 15_000 });
     
     // Should remain on checkout page
     expect(authenticatedPage.url()).toContain('checkout');
@@ -219,11 +219,11 @@ test.describe('Payment Processing', () => {
     
     // Use insufficient funds test card (if available)
     const insufficientFundsCard = {
+      cardholderName: 'Test User',
       cardNumber: '4000000000000002', // Common test card for insufficient funds
-      expiryMonth: '12',
-      expiryYear: '25',
       cvc: '123',
-      cardholderName: 'Test User'
+      expiryMonth: '12',
+      expiryYear: '25'
     };
     
     await helpers.fillPaymentInfo(insufficientFundsCard);
@@ -236,7 +236,7 @@ test.describe('Payment Processing', () => {
       .or(authenticatedPage.locator('text=Insufficient funds'))
       .or(authenticatedPage.locator('text=Payment declined'));
     
-    await expect(insufficientFundsError).toBeVisible({ timeout: 15000 });
+    await expect(insufficientFundsError).toBeVisible({ timeout: 15_000 });
   });
 
   test('should support different card types', async ({ authenticatedPage }) => {
@@ -263,11 +263,11 @@ test.describe('Payment Processing', () => {
       
       // Fill card information
       const cardData = {
+        cardholderName: 'Test User',
         cardNumber: cardType.number,
-        expiryMonth: '12',
-        expiryYear: '25',
         cvc: cardType.name === 'American Express' ? '1234' : '123',
-        cardholderName: 'Test User'
+        expiryMonth: '12',
+        expiryYear: '25'
       };
       
       await helpers.fillPaymentInfo(cardData);
@@ -310,7 +310,7 @@ test.describe('Payment Processing', () => {
     await helpers.completeCheckout();
     
     // Wait longer for payment processing
-    await authenticatedPage.waitForTimeout(10000);
+    await authenticatedPage.waitForTimeout(10_000);
     
     // Should either succeed or show timeout error
     const timeoutError = authenticatedPage.locator('[data-testid="payment-timeout"]')
@@ -376,11 +376,11 @@ test.describe('Payment Processing', () => {
     
     // Use 3D Secure test card
     const threeDSecureCard = {
+      cardholderName: 'Test User',
       cardNumber: '4000000000003220', // Common 3D Secure test card
-      expiryMonth: '12',
-      expiryYear: '25',
       cvc: '123',
-      cardholderName: 'Test User'
+      expiryMonth: '12',
+      expiryYear: '25'
     };
     
     await helpers.fillPaymentInfo(threeDSecureCard);

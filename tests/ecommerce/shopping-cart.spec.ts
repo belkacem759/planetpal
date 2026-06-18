@@ -22,7 +22,7 @@ test.describe('Shopping Cart Flow', () => {
     await addToCartButton.click();
     
     // Verify cart count increased
-    await expect(cartBadge).toHaveText((parseInt(initialCount) + 1).toString());
+    await expect(cartBadge).toHaveText((Number.parseInt(initialCount) + 1).toString());
     
     // Verify success message or notification
     const successMessage = page.locator('[data-testid="add-to-cart-success"]')
@@ -183,7 +183,7 @@ test.describe('Shopping Cart Flow', () => {
     // Navigate to cart and verify items
     await helpers.navigateToCart();
     const cartItems = page.locator('[data-testid^="cart-item-"]');
-    await expect(cartItems).toHaveCount(parseInt(cartCount || '0'));
+    await expect(cartItems).toHaveCount(Number.parseInt(cartCount || '0'));
   });
 
   test('should handle adding same product multiple times', async ({ page }) => {
@@ -337,7 +337,7 @@ test.describe('Shopping Cart Flow', () => {
       } else {
         // Should revert to minimum valid quantity (usually 1)
         const currentValue = await quantityInput.inputValue();
-        expect(parseInt(currentValue)).toBeGreaterThan(0);
+        expect(Number.parseInt(currentValue)).toBeGreaterThan(0);
       }
     }
   });

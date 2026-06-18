@@ -32,12 +32,12 @@ export class StripeService {
       
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
-        currency,
-        customer: customerId,
-        metadata,
         automatic_payment_methods: {
           enabled: true,
         },
+        currency,
+        customer: customerId,
+        metadata,
       }, {
         idempotencyKey,
       });
@@ -75,10 +75,10 @@ export class StripeService {
       // Create new customer if not found
       const customer = await stripe.customers.create({
         email,
-        name,
         metadata: {
           userId,
         },
+        name,
       });
 
       return customer;

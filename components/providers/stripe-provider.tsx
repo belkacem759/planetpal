@@ -14,23 +14,23 @@ interface StripeProviderProps {
 
 export function StripeProvider({ children, clientSecret }: StripeProviderProps) {
   const options = {
-    clientSecret,
     appearance: {
       theme: 'stripe' as const,
       variables: {
-        colorPrimary: '#0570de',
+        borderRadius: '6px',
         colorBackground: '#ffffff',
-        colorText: '#30313d',
         colorDanger: '#df1b41',
+        colorPrimary: '#0570de',
+        colorText: '#30313d',
         fontFamily: 'system-ui, sans-serif',
         spacingUnit: '4px',
-        borderRadius: '6px',
       },
     },
+    clientSecret,
   };
 
   return (
-    <Elements stripe={stripePromise} options={clientSecret ? options : undefined}>
+    <Elements options={clientSecret ? options : undefined} stripe={stripePromise}>
       {children}
     </Elements>
   );

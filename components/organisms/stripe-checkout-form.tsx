@@ -15,84 +15,84 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api/client";
 import { PaymentStatus, usePaymentStatus } from "@/components/ui/payment-status";
-import * as v from 'valibot';
+import { object, pipe, string, email, minLength, regex, optional, safeParse } from 'valibot';
 
 
 
 // Validation schemas
-const checkoutFormSchema = v.object({
-  email: v.pipe(v.string(), v.email()),
-  firstName: v.pipe(v.string(), v.minLength(1)),
-  lastName: v.pipe(v.string(), v.minLength(1)),
-  address: v.pipe(v.string(), v.minLength(1)),
-  city: v.pipe(v.string(), v.minLength(1)),
-  state: v.pipe(v.string(), v.minLength(1)),
-  zipCode: v.pipe(v.string(), v.regex(/^\d{5}(-\d{4})?$/)),
-  phone: v.optional(v.string()),
+const checkoutFormSchema = object({
+  address: pipe(string(), minLength(1)),
+  city: pipe(string(), minLength(1)),
+  email: pipe(string(), email()),
+  firstName: pipe(string(), minLength(1)),
+  lastName: pipe(string(), minLength(1)),
+  phone: optional(string()),
+  state: pipe(string(), minLength(1)),
+  zipCode: pipe(string(), regex(/^\d{5}(-\d{4})?$/)),
 });
 
 interface CheckoutFormData {
+  address: string;
+  city: string;
   email: string;
   firstName: string;
   lastName: string;
-  address: string;
-  city: string;
+  phone?: string;
   state: string;
   zipCode: string;
-  phone?: string;
 }
 
 interface StripeCheckoutFormProps {
-  orderId: string;
   amount: number;
-  currency?: string;
-  onSuccess: (paymentIntentId: string) => void;
-  onError: (error: Error) => void;
   className?: string;
+  currency?: string;
   initialData?: Partial<CheckoutFormData>;
+  onError: (error: Error) => void;
+  onSuccess: (paymentIntentId: string) => void;
+  orderId: string;
 }
 
 // Card Element styling
 const cardElementOptions = {
+  hidePostalCode: true, // We collect this separately
   style: {
     base: {
-      fontSize: '16px',
-      color: '#424770',
       '::placeholder': {
         color: '#aab7c4',
       },
+      color: '#424770',
       fontFamily: 'system-ui, -apple-system, sans-serif',
+      fontSize: '16px',
     },
     invalid: {
       color: '#9e2146',
     },
   },
-  hidePostalCode: true, // We collect this separately
 };
 
 // Internal form component that uses Stripe hooks
 const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
-  orderId,
   amount,
-  currency = 'usd',
-  onSuccess,
-  onError,
   className,
+  currency = 'usd',
   initialData = {},
+  onError,
+  onSuccess,
+  orderId,
 }) => {
-  const { status: paymentStatus, message: statusMessage, updateStatus } = usePaymentStatus();
+  const { message: statusMessage, status: paymentStatus, updateStatus } = usePaymentStatus();
   const stripe = useStripe();
   const elements = useElements();
   
   const [formData, setFormData] = React.useState<CheckoutFormData>({
+    address: initialData.address || "",
+    city: initialData.city || "",
     email: initialData.email || "",
     firstName: initialData.firstName || "",
     lastName: initialData.lastName || "",
-    address: initialData.address || "",
-    city: initialData.city || "",
+    phone: initialData.phone || "",
     state: initialData.state || "",
     zipCode: initialData.zipCode || "",
-    phone: initialData.phone || "",
   });
 
   const [errors, setErrors] = React.useState<Partial<CheckoutFormData>>({});
@@ -121,9 +121,9 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
 
   const validateField = (field: keyof CheckoutFormData, value: string) => {
     const fieldSchema = checkoutFormSchema.entries[field];
-    if (!fieldSchema) return true;
+    if (!fieldSchema) {return true;}
 
-    const result = v.safeParse(fieldSchema, value);
+    const result = safeParse(fieldSchema, value);
     const error = result.success ? undefined : result.issues[0]?.message;
     
     setErrors(prev => ({ ...prev, [field]: error }));
@@ -131,7 +131,7 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
   };
 
   const validateForm = () => {
-    const result = v.safeParse(checkoutFormSchema, formData);
+    const result = safeParse(checkoutFormSchema, formData);
     
     if (!result.success) {
       const newErrors: Partial<CheckoutFormData> = {};
@@ -177,9 +177,9 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
       const response = await api.post('/api/stripe/create-payment-intent', {
         amount,
         currency,
-        orderId,
         customerEmail: formData.email,
         customerName: `${formData.firstName} ${formData.lastName}`,
+        orderId,
       }, { requiresAuth: true });
 
       if (!response.ok) {
@@ -202,18 +202,18 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
         clientSecret,
         {
           payment_method: {
-            card: cardElement,
             billing_details: {
-              name: `${formData.firstName} ${formData.lastName}`,
-              email: formData.email,
               address: {
-                line1: formData.address,
                 city: formData.city,
-                state: formData.state,
+                line1: formData.address,
                 postal_code: formData.zipCode,
+                state: formData.state,
               },
+              email: formData.email,
+              name: `${formData.firstName} ${formData.lastName}`,
               phone: formData.phone,
             },
+            card: cardElement,
           },
         }
       );
@@ -229,17 +229,17 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
         // Update order with shipping address and create order items
         try {
           const updateResponse = await api.put(`/api/orders/${orderId}`, {
+            payment_status: 'paid',
             shipping_address: {
-              first_name: formData.firstName,
-              last_name: formData.lastName,
               address_line_1: formData.address,
               city: formData.city,
-              state: formData.state,
-              postal_code: formData.zipCode,
               country: 'US',
+              first_name: formData.firstName,
+              last_name: formData.lastName,
               phone: formData.phone,
+              postal_code: formData.zipCode,
+              state: formData.state,
             },
-            payment_status: 'paid',
             status: 'processing'
           }, { requiresAuth: true });
 
@@ -275,9 +275,9 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={cn("space-y-6", className)}>
+    <form className={cn("space-y-6", className)} onSubmit={handleSubmit}>
       {/* Payment Status */}
-      <PaymentStatus status={paymentStatus} message={statusMessage} />
+      <PaymentStatus message={statusMessage} status={paymentStatus} />
 
       {/* Error Alert */}
       {paymentError && (
@@ -295,14 +295,14 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
           <div>
             <Label htmlFor="email">Email Address *</Label>
             <Input
+              className={getFieldError("email") ? "border-destructive" : ""}
+              disabled={isSubmitting}
               id="email"
+              onBlur={handleInputBlur("email")}
+              onChange={handleInputChange("email")}
+              placeholder="your@email.com"
               type="email"
               value={formData.email}
-              onChange={handleInputChange("email")}
-              onBlur={handleInputBlur("email")}
-              disabled={isSubmitting}
-              className={getFieldError("email") ? "border-destructive" : ""}
-              placeholder="your@email.com"
             />
             {getFieldError("email") && (
               <p className="text-sm text-destructive mt-1">
@@ -315,14 +315,14 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
             <div>
               <Label htmlFor="firstName">First Name *</Label>
               <Input
+                className={getFieldError("firstName") ? "border-destructive" : ""}
+                disabled={isSubmitting}
                 id="firstName"
+                onBlur={handleInputBlur("firstName")}
+                onChange={handleInputChange("firstName")}
+                placeholder="John"
                 type="text"
                 value={formData.firstName}
-                onChange={handleInputChange("firstName")}
-                onBlur={handleInputBlur("firstName")}
-                disabled={isSubmitting}
-                className={getFieldError("firstName") ? "border-destructive" : ""}
-                placeholder="John"
               />
               {getFieldError("firstName") && (
                 <p className="text-sm text-destructive mt-1">
@@ -334,14 +334,14 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
             <div>
               <Label htmlFor="lastName">Last Name *</Label>
               <Input
+                className={getFieldError("lastName") ? "border-destructive" : ""}
+                disabled={isSubmitting}
                 id="lastName"
+                onBlur={handleInputBlur("lastName")}
+                onChange={handleInputChange("lastName")}
+                placeholder="Doe"
                 type="text"
                 value={formData.lastName}
-                onChange={handleInputChange("lastName")}
-                onBlur={handleInputBlur("lastName")}
-                disabled={isSubmitting}
-                className={getFieldError("lastName") ? "border-destructive" : ""}
-                placeholder="Doe"
               />
               {getFieldError("lastName") && (
                 <p className="text-sm text-destructive mt-1">
@@ -354,14 +354,14 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
           <div>
             <Label htmlFor="phone">Phone Number</Label>
             <Input
+              className={getFieldError("phone") ? "border-destructive" : ""}
+              disabled={isSubmitting}
               id="phone"
+              onBlur={handleInputBlur("phone")}
+              onChange={handleInputChange("phone")}
+              placeholder="(555) 123-4567"
               type="tel"
               value={formData.phone}
-              onChange={handleInputChange("phone")}
-              onBlur={handleInputBlur("phone")}
-              disabled={isSubmitting}
-              className={getFieldError("phone") ? "border-destructive" : ""}
-              placeholder="(555) 123-4567"
             />
             {getFieldError("phone") && (
               <p className="text-sm text-destructive mt-1">
@@ -381,14 +381,14 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
           <div>
             <Label htmlFor="address">Address *</Label>
             <Input
+              className={getFieldError("address") ? "border-destructive" : ""}
+              disabled={isSubmitting}
               id="address"
+              onBlur={handleInputBlur("address")}
+              onChange={handleInputChange("address")}
+              placeholder="123 Main St"
               type="text"
               value={formData.address}
-              onChange={handleInputChange("address")}
-              onBlur={handleInputBlur("address")}
-              disabled={isSubmitting}
-              className={getFieldError("address") ? "border-destructive" : ""}
-              placeholder="123 Main St"
             />
             {getFieldError("address") && (
               <p className="text-sm text-destructive mt-1">
@@ -401,14 +401,14 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
             <div>
               <Label htmlFor="city">City *</Label>
               <Input
+                className={getFieldError("city") ? "border-destructive" : ""}
+                disabled={isSubmitting}
                 id="city"
+                onBlur={handleInputBlur("city")}
+                onChange={handleInputChange("city")}
+                placeholder="New York"
                 type="text"
                 value={formData.city}
-                onChange={handleInputChange("city")}
-                onBlur={handleInputBlur("city")}
-                disabled={isSubmitting}
-                className={getFieldError("city") ? "border-destructive" : ""}
-                placeholder="New York"
               />
               {getFieldError("city") && (
                 <p className="text-sm text-destructive mt-1">
@@ -420,14 +420,14 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
             <div>
               <Label htmlFor="state">State *</Label>
               <Input
+                className={getFieldError("state") ? "border-destructive" : ""}
+                disabled={isSubmitting}
                 id="state"
+                onBlur={handleInputBlur("state")}
+                onChange={handleInputChange("state")}
+                placeholder="NY"
                 type="text"
                 value={formData.state}
-                onChange={handleInputChange("state")}
-                onBlur={handleInputBlur("state")}
-                disabled={isSubmitting}
-                className={getFieldError("state") ? "border-destructive" : ""}
-                placeholder="NY"
               />
               {getFieldError("state") && (
                 <p className="text-sm text-destructive mt-1">
@@ -440,14 +440,14 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
           <div>
             <Label htmlFor="zipCode">ZIP Code *</Label>
             <Input
+              className={getFieldError("zipCode") ? "border-destructive" : ""}
+              disabled={isSubmitting}
               id="zipCode"
+              onBlur={handleInputBlur("zipCode")}
+              onChange={handleInputChange("zipCode")}
+              placeholder="10001"
               type="text"
               value={formData.zipCode}
-              onChange={handleInputChange("zipCode")}
-              onBlur={handleInputBlur("zipCode")}
-              disabled={isSubmitting}
-              className={getFieldError("zipCode") ? "border-destructive" : ""}
-              placeholder="10001"
             />
             {getFieldError("zipCode") && (
               <p className="text-sm text-destructive mt-1">
@@ -468,8 +468,8 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
             <Label>Card Details *</Label>
             <div className="mt-2 p-3 border rounded-md">
               <CardElement
-                options={cardElementOptions}
                 onChange={handleCardChange}
+                options={cardElementOptions}
               />
             </div>
             {cardError && (
@@ -487,14 +487,14 @@ const StripeCheckoutFormInner: React.FC<StripeCheckoutFormProps> = ({
       {/* Submit Button */}
       <div className="pt-4">
         <Button
-          type="submit"
-          disabled={isSubmitting || !stripe || !cardComplete}
           className="w-full"
+          disabled={isSubmitting || !stripe || !cardComplete}
           size="lg"
+          type="submit"
         >
           {isSubmitting ? (
             <>
-              <Spinner size="sm" className="mr-2" />
+              <Spinner className="mr-2" size="sm" />
               Processing Payment...
             </>
           ) : (

@@ -9,35 +9,35 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 interface ProductCardProps {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  images: { main: string; gallery: string[] };
-  difficultyLevel?: string;
-  isPlant?: boolean;
-  stockQuantity?: number;
   careInstructions?: CareInstructions | Json | null;
-  onAddToCart?: (productId: string) => void;
-  isLoading?: boolean;
   className?: string;
+  difficultyLevel?: string;
+  id: string;
+  images: { gallery: string[]; main: string; };
+  isLoading?: boolean;
+  isPlant?: boolean;
+  name: string;
+  onAddToCart?: (productId: string) => void;
+  price: number;
   ref?: React.Ref<HTMLDivElement>;
+  slug: string;
+  stockQuantity?: number;
 }
 
 const ProductCard = ({
-  id,
-  name,
-  slug,
-  price,
-  images,
-  difficultyLevel,
-  isPlant,
-  stockQuantity = 0,
   careInstructions,
-  onAddToCart,
-  isLoading = false,
   className,
+  difficultyLevel,
+  id,
+  images,
+  isLoading = false,
+  isPlant,
+  name,
+  onAddToCart,
+  price,
   ref,
+  slug,
+  stockQuantity = 0,
   ...props
 }: ProductCardProps) => {
   // Handle both new JSON structure and legacy array format
@@ -45,7 +45,7 @@ const ProductCard = ({
   const isOutOfStock = stockQuantity <= 0;
   // Calculate average care difficulty for plants
   const getAverageDifficulty = () => {
-    if (!careInstructions || !isPlant) return null;
+    if (!careInstructions || !isPlant) {return null;}
 
     try {
       // Handle both CareInstructions object and raw Json data
@@ -54,7 +54,7 @@ const ProductCard = ({
           ? JSON.parse(careInstructions)
           : careInstructions;
 
-      if (!instructions || typeof instructions !== 'object') return null;
+      if (!instructions || typeof instructions !== 'object') {return null;}
 
       const difficulties = Object.values(instructions)
         .map((instruction: any) => instruction?.difficulty)
@@ -63,7 +63,7 @@ const ProductCard = ({
             typeof difficulty === 'number' && difficulty >= 1 && difficulty <= 5
         );
 
-      if (difficulties.length === 0) return null;
+      if (difficulties.length === 0) {return null;}
 
       const average =
         difficulties.reduce((sum, diff) => sum + diff, 0) / difficulties.length;
@@ -92,25 +92,25 @@ const ProductCard = ({
 
   return (
     <Card
-      ref={ref}
       className={cn(
         'group cursor-pointer transition-all hover:shadow-lg',
         className
       )}
+      ref={ref}
       {...props}
     >
       <CardContent className="p-0" onClick={handleProductClick}>
         <div className="relative aspect-square overflow-hidden rounded-t-xl">
           <ViewTransition name={`img-${slug}`}>
             <img
-              src={images.main}
               alt={name}
               className="object-cover transition-transform group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              src={images.main}
             />
           </ViewTransition>
           {isPlant && (difficultyLevel || avgDifficulty) && (
-            <Badge variant="secondary" className="absolute top-2 right-2">
+            <Badge className="absolute top-2 right-2" variant="secondary">
               {difficultyLevel || `Difficulty: ${avgDifficulty}/5`}
             </Badge>
           )}
@@ -153,8 +153,8 @@ const ProductCard = ({
                         .slice(0, 2)
                         .map(([key, instruction]: [string, any]) => (
                           <div
-                            key={key}
                             className="flex justify-between items-center"
+                            key={key}
                           >
                             <span className="capitalize">
                               {key.replace('_', ' ')}:
@@ -164,8 +164,8 @@ const ProductCard = ({
                             </span>
                             {instruction.difficulty && (
                               <Badge
-                                variant="outline"
                                 className="ml-1 text-xs px-1 py-0"
+                                variant="outline"
                               >
                                 {instruction.difficulty}/5
                               </Badge>
@@ -185,9 +185,9 @@ const ProductCard = ({
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button
-          onClick={handleAddToCart}
-          disabled={isOutOfStock || isLoading}
           className="w-full"
+          disabled={isOutOfStock || isLoading}
+          onClick={handleAddToCart}
           variant={isOutOfStock ? 'outline' : 'default'}
         >
           {isLoading

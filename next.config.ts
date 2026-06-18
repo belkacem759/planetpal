@@ -2,17 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Pin the workspace root so Next ignores stray lockfiles outside the project.
-  turbopack: {
-    root: __dirname,
-  },
-  images: {
-    remotePatterns: [new URL("https://lh3.googleusercontent.com/**")],
-  },
   async headers() {
     return [
       {
         // Apply security headers to all routes
-        source: "/(.*)",
         headers: [
           {
             key: "X-Frame-Options",
@@ -50,8 +43,15 @@ const nextConfig: NextConfig = {
             ].join("; "),
           },
         ],
+        source: "/(.*)",
       },
     ];
+  },
+  images: {
+    remotePatterns: [new URL("https://lh3.googleusercontent.com/**")],
+  },
+  turbopack: {
+    root: __dirname,
   },
 };
 

@@ -18,9 +18,9 @@ export async function PUT(
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
-    const { user, error: authError } = await getAuthenticatedUser();
+    const { error: authError, user } = await getAuthenticatedUser();
     if (authError || !user) {
       return handleApiError(authError || createError.unauthorized());
     }
@@ -64,9 +64,9 @@ export async function DELETE(
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
-    const { user, error: authError } = await getAuthenticatedUser();
+    const { error: authError, user } = await getAuthenticatedUser();
     if (authError || !user) {
       return handleApiError(authError || createError.unauthorized());
     }

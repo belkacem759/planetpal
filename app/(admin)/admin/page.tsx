@@ -31,27 +31,27 @@ export default async function AdminPage() {
           <h3 className="font-bold text-xl mb-2">Admin Management</h3>
           <ul className="list-disc pl-5">
             <li>
-              <a href="/admin/users" className="text-blue-600 hover:underline">
+              <a className="text-blue-600 hover:underline" href="/admin/users">
                 User Management
               </a>
             </li>
             <li>
-              <a href="/admin/products" className="text-blue-600 hover:underline">
+              <a className="text-blue-600 hover:underline" href="/admin/products">
                 Product Management
               </a>
             </li>
             <li>
-              <a href="/admin/orders" className="text-blue-600 hover:underline">
+              <a className="text-blue-600 hover:underline" href="/admin/orders">
                 Order Management
               </a>
             </li>
             <li>
-              <a href="/admin/categories" className="text-blue-600 hover:underline">
+              <a className="text-blue-600 hover:underline" href="/admin/categories">
                 Category Management
               </a>
             </li>
             <li>
-              <a href="/admin/analytics" className="text-blue-600 hover:underline">
+              <a className="text-blue-600 hover:underline" href="/admin/analytics">
                 Site Analytics
               </a>
             </li>

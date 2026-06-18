@@ -1,12 +1,11 @@
 import { test as base, Page } from '@playwright/test';
 import { TestHelpers } from '../helpers/test-helpers';
-import path from 'path';
 
 // Define the types for our fixtures
 type AuthFixtures = {
-  testHelpers: TestHelpers;
   authenticatedPage: Page;
   guestPage: Page;
+  testHelpers: TestHelpers;
 };
 
 // Extend the base test with our fixtures

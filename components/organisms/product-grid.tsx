@@ -6,25 +6,25 @@ import { ProductCardSkeleton } from '@/components/molecules/product-card-skeleto
 import { Product } from '@/types/types';
 
 interface ProductGridProps {
-  products: Product[];
-  isLoading?: boolean;
-  error?: Error | null;
-  onAddToCart?: (productId: string) => void;
-  isAddingToCart?: string | null;
   className?: string;
   emptyMessage?: string;
+  error?: Error | null;
+  isAddingToCart?: string | null;
+  isLoading?: boolean;
+  onAddToCart?: (productId: string) => void;
+  products: Product[];
   ref?: React.Ref<HTMLDivElement>;
 }
 
 const ProductGrid = React.memo(
   ({
-    products,
-    isLoading = false,
-    error = null,
-    onAddToCart,
-    isAddingToCart = null,
     className,
     emptyMessage = 'No products found.',
+    error = null,
+    isAddingToCart = null,
+    isLoading = false,
+    onAddToCart,
+    products,
     ref,
     ...props
   }: ProductGridProps) => {
@@ -37,18 +37,18 @@ const ProductGrid = React.memo(
     const productCards =
       products?.map((product) => (
         <ProductCard
-          key={product.id}
-          id={product.id}
-          name={product.name}
-          slug={product.slug}
-          price={product.price}
-          images={product.images ?? { main: "", gallery: [] }}
-          stockQuantity={product.stock_quantity}
-          difficultyLevel={product.difficulty_level ? String(product.difficulty_level) : undefined}
-          isPlant={product.is_plant || undefined}
-          onAddToCart={onAddToCart}
-          isLoading={isAddingToCart === product.id}
           careInstructions={product.care_instructions || undefined}
+          difficultyLevel={product.difficulty_level ? String(product.difficulty_level) : undefined}
+          id={product.id}
+          images={product.images ?? { gallery: [], main: "" }}
+          isLoading={isAddingToCart === product.id}
+          isPlant={product.is_plant || undefined}
+          key={product.id}
+          name={product.name}
+          onAddToCart={onAddToCart}
+          price={product.price}
+          slug={product.slug}
+          stockQuantity={product.stock_quantity}
         />
       )) || [];
 
@@ -56,11 +56,11 @@ const ProductGrid = React.memo(
     if (isLoading) {
       return (
         <div
-          ref={ref}
           className={cn(
             'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6',
             className
           )}
+          ref={ref}
           {...props}
         >
           {skeletonCards}
@@ -71,7 +71,7 @@ const ProductGrid = React.memo(
     // Error state
     if (error) {
       return (
-        <div ref={ref} className={cn('min-h-[400px]', className)} {...props}>
+        <div className={cn('min-h-[400px]', className)} ref={ref} {...props}>
           <Alert variant="destructive">
             <AlertDescription>
               {error.message || 'Failed to load products. Please try again.'}
@@ -85,11 +85,11 @@ const ProductGrid = React.memo(
     if (!products || products.length === 0) {
       return (
         <div
-          ref={ref}
           className={cn(
             'flex items-center justify-center min-h-[400px]',
             className
           )}
+          ref={ref}
           {...props}
         >
           <div className="text-center">
@@ -100,10 +100,10 @@ const ProductGrid = React.memo(
               viewBox="0 0 24 24"
             >
               <path
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={1.5}
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
               />
             </svg>
             <h3 className="text-lg font-semibold mb-2">No Products Found</h3>
@@ -116,11 +116,11 @@ const ProductGrid = React.memo(
     // Products grid
     return (
       <div
-        ref={ref}
         className={cn(
           'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6',
           className
         )}
+        ref={ref}
         {...props}
       >
         {productCards}

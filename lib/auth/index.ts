@@ -2,8 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createError } from '@/lib/errors';
 
 export interface AuthenticatedUser {
-  id: string;
   email: string;
+  id: string;
   role?: string;
 }
 
@@ -12,8 +12,8 @@ export interface AuthenticatedUser {
  * This utility can be reused across API routes that need user authentication
  */
 export async function getAuthenticatedUser(): Promise<{
-  user: AuthenticatedUser | null;
   error: any | null;
+  user: AuthenticatedUser | null;
 }> {
   try {
     const supabase = await createClient();
@@ -23,8 +23,8 @@ export async function getAuthenticatedUser(): Promise<{
 
     if (error || !user) {
       return {
-        user: null,
-        error: createError.unauthorized('Authentication required')
+        error: createError.unauthorized('Authentication required'),
+        user: null
       };
     }
 
@@ -38,27 +38,27 @@ export async function getAuthenticatedUser(): Promise<{
     if (profileError) {
       // If profile doesn't exist, use basic user info
       return {
+        error: null,
         user: {
-          id: user.id,
           email: user.email || '',
+          id: user.id,
           role: 'user'
-        },
-        error: null
+        }
       };
     }
 
     return {
+      error: null,
       user: {
-        id: profile.id,
         email: profile.email || user.email || '',
+        id: profile.id,
         role: profile.role || 'user'
-      },
-      error: null
+      }
     };
   } catch (error) {
     return {
-      user: null,
-      error: createError.internal('Authentication failed', error)
+      error: createError.internal('Authentication failed', error),
+      user: null
     };
   }
 }
@@ -74,6 +74,6 @@ export function isAdmin(user: AuthenticatedUser | null): boolean {
  * Check if user owns a resource or is admin
  */
 export function canAccessResource(user: AuthenticatedUser | null, resourceUserId: string): boolean {
-  if (!user) return false;
+  if (!user) {return false;}
   return user.id === resourceUserId || isAdmin(user);
 }

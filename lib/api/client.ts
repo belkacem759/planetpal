@@ -29,9 +29,9 @@ export async function apiClient(
   options: ApiOptions = {}
 ): Promise<Response> {
   const {
-    requiresAuth = false,
     headers = {},
     method = 'GET',
+    requiresAuth = false,
     ...restOptions
   } = options;
 
@@ -53,32 +53,32 @@ export async function apiClient(
 
   // Make the request
   return fetch(url, {
-    method,
-    headers: finalHeaders,
     credentials: 'include',
+    headers: finalHeaders,
+    method,
     ...restOptions
   });
 }
 
 // Convenience methods for common operations
 export const api = {
+  delete: (url: string, options?: Omit<ApiOptions, 'method'>) => 
+    apiClient(url, { ...options, method: 'DELETE' }),
+    
   get: (url: string, options?: Omit<ApiOptions, 'method'>) => 
     apiClient(url, { ...options, method: 'GET' }),
     
   post: (url: string, data?: any, options?: Omit<ApiOptions, 'method'>) => 
     apiClient(url, { 
       ...options, 
-      method: 'POST',
-      body: data ? JSON.stringify(data) : undefined
+      body: data ? JSON.stringify(data) : undefined,
+      method: 'POST'
     }),
     
   put: (url: string, data?: any, options?: Omit<ApiOptions, 'method'>) => 
     apiClient(url, { 
       ...options, 
-      method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined
-    }),
-    
-  delete: (url: string, options?: Omit<ApiOptions, 'method'>) => 
-    apiClient(url, { ...options, method: 'DELETE' })
+      body: data ? JSON.stringify(data) : undefined,
+      method: 'PUT'
+    })
 };

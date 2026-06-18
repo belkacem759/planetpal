@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createMiddleware } from '@/lib/middleware';
 import { CategoryService } from '@/lib/db';
-import { CategoryInsertSchema, PaginationSchema } from '@/lib/validation';
+import { CategoryInsertSchema } from '@/lib/validation';
 import { handleApiError, createSuccessResponse, createPaginatedResponse } from '@/lib/errors';
 import { validateData } from '@/lib/validation';
 
@@ -15,11 +15,11 @@ export async function GET(request: NextRequest) {
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = Number.parseInt(searchParams.get('page') || '1');
+    const limit = Number.parseInt(searchParams.get('limit') || '10');
 
     // Validate pagination
     // const paginationValidation = validateData(PaginationSchema, { page, limit });
@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
     }
 
     return createPaginatedResponse(result.data.data, {
-      page,
       limit,
+      page,
       total: result.data.count
     });
   } catch (error) {
@@ -48,13 +48,13 @@ export async function POST(request: NextRequest) {
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
-      requireAuth: true,
       requireAdmin: true,
+      requireAuth: true,
   
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const body = await request.json();
     

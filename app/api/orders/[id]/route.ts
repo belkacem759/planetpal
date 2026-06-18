@@ -19,7 +19,7 @@ export async function GET(
     });
 
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const user = (request as any).user;
 
@@ -61,33 +61,33 @@ export async function GET(
     // Transform the data to match the expected Order interface
     const transformedOrder = {
       ...orderData,
+      items: orderData.order_items?.map((item: any) => ({
+        created_at: item.created_at,
+        id: item.id,
+        image_url: item.product?.images?.[0], // Frontend expects 'image_url' not 'product_image_url'
+        name: item.product?.name, // Frontend expects 'name' not 'product_name'
+        order_id: id,
+        price: item.price_at_purchase, // Frontend expects 'price' for calculations
+        product_id: item.product?.id,
+        product_image_url: item.product?.images?.[0],
+        product_name: item.product?.name,
+        product_slug: item.product?.slug,
+        quantity: item.quantity,
+        total_price: item.quantity * item.price_at_purchase,
+        unit_price: item.price_at_purchase,
+        updated_at: item.updated_at
+      })) || [],
       order_number: orderData.id, // Use ID as order number since order_number column doesn't exist
       shipping_address: orderData.shipping_address || {
-        first_name: '',
-        last_name: '',
         address_line_1: '',
         address_line_2: '',
         city: '',
-        state: '',
+        country: '',
+        first_name: '',
+        last_name: '',
         postal_code: '',
-        country: ''
-      },
-      items: orderData.order_items?.map((item: any) => ({
-        id: item.id,
-        order_id: id,
-        product_id: item.product?.id,
-        name: item.product?.name, // Frontend expects 'name' not 'product_name'
-        product_name: item.product?.name,
-        product_slug: item.product?.slug,
-        image_url: item.product?.images?.[0], // Frontend expects 'image_url' not 'product_image_url'
-        product_image_url: item.product?.images?.[0],
-        quantity: item.quantity,
-        price: item.price_at_purchase, // Frontend expects 'price' for calculations
-        unit_price: item.price_at_purchase,
-        total_price: item.quantity * item.price_at_purchase,
-        created_at: item.created_at,
-        updated_at: item.updated_at
-      })) || []
+        state: ''
+      }
     };
 
     return createSuccessResponse(transformedOrder);
@@ -109,7 +109,7 @@ export async function PUT(
     });
     
     const middlewareResult = await middleware(request);
-    if (middlewareResult) return middlewareResult;
+    if (middlewareResult) {return middlewareResult;}
 
     const user = (request as any).user;
     

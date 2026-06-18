@@ -2,13 +2,13 @@
 import { ViewTransition } from '@/components/ui/view-transition';
 
 interface ProductDetailsProps {
-  slug: string
+  description?: string;
   name: string;
   price: number;
-  description?: string;
+  slug: string
 }
 
-export function ProductDetails({ slug, name, price, description }: ProductDetailsProps) {
+export function ProductDetails({ description, name, price, slug }: ProductDetailsProps) {
   return (
     <div>
       <ViewTransition name={`title-${slug}`}>
