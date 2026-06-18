@@ -1,20 +1,22 @@
 'use client';
 
-import { ProductPageLayout } from '@/components/organisms/ProductPageLayout';
+import {
+  startTransition,
+  use,
+  useState,
+  unstable_ViewTransition as ViewTransition,
+} from 'react';
+import { useRouter } from 'next/navigation';
+
+import { Params } from '@/types/types';
+import { useAddToCartMutation } from '@/hooks/useCart';
+import { useProductQuery } from '@/hooks/useProducts';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ProductDetailsSkeleton } from '@/components/ui/product-skeleton';
-import { useAddToCartMutation } from '@/hooks/useCart';
-import { useProductQuery } from '@/hooks/useProducts';
-import { Params } from '@/types/types';
-import { useRouter } from 'next/navigation';
-import { use, useState } from 'react';
+import { ProductPageLayout } from '@/components/organisms/ProductPageLayout';
 
-export default function ProductDetailsPage({
-  params,
-}: {
-  params: Params;
-}) {
+export default function ProductDetailsPage({ params }: { params: Params }) {
   const { slug } = use(params);
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
@@ -40,11 +42,11 @@ export default function ProductDetailsPage({
   };
 
   const incrementQuantity = () => {
-    setQuantity(prev => prev + 1);
+    setQuantity((prev) => prev + 1);
   };
 
   const decrementQuantity = () => {
-    setQuantity(prev => Math.max(1, prev - 1));
+    setQuantity((prev) => Math.max(1, prev - 1));
   };
 
   const handleViewCart = () => {
@@ -56,7 +58,9 @@ export default function ProductDetailsPage({
   };
 
   const handleBackToShop = () => {
-    router.back();
+    startTransition(() => {
+      router.back();
+    });
   };
 
   if (isLoading) {
@@ -86,16 +90,18 @@ export default function ProductDetailsPage({
   }
 
   return (
-    <ProductPageLayout
-      product={product}
-      quantity={quantity}
-      isAddingToCart={isAddingToCart}
-      onQuantityIncrement={incrementQuantity}
-      onQuantityDecrement={decrementQuantity}
-      onAddToCart={handleAddToCart}
-      onViewCart={handleViewCart}
-      onBuyNow={handleBuyNow}
-      onBackToShop={handleBackToShop}
-    />
+    <ViewTransition>
+      <ProductPageLayout
+        product={product}
+        quantity={quantity}
+        isAddingToCart={isAddingToCart}
+        onQuantityIncrement={incrementQuantity}
+        onQuantityDecrement={decrementQuantity}
+        onAddToCart={handleAddToCart}
+        onViewCart={handleViewCart}
+        onBuyNow={handleBuyNow}
+        onBackToShop={handleBackToShop}
+      />
+    </ViewTransition>
   );
 }

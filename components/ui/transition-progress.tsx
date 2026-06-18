@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { ProgressBar } from './progress-bar';
 
 export function TransitionProgress() {
@@ -11,24 +11,15 @@ export function TransitionProgress() {
 
   useEffect(() => {
     let progressTimer: NodeJS.Timeout;
-    let completeTimer: NodeJS.Timeout;
 
     const startTransition = () => {
       setIsLoading(true);
       setProgress(30); // Initial 30% progress
-      
+
       // Simulate gradual progress increase
       progressTimer = setTimeout(() => {
-        setProgress(70);
+        setProgress(100);
       }, 300);
-    };
-
-    const completeTransition = () => {
-      setProgress(100);
-      completeTimer = setTimeout(() => {
-        setIsLoading(false);
-        setProgress(0);
-      }, 200);
     };
 
     // Track navigation start with click events on links
@@ -41,24 +32,15 @@ export function TransitionProgress() {
     };
 
     // Track navigation completion with pathname changes
-    let previousPathname = pathname;
-    const checkPathnameChange = () => {
-      if (pathname !== previousPathname) {
-        completeTransition();
-        previousPathname = pathname;
-      }
-    };
+
 
     // Add click listener to document
     document.addEventListener('click', handleLinkClick);
-    
+
     // Check for pathname changes
-    const interval = setInterval(checkPathnameChange, 100);
 
     return () => {
       clearTimeout(progressTimer);
-      clearTimeout(completeTimer);
-      clearInterval(interval);
       document.removeEventListener('click', handleLinkClick);
     };
   }, [pathname]);

@@ -2,15 +2,16 @@
 import { unstable_ViewTransition as ViewTransition } from 'react';
 
 interface ProductDetailsProps {
+  slug: string
   name: string;
   price: number;
   description?: string;
 }
 
-export function ProductDetails({ name, price, description }: ProductDetailsProps) {
+export function ProductDetails({ slug, name, price, description }: ProductDetailsProps) {
   return (
     <div>
-      <ViewTransition name={`title-${name}`}>
+      <ViewTransition name={`title-${slug}`}>
         <h1
           className="text-3xl font-bold mb-2"
         >

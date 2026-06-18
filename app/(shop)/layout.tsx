@@ -1,10 +1,11 @@
+import { ReactNode, unstable_ViewTransition as ViewTransition } from 'react';
+
 import { MainLayout } from '@/components/layouts/main-layout';
-import { ReactNode } from 'react';
 
 export default function ShopLayout({ children }: { children: ReactNode }) {
   return (
     <MainLayout>
-      {children}
+      <ViewTransition>{children}</ViewTransition>
     </MainLayout>
   );
 }

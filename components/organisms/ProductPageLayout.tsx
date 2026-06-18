@@ -46,12 +46,13 @@ export function ProductPageLayout({
         <ProductImage
           images={product.images}
           name={product.name}
-          productId={product.id}
+          slug={product.slug}
         />
 
         {/* Product Details */}
         <div className="space-y-6">
           <ProductDetails
+            slug={product.slug}
             name={product.name}
             price={product.price}
             description={product.description || undefined}

@@ -97,40 +97,6 @@
   }
 }
 
-/* View Transition API Styles */
-::view-transition-old(category-card),
-::view-transition-new(category-card) {
-  animation-duration: 0.5s;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-::view-transition-old(category-card) {
-  animation-name: slide-out-to-left;
-}
-
-::view-transition-new(category-card) {
-  animation-name: slide-in-from-right;
-}
-
-/* Custom view transition animations */
-@keyframes slide-out-to-left {
-  to {
-    transform: translateX(-100%) scale(0.9);
-    opacity: 0;
-  }
-}
-
-@keyframes slide-in-from-right {
-  from {
-    transform: translateX(100%) scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0) scale(1);
-    opacity: 1;
-  }
-}
-
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);
@@ -185,39 +151,5 @@
   100% {
     opacity: 1;
     transform: scale(1);
-  }
-}
-
-/* View Transition Styles */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.3s;
-}
-
-::view-transition-old(category-card),
-::view-transition-new(category-card) {
-  animation-duration: 0.5s;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-::view-transition-old(category-card) {
-  animation-name: slide-out-to-right;
-}
-
-::view-transition-new(category-card) {
-  animation-name: slide-in-from-left;
-}
-
-@keyframes slide-out-to-right {
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
-
-@keyframes slide-in-from-left {
-  from {
-    transform: translateX(-100%);
-    opacity: 0;
   }
 }

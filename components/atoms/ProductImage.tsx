@@ -1,40 +1,49 @@
+import { unstable_ViewTransition as ViewTransition } from 'react';
+
 interface ProductImageProps {
   images: any;
   name: string;
-  productId: string;
+  slug: string;
   className?: string;
 }
 
-export function ProductImage({ images, name, productId, className = "" }: ProductImageProps) {
+export function ProductImage({
+  images,
+  name,
+  slug,
+  className = '',
+}: ProductImageProps) {
   const renderImage = () => {
     // Handle nested object structure with main and gallery
     if (images && typeof images === 'object' && images.main) {
       return (
-        <img
-          src={images.main || '/placeholder.jpg'}
-          alt={name}
-          width={400}
-          height={400}
-          className={`w-full h-full object-cover rounded-lg ${className}`}
-          style={{ viewTransitionName: `product-image-${productId}` }}
-        />
+        <ViewTransition name={`img-${slug}`}>
+          <img
+            src={images.main || '/placeholder.jpg'}
+            alt={name}
+            width={400}
+            height={400}
+            className={`w-full h-full object-cover rounded-lg ${className}`}
+          />
+        </ViewTransition>
       );
     }
-    
+
     // Handle array structure
     if (Array.isArray(images) && images.length > 0) {
       return (
-        <img
-          src={images[0] || '/placeholder.jpg'}
-          alt={name}
-          width={400}
-          height={400}
-          className={`w-full h-full object-cover rounded-lg ${className}`}
-          style={{ viewTransitionName: `product-image-${productId}` }}
-        />
+        <ViewTransition name={`img-${slug}`}>
+          <img
+            src={images[0] || '/placeholder.jpg'}
+            alt={name}
+            width={400}
+            height={400}
+            className={`w-full h-full object-cover rounded-lg ${className}`}
+          />
+        </ViewTransition>
       );
     }
-    
+
     // Fallback for no image
     return (
       <div className="text-gray-400 text-center">
