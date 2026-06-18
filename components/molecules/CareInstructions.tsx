@@ -90,7 +90,7 @@ export default function CareInstructions({ careInstructions, isPlant = false }: 
 
       return (
         <div key={key} className={`flex items-start gap-2 p-2 rounded-lg border ${bgColor} transition-all hover:shadow-sm`}>
-          <div className={`${iconColor} mt-0.5 flex-shrink-0`}>
+          <div className={`${iconColor} mt-0.5 shrink-0`}>
             {IconComponent ? (
               <IconComponent className="h-4 w-4" />
             ) : (

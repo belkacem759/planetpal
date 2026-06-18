@@ -5,8 +5,8 @@
 
 import Link from 'next/link';
 
-export default function PlantDetailsPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function PlantDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   
   return (
     <div className="container mx-auto p-6">

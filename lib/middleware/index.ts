@@ -184,7 +184,7 @@ export async function withOwnership(
       );
     }
     
-    if (data.user_id !== user.id) {
+    if ((data as { user_id: string | null }).user_id !== user.id) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }

@@ -320,7 +320,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {categories?.data?.slice(0, 4).map((category: any, index: number) => (
+              {categories?.slice(0, 4).map((category: any, index: number) => (
                 <motion.div
                   key={category.id}
                   initial={{ opacity: 0, y: 30, scale: 0.9 }}

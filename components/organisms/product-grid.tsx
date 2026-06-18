@@ -42,9 +42,9 @@ const ProductGrid = React.memo(
           name={product.name}
           slug={product.slug}
           price={product.price}
-          images={product.images}
+          images={product.images ?? { main: "", gallery: [] }}
           stockQuantity={product.stock_quantity}
-          difficultyLevel={product.difficulty_level || undefined}
+          difficultyLevel={product.difficulty_level ? String(product.difficulty_level) : undefined}
           isPlant={product.is_plant || undefined}
           onAddToCart={onAddToCart}
           isLoading={isAddingToCart === product.id}

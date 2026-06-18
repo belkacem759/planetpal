@@ -14,8 +14,10 @@ const middleware = createMiddleware({
 // PUT /api/auth/addresses/[id] - Update address
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   // Apply middleware
   const middlewareResponse = await middleware(request);
   if (middlewareResponse) return middlewareResponse;
@@ -51,10 +53,10 @@ export async function PUT(
     }
 
     const currentAddresses = (userData?.addresses as any[]) || [];
-    const addressIndex = currentAddresses.findIndex((addr: any) => addr.id === params.id);
+    const addressIndex = currentAddresses.findIndex((addr: any) => addr.id === id);
 
     if (addressIndex === -1) {
-      return handleApiError(createError.notFound('Address', params.id));
+      return handleApiError(createError.notFound('Address', id));
     }
 
     // Check ownership
@@ -96,15 +98,17 @@ export async function PUT(
 
     return createSuccessResponse(updatedAddress);
   } catch (error) {
-    return handleApiError(error, `/api/auth/addresses/${params.id}`);
+    return handleApiError(error, `/api/auth/addresses/${id}`);
   }
 }
 
 // DELETE /api/auth/addresses/[id] - Delete address
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   // Apply middleware
   const middlewareResponse = await middleware(request);
   if (middlewareResponse) return middlewareResponse;
@@ -129,10 +133,10 @@ export async function DELETE(
     }
 
     const currentAddresses = (userData?.addresses as any[]) || [];
-    const addressIndex = currentAddresses.findIndex((addr: any) => addr.id === params.id);
+    const addressIndex = currentAddresses.findIndex((addr: any) => addr.id === id);
 
     if (addressIndex === -1) {
-      return handleApiError(createError.notFound('Address', params.id));
+      return handleApiError(createError.notFound('Address', id));
     }
 
     // Check ownership
@@ -141,7 +145,7 @@ export async function DELETE(
     }
 
     // Remove the address from the array
-    const updatedAddresses = currentAddresses.filter((addr: any) => addr.id !== params.id);
+    const updatedAddresses = currentAddresses.filter((addr: any) => addr.id !== id);
 
     // Update user's addresses
     const { error: updateError } = await supabase
@@ -158,6 +162,6 @@ export async function DELETE(
 
     return createSuccessResponse({ deleted: true });
   } catch (error) {
-    return handleApiError(error, `/api/auth/addresses/${params.id}`);
+    return handleApiError(error, `/api/auth/addresses/${id}`);
   }
 }

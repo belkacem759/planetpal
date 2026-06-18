@@ -2,7 +2,7 @@ import { ProductInfoCard } from "@/components/molecules/product-info-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { Product } from "@/types/database";
+import { Product } from "@/types/types";
 import * as React from "react";
 
 interface ProductGridInfoProps {
@@ -107,9 +107,9 @@ const ProductGridInfo = React.forwardRef<HTMLDivElement, ProductGridInfoProps>(
             name={product.name}
             slug={product.slug}
             price={product.price}
-            images={product.images}
+            images={product.images ?? { main: "", gallery: [] }}
             stockQuantity={product.stock_quantity}
-            difficultyLevel={product.difficulty_level || undefined}
+            difficultyLevel={product.difficulty_level ? String(product.difficulty_level) : undefined}
             isPlant={product.is_plant || undefined}
             description={product.description || undefined}
             careInstructions={product.care_instructions}

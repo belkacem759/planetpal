@@ -148,13 +148,15 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {updateUserMutation.error && (
+                {updateUserMutation.error ? (
                   <Alert variant="destructive">
                     <AlertDescription>
-                      {updateUserMutation.error.message}
+                      {updateUserMutation.error instanceof Error
+                        ? updateUserMutation.error.message
+                        : 'Failed to update profile'}
                     </AlertDescription>
                   </Alert>
-                )}
+                ) : null}
 
                 <Button
                   type="submit"
@@ -261,13 +263,15 @@ export default function ProfilePage() {
                   />
                 </div>
 
-                {changePasswordMutation.error && (
+                {changePasswordMutation.error ? (
                   <Alert variant="destructive">
                     <AlertDescription>
-                      {changePasswordMutation.error.message}
+                      {changePasswordMutation.error instanceof Error
+                        ? changePasswordMutation.error.message
+                        : 'Failed to change password'}
                     </AlertDescription>
                   </Alert>
-                )}
+                ) : null}
 
                 <Button
                   type="submit"

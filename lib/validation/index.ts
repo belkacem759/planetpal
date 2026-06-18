@@ -258,11 +258,9 @@ export const FilterSchema = v.object({
 });
 
 // Validation helper function
-export function validateData<T>(schema: v.BaseSchema<unknown, T, v.BaseIssue<unknown>>, data: unknown): {
-  success: boolean;
-  data?: T;
-  errors?: string[];
-} {
+export function validateData<T>(schema: v.BaseSchema<unknown, T, v.BaseIssue<unknown>>, data: unknown):
+  | { success: true; data: T; errors?: undefined }
+  | { success: false; data?: undefined; errors: string[] } {
   try {
     const result = v.parse(schema, data);
     return { success: true, data: result };

@@ -3,8 +3,8 @@
  * Dynamic blog post page
  */
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   
   return (
     <div className="container mx-auto p-6">

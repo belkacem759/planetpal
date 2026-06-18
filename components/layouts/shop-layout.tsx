@@ -113,7 +113,7 @@ const ShopLayout = ({
             aria-label={isSidebarOpen ? "Close filters" : "Open filters"}
             aria-expanded={isSidebarOpen}
             aria-controls="filters-sidebar"
-            className="flex-shrink-0"
+            className="shrink-0"
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">{isSidebarOpen ? "Close" : "Open"} filters</span>

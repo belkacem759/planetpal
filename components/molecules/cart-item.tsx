@@ -103,7 +103,7 @@ const CartItem = React.forwardRef<HTMLDivElement, CartItemProps>(
         <CardContent className="p-4">
           <div className="flex gap-4">
             {/* Product Image */}
-            <Link href={`/products/${productSlug}`} className="flex-shrink-0">
+            <Link href={`/products/${productSlug}`} className="shrink-0">
               <div className="relative w-20 h-20 rounded-md overflow-hidden">
                 <img
                   src={productImage || "/placeholder-plant.jpg"}

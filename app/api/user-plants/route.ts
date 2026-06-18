@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       return handleApiError(new Error(`Validation failed: ${validation.errors?.join(', ')}`));
     }
 
-    const result = await userPlantService.addPlant(userId, validation.data);
+    const result = await userPlantService.createUserPlant(userId, validation.data);
     
     if (!result.success) {
       return handleApiError(new Error(result.error));

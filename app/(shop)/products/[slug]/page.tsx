@@ -1,12 +1,8 @@
 'use client';
 
-import {
-  startTransition,
-  use,
-  useState,
-  unstable_ViewTransition as ViewTransition,
-} from 'react';
+import { startTransition, use, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ViewTransition } from '@/components/ui/view-transition';
 
 import { Params } from '@/types/types';
 import { useAddToCartMutation } from '@/hooks/useCart';

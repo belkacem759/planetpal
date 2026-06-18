@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { unstable_ViewTransition as ViewTransition } from 'react';
+import { ViewTransition } from '@/components/ui/view-transition';
 import { useRouter } from 'next/navigation';
 
 import { CareInstructions, Json } from '@/types/database';

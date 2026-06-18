@@ -26,7 +26,7 @@ export function FilterBar() {
     offset: 0
   });
 
-  const categories = categoriesData?.data || [];
+  const categories = categoriesData || [];
   const isLoading = categoriesLoading;
 
   const difficultyOptions = [

@@ -10,8 +10,9 @@ const productService = new ProductService();
 // GET /api/products/[id] - Get product by ID (public)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const middleware = createMiddleware({
       enableRateLimit: true
@@ -20,7 +21,6 @@ export async function GET(
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const { id } = await params;
     const result = await productService.findBySlug(id);
 
     if (!result.success) {
@@ -29,7 +29,6 @@ export async function GET(
 
     return createSuccessResponse(result.data);
   } catch (error) {
-    const { id } = await params;
     return handleApiError(error, `/api/products/${id}`);
   }
 }
@@ -37,14 +36,15 @@ export async function GET(
 // PUT /api/products/[id] - Update product (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
       requireAuth: true,
       requireAdmin: true,
-  
+
     });
 
     const middlewareResult = await middleware(request);
@@ -61,7 +61,7 @@ export async function PUT(
       ));
     }
 
-    const result = await productService.update(params.id, validation.data);
+    const result = await productService.update(id, validation.data);
 
     if (!result.success) {
       return handleApiError(new Error(result.error));
@@ -69,27 +69,28 @@ export async function PUT(
 
     return createSuccessResponse(result.data);
   } catch (error) {
-    return handleApiError(error, `/api/products/${params.id}`);
+    return handleApiError(error, `/api/products/${id}`);
   }
 }
 
 // DELETE /api/products/[id] - Delete product (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
       requireAuth: true,
       requireAdmin: true,
-  
+
     });
 
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const result = await productService.delete(params.id);
+    const result = await productService.delete(id);
 
     if (!result.success) {
       return handleApiError(new Error(result.error));
@@ -97,6 +98,6 @@ export async function DELETE(
 
     return createSuccessResponse({ deleted: true });
   } catch (error) {
-    return handleApiError(error, `/api/products/${params.id}`);
+    return handleApiError(error, `/api/products/${id}`);
   }
 }

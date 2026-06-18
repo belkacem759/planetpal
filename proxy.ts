@@ -1,7 +1,7 @@
 import { updateSession } from "@/lib/supabase/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // First, handle Supabase session
   const response = await updateSession(request);
 
@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
   // Add security headers for PCI DSS compliance
   if (response) {
     // Prevent caching of sensitive pages
-    if (request.nextUrl.pathname.startsWith('/checkout') || 
+    if (request.nextUrl.pathname.startsWith('/checkout') ||
         request.nextUrl.pathname.startsWith('/api/stripe')) {
       response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       response.headers.set('Pragma', 'no-cache');

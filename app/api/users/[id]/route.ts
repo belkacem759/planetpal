@@ -10,8 +10,9 @@ const userService = new UserService();
 // GET /api/users/[id] - Get user by ID (admin or self)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
@@ -21,38 +22,39 @@ export async function GET(
         resourceIdParam: 'id'
       }
     });
-    
+
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const result = await userService.findById(params.id);
-    
+    const result = await userService.findById(id);
+
     if (!result.success) {
-      return handleApiError(createError.notFound('User', params.id));
+      return handleApiError(createError.notFound('User', id));
     }
 
     return createSuccessResponse(result.data);
   } catch (error) {
-    return handleApiError(error, `/api/users/${params.id}`);
+    return handleApiError(error, `/api/users/${id}`);
   }
 }
 
 // PUT /api/users/[id] - Update user (admin or self)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
       requireAuth: true,
-  
+
       checkOwnership: {
         resourceType: 'users',
         resourceIdParam: 'id'
       }
     });
-    
+
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
@@ -67,42 +69,43 @@ export async function PUT(
       ));
     }
 
-    const result = await userService.update(params.id, validation.data);
-    
+    const result = await userService.update(id, validation.data);
+
     if (!result.success) {
       return handleApiError(new Error(result.error));
     }
 
     return createSuccessResponse(result.data);
   } catch (error) {
-    return handleApiError(error, `/api/users/${params.id}`);
+    return handleApiError(error, `/api/users/${id}`);
   }
 }
 
 // DELETE /api/users/[id] - Delete user (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
       requireAuth: true,
       requireAdmin: true,
-  
+
     });
-    
+
     const middlewareResult = await middleware(request);
     if (middlewareResult) return middlewareResult;
 
-    const result = await userService.delete(params.id);
-    
+    const result = await userService.delete(id);
+
     if (!result.success) {
       return handleApiError(new Error(result.error));
     }
 
     return createSuccessResponse({ deleted: true });
   } catch (error) {
-    return handleApiError(error, `/api/users/${params.id}`);
+    return handleApiError(error, `/api/users/${id}`);
   }
 }

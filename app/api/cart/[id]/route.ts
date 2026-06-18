@@ -7,8 +7,9 @@ import { getAuthenticatedUser } from '@/lib/auth';
 // PUT /api/cart/[id] - Update cart item quantity (authenticated user)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
@@ -31,7 +32,7 @@ export async function PUT(
       return handleApiError(createError.validation('Quantity must be at least 1'));
     }
 
-    const result = await cartService.updateQuantity(user.id, params.id, quantity);
+    const result = await cartService.updateQuantity(user.id, id, quantity);
 
     if (!result.success) {
       return handleApiError(new Error(result.error));
@@ -45,15 +46,16 @@ export async function PUT(
 
     return createSuccessResponse(cartResult.data);
   } catch (error) {
-    return handleApiError(error, `/api/cart/${params.id}`);
+    return handleApiError(error, `/api/cart/${id}`);
   }
 }
 
 // DELETE /api/cart/[id] - Remove item from cart (authenticated user)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const middleware = createMiddleware({
       enableRateLimit: true,
@@ -69,7 +71,7 @@ export async function DELETE(
       return handleApiError(authError || createError.unauthorized());
     }
 
-    const result = await cartService.removeFromCart(user.id, params.id);
+    const result = await cartService.removeFromCart(user.id, id);
 
     if (!result.success) {
       return handleApiError(new Error(result.error));
@@ -77,6 +79,6 @@ export async function DELETE(
 
     return createSuccessResponse({ deleted: true });
   } catch (error) {
-    return handleApiError(error, `/api/cart/${params.id}`);
+    return handleApiError(error, `/api/cart/${id}`);
   }
 }

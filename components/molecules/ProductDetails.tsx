@@ -1,5 +1,5 @@
 "use client"
-import { unstable_ViewTransition as ViewTransition } from 'react';
+import { ViewTransition } from '@/components/ui/view-transition';
 
 interface ProductDetailsProps {
   slug: string
