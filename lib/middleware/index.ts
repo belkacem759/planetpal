@@ -1,12 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { rateLimit } from './rate-limit';
 import { Database } from '@/types/database';
 
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
-);
+// Lazily create the Supabase client so importing this module never throws at
+// build/load time when env vars are absent (the client is only used at request
+// time). Property access initializes the real client on first use.
+let supabaseInstance: SupabaseClient<Database> | null = null;
+
+function getSupabase(): SupabaseClient<Database> {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
+    );
+  }
+  return supabaseInstance;
+}
+
+const supabase = new Proxy({} as SupabaseClient<Database>, {
+  get(_target, prop, receiver) {
+    const instance = getSupabase();
+    const value = Reflect.get(instance, prop, receiver);
+    return typeof value === 'function' ? value.bind(instance) : value;
+  },
+});
 
 export interface AuthenticatedRequest extends NextRequest {
   user: {

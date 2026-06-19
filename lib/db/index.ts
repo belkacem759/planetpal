@@ -3,7 +3,20 @@ import { validateData, UserUpdateSchema, CartInsertSchema, OrderInsertSchema, Us
 import { Database } from '@/types/database';
 import { SupabaseClient } from '@supabase/supabase-js';
 
-const serviceSupabase = createServiceClient();
+// Lazily create the service-role client so importing this module (and the
+// services instantiated below) never throws at build/load time when env vars
+// are absent. The client is only needed at request time.
+let serviceSupabaseInstance: SupabaseClient<Database> | null = null;
+
+const serviceSupabase = new Proxy({} as SupabaseClient<Database>, {
+  get(_target, prop, receiver) {
+    if (!serviceSupabaseInstance) {
+      serviceSupabaseInstance = createServiceClient();
+    }
+    const value = Reflect.get(serviceSupabaseInstance, prop, receiver);
+    return typeof value === 'function' ? value.bind(serviceSupabaseInstance) : value;
+  },
+});
 
 export type DbResult<T> = {
   data: T;
